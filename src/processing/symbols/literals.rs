@@ -1,7 +1,7 @@
 use super::Symbol;
 use super::SymbolHandler;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Literal {
     StringLiteral(String),
     IntLiteral(i32),

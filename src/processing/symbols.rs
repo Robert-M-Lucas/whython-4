@@ -3,7 +3,7 @@ mod blocks;
 mod builtins;
 mod literals;
 mod operators;
-mod types;
+mod type_symbols;
 
 pub use assigners::Assigner;
 use assigners::AssignerSymbolHandler;
@@ -15,24 +15,26 @@ pub use literals::STRING_DELIMITERS;
 pub use operators::Operator;
 use operators::OperatorSymbolHandler;
 
-pub use types::Type;
-use types::TypeSymbolHandler;
+pub use type_symbols::TypeSymbol;
+use type_symbols::TypeSymbolHandler;
 
 pub use blocks::Block;
 use blocks::BlockSymbolHandler;
 
 pub use builtins::Builtin;
 use builtins::BuiltinSymbolHandler;
+use crate::processing::symbols::Symbol::Name;
 
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Symbol {
     Assigner(Assigner),
     Literal(Literal),
     Operator(Operator),
-    Type(Type),
+    Type(TypeSymbol),
     Block(Block),
     Builtin(Builtin),
+    Name(String)
 }
 
 
@@ -45,6 +47,7 @@ pub fn get_symbol(string: &String) -> Option<Symbol> {
     AllSymbolHandler::get_symbol(string)
 }
 
+const ALLOWED_CHARS_IN_NAME: &str = "abcdefghijklmnopqrstuvwxyz_";
 
 struct AllSymbolHandler {}
 
@@ -56,5 +59,14 @@ impl SymbolHandler for AllSymbolHandler {
             .or_else(|| BlockSymbolHandler::get_symbol(string))
             .or_else(|| BuiltinSymbolHandler::get_symbol(string))
             .or_else(|| LiteralSymbolHandler::get_symbol(string))
+            .or_else(
+                || {
+                    for c in string.chars() {
+                        if !ALLOWED_CHARS_IN_NAME.contains(c) { return None; }
+                    }
+
+                    return Some(Name(string.clone()));
+                }
+            )
     }
 }

@@ -15,11 +15,29 @@ impl MemoryManager {
         Self { name, memory: Vec::new() }
     }
 
-    pub fn size(&self) -> usize { self.memory.len() }
+    pub fn get_postition(&self) -> usize { self.memory.len() }
 
-    pub fn append_byte(&mut self, data: u8) { self.memory.push(data); }
+    pub fn append_byte(&mut self, data: u8) -> usize
+    {
+        let position = self.get_postition();
+        self.memory.push(data);
+        position
+    }
 
-    pub fn append(&mut self, data: Vec<u8>) { self.memory.extend(data); }
+    pub fn append(&mut self, data: Vec<u8>) -> usize {
+        let position = self.get_postition();
+        self.memory.extend(data);
+        position
+    }
+
+    pub fn reserve(&mut self, amount: usize) -> usize {
+        let position = self.get_postition();
+        self.memory.reserve(amount);
+        for _ in 0..amount {
+            self.memory.push(0);
+        }
+        position
+    }
 
     pub fn dump_bytes(&self) {
         let name = self.name.clone() + " - dump.b";

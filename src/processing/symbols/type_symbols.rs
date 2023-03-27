@@ -1,8 +1,8 @@
 use super::Symbol;
 use super::SymbolHandler;
 
-#[derive(PartialEq)]
-pub enum Type {
+#[derive(PartialEq, Copy, Clone)]
+pub enum TypeSymbol {
     Int,
     Bool,
     Char,
@@ -13,9 +13,9 @@ pub struct TypeSymbolHandler {}
 impl SymbolHandler for TypeSymbolHandler {
     fn get_symbol(string: &String) -> Option<Symbol> {
         match string.as_str() {
-            "int" => Some(Symbol::Type(Type::Int)),
-            "bool" => Some(Symbol::Type(Type::Bool)),
-            "char" => Some(Symbol::Type(Type::Char)),
+            "int" => Some(Symbol::Type(TypeSymbol::Int)),
+            "bool" => Some(Symbol::Type(TypeSymbol::Bool)),
+            "char" => Some(Symbol::Type(TypeSymbol::Char)),
             _ => None,
         }
     }

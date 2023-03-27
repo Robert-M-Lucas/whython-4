@@ -1,7 +1,7 @@
 use super::Symbol;
 use super::SymbolHandler;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 pub enum Block {
     While,
     Loop,

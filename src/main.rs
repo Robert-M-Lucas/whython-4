@@ -5,11 +5,14 @@ mod processing;
 mod error;
 
 use std::fs;
+use std::mem::size_of;
 use processing::preprocessor::convert_to_symbols;
 use processing::processor::process_symbols;
 use debugless_unwrap::*;
 
 fn main() {
+    println!("Usize: {}", size_of::<usize>());
+
     let input = fs::read_to_string("main.why").expect("IO error");
 
     let r = convert_to_symbols(input);
@@ -24,5 +27,10 @@ fn main() {
         let s = r.debugless_unwrap_err();
         println!("Compilation (post) failed:\n\t{}", s);
         return;
+    }
+    else {
+        let m = r.unwrap();
+        m.variable_memory.dump_bytes();
+        m.program_memory.dump_bytes();
     }
 }

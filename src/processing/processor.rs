@@ -3,6 +3,7 @@ use crate::error::create_error;
 use crate::processing::block_handler::BlockCoordinator;
 use crate::processing::lines::block_line::BlockLine;
 use crate::processing::lines::LineHandler;
+use crate::processing::lines::variable_initialisation_line::VariableInitialisationLine;
 use crate::processing::symbols::Symbol;
 
 #[derive(PartialEq)]
@@ -47,6 +48,8 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
     let mut block_coordinator = BlockCoordinator::new();
 
     for (line_index, line) in symbols.into_iter().enumerate() {
+        if line.1.len() == 0 { continue; }
+
         let indentation = line.0;
         let symbol_line = line.1;
 
@@ -61,7 +64,7 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
             if result.is_err() { return create_error(result.unwrap_err(), line_index); }
         }
 
-        let r = BlockLine::process_line(&symbol_line, &mut memory_managers)
+        let r = VariableInitialisationLine::process_line(&symbol_line, &mut memory_managers)
             .or_else(|| { BlockLine::process_line(&symbol_line, &mut memory_managers) });
 
         if r.is_failure() {
