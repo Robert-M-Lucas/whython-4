@@ -4,7 +4,8 @@ use crate::processing::symbols::{Literal, Operator, TypeSymbol};
 use crate::processing::types::Type;
 
 pub struct BooleanType {
-    address: Option<usize>
+    address: Option<usize>,
+    name: Option<String>
 }
 
 const BOOLEAN_FALSE: u8 = 0x00;
@@ -12,13 +13,21 @@ const BOOLEAN_TRUE: u8 = 0xFF;
 
 impl BooleanType {
     pub(crate) fn create_empty() -> Self {
-        Self { address: None }
+        Self { address: None, name: None }
     }
 }
 
 impl Type for BooleanType {
+    fn set_name(&mut self, name: String) {
+        self.name = Some(name);
+    }
+
+    fn get_name(&self) -> String {
+        self.name.clone().unwrap()
+    }
+
     fn static_assign_clone(&mut self, memory_managers: &mut MemoryManagers, to_clone: &Box<dyn Type>) -> Result<(), String> {
-        todo!()
+        return Err("Boolean cloning assignment not implemented".to_string())
     }
 
     fn static_assign_literal(&mut self, memory_managers: &mut MemoryManagers, literal: &Literal) -> Result<(), String> {
@@ -58,6 +67,6 @@ impl Type for BooleanType {
     fn get_size(&self) -> usize { 1 }
 
     fn operate(&self, memory_managers: &MemoryManagers, operator: Operator, rhs: Box<dyn Type>, destination: Box<dyn Type>) -> Result<(), String> {
-        todo!()
+        return Err("No operators implemented for Boolean".to_string())
     }
 }

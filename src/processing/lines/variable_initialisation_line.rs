@@ -1,3 +1,4 @@
+use crate::processing::block_handler::BlockCoordinator;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::processor::ProcessingResult;
 use crate::processing::symbols::{Assigner, Literal, Symbol, TypeSymbol};
@@ -7,7 +8,7 @@ use super::LineHandler;
 pub struct VariableInitialisationLine {}
 
 impl LineHandler for VariableInitialisationLine {
-    fn process_line(line: &Vec<Symbol>, _memory_managers: &mut MemoryManagers) -> ProcessingResult {
+    fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers, block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
         if line.len() == 0 || !matches!(line[0], Symbol::Type(_)) { return ProcessingResult::Unmatched; }
 
         if line.len() < 2 || !matches!(line[1], Symbol::Name(_)) {
@@ -40,11 +41,20 @@ impl LineHandler for VariableInitialisationLine {
         };
 
         let r =
-            type_.static_assign_literal(_memory_managers,
+            type_.static_assign_literal(memory_managers,
             match &line[3] {
                 Symbol::Literal(literal) => literal,
                 _ => panic!()
             });
+
+        if r.is_err() { return ProcessingResult::Failure(r.unwrap_err()); }
+
+        let name = match &line[1] {
+            Symbol::Name(name) => name,
+            _ => panic!()
+        };
+
+        let r = block_coordinator.register_variable(type_, name.clone());
 
         if r.is_err() { return ProcessingResult::Failure(r.unwrap_err()); }
 

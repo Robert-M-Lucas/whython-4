@@ -1,7 +1,6 @@
 use crate::memory_manager::MemoryManager;
 use crate::error::create_error;
 use crate::processing::block_handler::BlockCoordinator;
-use crate::processing::lines::block_line::BlockLine;
 use crate::processing::lines::LineHandler;
 use crate::processing::lines::variable_initialisation_line::VariableInitialisationLine;
 use crate::processing::symbols::Symbol;
@@ -63,10 +62,13 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
             let result = block_coordinator.on_forced_exit(&memory_managers, &symbol_line);
             if result.is_err() { return create_error(result.unwrap_err(), line_index); }
         }
+        // START
 
-        let r = VariableInitialisationLine::process_line(&symbol_line, &mut memory_managers)
-            .or_else(|| { BlockLine::process_line(&symbol_line, &mut memory_managers) });
 
+        let r = VariableInitialisationLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator);
+
+
+        // END
         if r.is_failure() {
             return create_error(r.get_error(), line_index);
         }

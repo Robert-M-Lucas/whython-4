@@ -4,6 +4,7 @@ pub mod preprocessor;
 pub mod processor;
 pub mod block_handler;
 pub mod types;
-mod instructions;
+pub mod instructions;
+pub mod reference_manager;
 
-
+pub use reference_manager::ReferenceManager;
