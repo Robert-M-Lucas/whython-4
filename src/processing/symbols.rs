@@ -65,7 +65,7 @@ impl SymbolHandler for AllSymbolHandler {
                         if !ALLOWED_CHARS_IN_NAME.contains(c) { return None; }
                     }
 
-                    return Some(Name(string.clone()));
+                    return Some(Symbol::Name(string.clone()));
                 }
             )
     }

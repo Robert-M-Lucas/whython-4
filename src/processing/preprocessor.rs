@@ -25,7 +25,7 @@ pub fn convert_to_symbols(data: String) -> Result<Vec<(usize, Vec<Symbol>)>, Str
             }
         }
 
-        if c == '\n' || c == ' ' {
+        if c == '\n' || c == '\r' || c == ' ' {
             if c == '\n' && in_string { return create_error("Strings cannot span multiple lines".to_string(), output.len() + 1); }
             if buffer.is_empty() {
                 if c == '\n' {

@@ -1,7 +1,8 @@
+use debugless_unwrap::DebuglessUnwrapErr;
 use crate::processing::block_handler::BlockCoordinator;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::processor::ProcessingResult;
-use crate::processing::symbols::{Assigner, Literal, Symbol, TypeSymbol};
+use crate::processing::symbols::{Assigner, Symbol};
 use crate::processing::types::get_type;
 use super::LineHandler;
 
@@ -33,28 +34,45 @@ impl LineHandler for VariableInitialisationLine {
 
         if line.len() > 5 { return ProcessingResult::Failure("Too many symbols on line".to_string()); }
 
-        if matches!(line[3], Symbol::Name(_)) { return ProcessingResult::Failure("Assigning from name not implemented".to_string()); }
+        // if matches!(line[3], Symbol::Name(_)) { return ProcessingResult::Failure("Assigning from name not implemented".to_string()); }
 
-        let mut type_ = match line[0] {
+        let mut variable = match line[0] {
             Symbol::Type(type_symbol) => get_type(&type_symbol),
             _ => panic!()
         };
 
-        let r =
-            type_.static_assign_literal(memory_managers,
-            match &line[3] {
-                Symbol::Literal(literal) => literal,
-                _ => panic!()
-            });
+        if matches!(line[3], Symbol::Literal(_)) {
+            let r =
+                variable.static_assign_literal(memory_managers,
+                                               match &line[3] {
+                                                Symbol::Literal(literal) => literal,
+                                                _ => panic!()
+                                            });
 
-        if r.is_err() { return ProcessingResult::Failure(r.unwrap_err()); }
+            if r.is_err() { return ProcessingResult::Failure(r.unwrap_err()); }
+        }
+        else {
+            let name_to_clone = match &line[3] {
+                Symbol::Name(name) => name,
+                _ => panic!()
+            };
+
+            let v2 = block_coordinator.get_variable(name_to_clone.clone());
+
+            if v2.is_err() { return ProcessingResult::Failure(v2.debugless_unwrap_err()); }
+
+            let r =
+                variable.static_assign_clone(memory_managers, v2.unwrap());
+
+            if r.is_err() { return ProcessingResult::Failure(r.unwrap_err()); }
+        }
 
         let name = match &line[1] {
             Symbol::Name(name) => name,
             _ => panic!()
         };
 
-        let r = block_coordinator.register_variable(type_, name.clone());
+        let r = block_coordinator.register_variable(variable, name.clone());
 
         if r.is_err() { return ProcessingResult::Failure(r.unwrap_err()); }
 

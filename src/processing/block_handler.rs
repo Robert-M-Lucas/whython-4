@@ -62,17 +62,17 @@ impl BlockCoordinator {
         return self.reference_stack.last_mut().unwrap().register_variable(variable, name);
     }
 
-    pub fn get_variable(&mut self, name: String) -> Option<&Box<dyn Type>> {
+    pub fn get_variable(&mut self, name: String) -> Result<&Box<dyn Type>, String> {
         let mut i = self.reference_stack.len() - 1;
         let mut reference_manager = &self.reference_stack[i];
         loop {
             let r = reference_manager.get_variable(name.clone());
-            if r.is_some() { return r; }
+            if r.is_some() { return Ok(r.unwrap()); }
             if i == 0 { break; }
             i -= 1;
             reference_manager = &self.reference_stack[i];
         }
 
-        None
+        Err(format!("Variable '{}' not found", name))
     }
 }
