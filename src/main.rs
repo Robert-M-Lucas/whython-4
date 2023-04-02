@@ -11,7 +11,7 @@ use processing::processor::process_symbols;
 use debugless_unwrap::*;
 
 fn main() {
-    println!("Platform pointer length: {}", size_of::<usize>());
+    println!("Platform pointer length: {} [{}-bit]", size_of::<usize>(), size_of::<usize>() * 8);
 
     let input = fs::read_to_string("main.why").expect("IO error");
 

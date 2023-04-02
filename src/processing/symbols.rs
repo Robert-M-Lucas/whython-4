@@ -31,6 +31,7 @@ pub enum Symbol {
     Assigner(Assigner),
     Literal(Literal),
     Operator(Operator),
+    ArithmeticBlock(Vec<Symbol>),
     Type(TypeSymbol),
     Block(Block),
     Builtin(Builtin),

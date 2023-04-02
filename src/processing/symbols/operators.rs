@@ -38,3 +38,22 @@ impl SymbolHandler for OperatorSymbolHandler {
         }
     }
 }
+
+impl Operator {
+    pub(crate) fn get_name(&self) -> &str {
+        return match self {
+            Operator::Add => "Add",
+            Operator::Subtract => "Subtract",
+            Operator::Product => "Product",
+            Operator::Divide => "Divide",
+            Operator::Greater => "Greater",
+            Operator::Less => "Less",
+            Operator::GreaterEqual => "GreaterEqual",
+            Operator::LessEqual => "LessEqual",
+            Operator::Equal => "Equal",
+            Operator::NotEqual => "NotEqual",
+            Operator::Or => "Or",
+            Operator::And => "And",
+        }
+    }
+}

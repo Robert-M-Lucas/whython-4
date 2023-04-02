@@ -20,3 +20,13 @@ impl SymbolHandler for TypeSymbolHandler {
         }
     }
 }
+
+impl TypeSymbol {
+    pub(crate) fn get_name(&self) -> &str {
+        return match self {
+            TypeSymbol::Int => "Integer",
+            TypeSymbol::Bool => "Boolean",
+            TypeSymbol::Char => "Char"
+        }
+    }
+}

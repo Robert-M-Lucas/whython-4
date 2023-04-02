@@ -1,6 +1,7 @@
 use crate::processing::instructions::assign_instruction::AssignInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
+use crate::processing::symbols::Literal::IntLiteral;
 use crate::processing::types::Type;
 
 pub struct BooleanType {
@@ -26,10 +27,6 @@ impl Type for BooleanType {
         self.name.clone().unwrap()
     }
 
-    fn static_assign_clone(&mut self, memory_managers: &mut MemoryManagers, to_clone: &Box<dyn Type>) -> Result<(), String> {
-        return Err("Boolean cloning assignment not implemented".to_string())
-    }
-
     fn static_assign_literal(&mut self, memory_managers: &mut MemoryManagers, literal: &Literal) -> Result<(), String> {
         let value: bool;
         match literal
@@ -38,9 +35,15 @@ impl Type for BooleanType {
             Literal::IntLiteral(integer) => {
                 if *integer == 0 { value = false; }
                 else if *integer == 1 { value = true; }
-                else { return Err("Booleans can only be assigned IntLiterals '0' or '1'".to_string()) }
+                else {
+                    return Err(format!("{} can only be assigned {} '0' or '1'",
+                                          self.get_type().get_name(), IntLiteral(0).get_name()))
+                }
             }
-            _ => { return Err("Literal type not supported for Boolean assignment".to_string()) }
+            unhandled_literal => {
+                return Err(format!("{} not supported for {} assignment",
+                                        unhandled_literal.get_name(), self.get_type().get_name()))
+            }
         }
 
         let address = memory_managers.variable_memory.reserve(self.get_size());
@@ -55,7 +58,7 @@ impl Type for BooleanType {
 
         AssignInstruction::new_alloc(memory_managers, constant_address, address, self.get_size());
 
-        self.address = Some(address);
+        self.set_address(address);
 
         Ok(())
     }
@@ -64,9 +67,7 @@ impl Type for BooleanType {
 
     fn get_address(&self) -> usize { self.address.unwrap() }
 
-    fn get_size(&self) -> usize { 1 }
+    fn set_address(&mut self, address: usize) { self.address = Some(address); }
 
-    fn operate(&self, memory_managers: &MemoryManagers, operator: Operator, rhs: Box<dyn Type>, destination: Box<dyn Type>) -> Result<(), String> {
-        return Err("No operators implemented for Boolean".to_string())
-    }
+    fn get_size(&self) -> usize { 1 }
 }

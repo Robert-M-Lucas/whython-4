@@ -59,3 +59,13 @@ impl SymbolHandler for LiteralSymbolHandler {
         )
     }
 }
+
+impl Literal {
+    pub(crate) fn get_name(&self) -> &str {
+        return match self {
+            Literal::StringLiteral(_) => "StringLiteral",
+            Literal::IntLiteral(_) => "IntLiteral",
+            Literal::BoolLiteral(_) => "BoolLiteral"
+        }
+    }
+}
