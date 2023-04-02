@@ -62,7 +62,7 @@ impl LineHandler for VariableInitialisationLine {
             if v2.is_err() { return ProcessingResult::Failure(v2.debugless_unwrap_err()); }
 
             let r =
-                variable.static_assign_clone(memory_managers, v2.unwrap());
+                variable.static_assign_clone(memory_managers, &v2.unwrap());
 
             if r.is_err() { return ProcessingResult::Failure(r.unwrap_err()); }
         }

@@ -3,7 +3,6 @@ mod blocks;
 mod builtins;
 mod literals;
 mod operators;
-mod type_symbols;
 
 pub use assigners::Assigner;
 use assigners::AssignerSymbolHandler;
@@ -15,15 +14,14 @@ pub use literals::STRING_DELIMITERS;
 pub use operators::Operator;
 use operators::OperatorSymbolHandler;
 
-pub use type_symbols::TypeSymbol;
-use type_symbols::TypeSymbolHandler;
+pub use super::types::TypeSymbol;
+use super::types::TypeSymbolHandler;
 
 pub use blocks::Block;
 use blocks::BlockSymbolHandler;
 
 pub use builtins::Builtin;
 use builtins::BuiltinSymbolHandler;
-use crate::processing::symbols::Symbol::Name;
 
 
 #[derive(PartialEq, Clone)]

@@ -1,33 +1,20 @@
 use crate::processing::instructions::assign_instruction::AssignInstruction;
 use crate::processing::processor::MemoryManagers;
-use crate::processing::symbols::{Literal, Operator, TypeSymbol};
+use crate::processing::symbols::{Literal, TypeSymbol};
 use crate::processing::symbols::Literal::IntLiteral;
-use crate::processing::types::Type;
+use crate::processing::types::TypeTrait;
 
-pub struct BooleanType {
-    address: Option<usize>,
-    name: Option<String>
-}
+pub struct BooleanType {}
 
 const BOOLEAN_FALSE: u8 = 0x00;
 const BOOLEAN_TRUE: u8 = 0xFF;
 
 impl BooleanType {
-    pub(crate) fn create_empty() -> Self {
-        Self { address: None, name: None }
-    }
+    pub(crate) fn create_empty() -> Self { Self {} }
 }
 
-impl Type for BooleanType {
-    fn set_name(&mut self, name: String) {
-        self.name = Some(name);
-    }
-
-    fn get_name(&self) -> String {
-        self.name.clone().unwrap()
-    }
-
-    fn static_assign_literal(&mut self, memory_managers: &mut MemoryManagers, literal: &Literal) -> Result<(), String> {
+impl TypeTrait for BooleanType {
+    fn static_assign_literal(&mut self, memory_managers: &mut MemoryManagers, literal: &Literal) -> Result<usize, String> {
         let value: bool;
         match literal
         {
@@ -58,16 +45,10 @@ impl Type for BooleanType {
 
         AssignInstruction::new_alloc(memory_managers, constant_address, address, self.get_size());
 
-        self.set_address(address);
-
-        Ok(())
+        Ok(address)
     }
 
-    fn get_type(&self) -> TypeSymbol { TypeSymbol::Bool }
-
-    fn get_address(&self) -> usize { self.address.unwrap() }
-
-    fn set_address(&mut self, address: usize) { self.address = Some(address); }
+    fn get_type(&self) -> TypeSymbol { TypeSymbol::Boolean }
 
     fn get_size(&self) -> usize { 1 }
 }

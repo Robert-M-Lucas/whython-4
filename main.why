@@ -1,2 +1,1 @@
-bool a = false
-bool b = a
+("x" (() "z"))
