@@ -62,7 +62,7 @@ impl BlockCoordinator {
         return self.reference_stack.last_mut().unwrap().register_variable(variable, name);
     }
 
-    pub fn get_variable(&mut self, name: String) -> Result<&Type, String> {
+    pub fn get_variable(&self, name: &String) -> Result<&Type, String> {
         let mut i = self.reference_stack.len() - 1;
         let mut reference_manager = &self.reference_stack[i];
         loop {

@@ -13,6 +13,16 @@ pub fn get_type(type_symbol: &TypeSymbol) -> Type {
     }
 }
 
+pub fn get_type_from_literal(literal: &Literal) -> Type {
+    match literal
+    {
+        Literal::BoolLiteral(_) => {
+            Type::new(Box::new(BooleanType::create_empty()))
+        },
+        _ => panic!("Type not implemented!")
+    }
+}
+
 #[derive(PartialEq, Copy, Clone)]
 pub enum TypeSymbol {
     Integer,
@@ -96,7 +106,7 @@ impl Type {
         self.internal_type.get_size()
     }
 
-    pub fn operate(&self, memory_managers: &MemoryManagers, operator: Operator, rhs: Option<Box<dyn TypeTrait>>, destination: Box<dyn TypeTrait>) -> Result<(), String> {
+    pub fn operate(&self, memory_managers: &MemoryManagers, operator: Operator, rhs: Option<&Type>, destination: &Type) -> Result<(), String> {
         self.internal_type.operate(memory_managers, operator, rhs, destination)
     }
 }
@@ -124,7 +134,7 @@ pub trait TypeTrait {
     fn get_size(&self) -> usize;
 
     fn operate(&self, _memory_managers: &MemoryManagers, operator: Operator,
-               rhs: Option<Box<dyn TypeTrait>>, _destination: Box<dyn TypeTrait>) -> Result<(), String> {
+               rhs: Option<&Type>, _destination: &Type) -> Result<(), String> {
         return if rhs.is_some() {
             Err(format!("{} operator not supported between {} and {}",
                         operator.get_name(), self.get_type().get_name(), rhs.unwrap().get_type().get_name()))
