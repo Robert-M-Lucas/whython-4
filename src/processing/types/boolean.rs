@@ -1,8 +1,10 @@
-use crate::processing::instructions::assign_instruction::AssignInstruction;
+use crate::errors::create_op_not_impl_error;
+use crate::processing::instructions::copy_instruction_0::CopyInstruction;
+use crate::processing::instructions::invert_instruction_1::InvertInstruction;
 use crate::processing::processor::MemoryManagers;
-use crate::processing::symbols::{Literal, TypeSymbol};
+use crate::processing::symbols::{Literal, Operator, TypeSymbol};
 use crate::processing::symbols::Literal::IntLiteral;
-use crate::processing::types::TypeTrait;
+use crate::processing::types::{Type, TypeTrait};
 
 pub struct BooleanType {}
 
@@ -14,7 +16,7 @@ impl BooleanType {
 }
 
 impl TypeTrait for BooleanType {
-    fn static_assign_literal(&mut self, memory_managers: &mut MemoryManagers, literal: &Literal) -> Result<usize, String> {
+    fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers, literal: &Literal) -> Result<(), String> {
         let value: bool;
         match literal
         {
@@ -33,8 +35,6 @@ impl TypeTrait for BooleanType {
             }
         }
 
-        let address = memory_managers.variable_memory.reserve(self.get_size());
-
         let constant_address;
         if value {
             constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_TRUE); // Reserve for constant
@@ -43,12 +43,26 @@ impl TypeTrait for BooleanType {
             constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_FALSE); // Reserve for constant
         }
 
-        AssignInstruction::new_alloc(memory_managers, constant_address, address, self.get_size());
+        CopyInstruction::new_alloc(memory_managers, constant_address, _super.get_address(), self.get_size());
 
-        Ok(address)
+        Ok(())
     }
 
     fn get_type(&self) -> TypeSymbol { TypeSymbol::Boolean }
 
     fn get_size(&self) -> usize { 1 }
+
+    fn operate(&self, lhs: &Type, _memory_managers: &mut MemoryManagers, operator: Operator, rhs: Option<&Type>, _destination: &Type) -> Result<(), String> {
+        if rhs.is_none() {
+            return match operator {
+                Operator::Not => {
+                    InvertInstruction::new_alloc(_memory_managers, lhs.get_address(), _destination.get_address());
+                    Ok(())
+                },
+                _ => create_op_not_impl_error(operator, self.get_type(), rhs)
+            }
+        }
+
+        create_op_not_impl_error(operator, self.get_type(), rhs)
+    }
 }

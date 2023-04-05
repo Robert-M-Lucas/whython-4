@@ -3,7 +3,7 @@ use std::io::Write;
 
 pub struct MemoryManager {
     pub name: String,
-    memory: Vec<u8>
+    pub memory: Vec<u8>
 }
 
 impl MemoryManager {

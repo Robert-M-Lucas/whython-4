@@ -1,10 +1,8 @@
-use debugless_unwrap::DebuglessUnwrapErr;
 use crate::processing::block_handler::BlockCoordinator;
 use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::processor::ProcessingResult;
-use crate::processing::symbols::{Assigner, Symbol};
-use crate::processing::types::get_type;
+use crate::processing::symbols::Symbol;
 use super::LineHandler;
 
 pub struct VariableInitialisationLine {}

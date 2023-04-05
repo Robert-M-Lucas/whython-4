@@ -1,1 +1,1 @@
-bool a = false + true
+bool a = ! false

@@ -15,6 +15,7 @@ pub enum Operator {
     NotEqual,
     Or,
     And,
+    Not,
 }
 
 pub struct OperatorSymbolHandler {}
@@ -34,6 +35,7 @@ impl SymbolHandler for OperatorSymbolHandler {
             "!=" => Some(Symbol::Operator(Operator::NotEqual)),
             "|"  => Some(Symbol::Operator(Operator::Or)),
             "&"  => Some(Symbol::Operator(Operator::And)),
+            "!" => Some(Symbol::Operator(Operator::Not)),
             _ => None,
         }
     }
@@ -54,6 +56,7 @@ impl Operator {
             Operator::NotEqual => "NotEqual",
             Operator::Or => "Or",
             Operator::And => "And",
+            Operator::Not => "Not"
         }
     }
 }
