@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 debugless-unwrap = "0.0.4"
+num-format = "0.4.4"

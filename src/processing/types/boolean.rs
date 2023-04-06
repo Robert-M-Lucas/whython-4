@@ -3,7 +3,6 @@ use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::invert_instruction_1::InvertInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
-use crate::processing::symbols::Literal::IntLiteral;
 use crate::processing::types::{Type, TypeTrait};
 
 pub struct BooleanType {}
@@ -26,7 +25,7 @@ impl TypeTrait for BooleanType {
                 else if *integer == 1 { value = true; }
                 else {
                     return Err(format!("{} can only be assigned {} '0' or '1'",
-                                          self.get_type().get_name(), IntLiteral(0).get_name()))
+                                          self.get_type().get_name(), Literal::IntLiteral(0).get_name()))
                 }
             }
             unhandled_literal => {

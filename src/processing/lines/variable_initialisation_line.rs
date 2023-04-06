@@ -23,9 +23,9 @@ impl LineHandler for VariableInitialisationLine {
                     "Type must be followed by a Name to initialise a variable".to_string())
         };
 
-        let mut object = match handle_arithmetic_section(memory_managers, block_coordinator, &line[3..]) {
+        let mut object = match handle_arithmetic_section(memory_managers, block_coordinator, &line[3..], None) {
             Err(e) => return ProcessingResult::Failure(e),
-            Ok(value) => value
+            Ok(value) => value.unwrap()
         };
 
         object.set_name(name.clone());

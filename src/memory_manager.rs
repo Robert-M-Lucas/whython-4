@@ -17,8 +17,7 @@ impl MemoryManager {
 
     pub fn get_postition(&self) -> usize { self.memory.len() }
 
-    pub fn append_byte(&mut self, data: u8) -> usize
-    {
+    pub fn append_byte(&mut self, data: u8) -> usize {
         let position = self.get_postition();
         self.memory.push(data);
         position
@@ -41,7 +40,7 @@ impl MemoryManager {
 
     pub fn dump_bytes(&self) {
         let name = self.name.clone() + " - dump.b";
-        println!("Dumping memory to file '{}'", name.clone());
+        println!("Dumping memory to file '{}' [{} bytes]", name.clone(), self.memory.len());
 
         let file = fs::OpenOptions::new().write(true)
             .create(true)
