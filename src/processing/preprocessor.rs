@@ -91,7 +91,8 @@ pub fn convert_to_symbols(data: String) -> Result<Vec<(usize, Vec<Symbol>)>, Str
             indentation_char_count += 1;
         }
         if indentation_count % 4 != 0 {
-            return create_line_error("Indentation must be a multiple of 4 spaces or single tabs".to_string(), line_index + 1);
+            return create_line_error("Indentation must be a multiple of 4 spaces or single tabs"
+                                         .to_string(), line_index + 1);
         }
         let symbols = match get_symbols_from_line(&line[indentation_char_count..]) {
             Err(e) => return create_line_error(e, line_index),

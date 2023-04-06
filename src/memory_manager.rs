@@ -1,5 +1,6 @@
 use std::fs;
 use std::io::Write;
+use num_format::{Locale, ToFormattedString};
 
 pub struct MemoryManager {
     pub name: String,
@@ -15,22 +16,22 @@ impl MemoryManager {
         Self { name, memory: Vec::new() }
     }
 
-    pub fn get_postition(&self) -> usize { self.memory.len() }
+    pub fn get_position(&self) -> usize { self.memory.len() }
 
     pub fn append_byte(&mut self, data: u8) -> usize {
-        let position = self.get_postition();
+        let position = self.get_position();
         self.memory.push(data);
         position
     }
 
     pub fn append(&mut self, data: Vec<u8>) -> usize {
-        let position = self.get_postition();
+        let position = self.get_position();
         self.memory.extend(data);
         position
     }
 
     pub fn reserve(&mut self, amount: usize) -> usize {
-        let position = self.get_postition();
+        let position = self.get_position();
         self.memory.reserve(amount);
         for _ in 0..amount {
             self.memory.push(0);
@@ -40,7 +41,8 @@ impl MemoryManager {
 
     pub fn dump_bytes(&self) {
         let name = self.name.clone() + " - dump.b";
-        println!("Dumping memory to file '{}' [{} bytes]", name.clone(), self.memory.len());
+        println!("Dumping memory to file '{}' [{} bytes]",
+                 name.clone(), self.memory.len().to_formatted_string(&Locale::en));
 
         let file = fs::OpenOptions::new().write(true)
             .create(true)

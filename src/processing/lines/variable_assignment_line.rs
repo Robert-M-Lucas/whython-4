@@ -7,7 +7,8 @@ use crate::processing::symbols::Symbol;
 pub struct VariableAssignmentLine {}
 
 impl LineHandler for VariableAssignmentLine {
-    fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers, block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
+    fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,
+                    block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
         if line.len() == 0 { return ProcessingResult::Unmatched; }
 
         let name = match &line[0] {
@@ -30,7 +31,8 @@ impl LineHandler for VariableAssignmentLine {
 
         let to_evaluate = assigner.get_equivalent(line[0].clone(), rhs);
 
-        match handle_arithmetic_section(memory_managers, block_coordinator, &to_evaluate, Some(object)) {
+        match handle_arithmetic_section(memory_managers, block_coordinator,
+                                        &to_evaluate, Some(object)) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(_) => { },
         };

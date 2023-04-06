@@ -8,5 +8,6 @@ mod arithmetic;
 pub mod variable_assignment_line;
 
 pub trait LineHandler {
-    fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers, block_coordinator: &mut  BlockCoordinator) -> ProcessingResult;
+    fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,
+                    block_coordinator: &mut  BlockCoordinator) -> ProcessingResult;
 }

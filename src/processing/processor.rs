@@ -53,20 +53,25 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
         let indentation = line.0;
         let symbol_line = line.1;
 
-        if indentation > block_coordinator.get_indentation() { return create_line_error("Indentation to high".to_string(), line_index) }
-        if block_coordinator.get_indentation() >= 1 && indentation == block_coordinator.get_indentation() - 1 {
+        if indentation > block_coordinator.get_indentation() {
+            return create_line_error("Indentation to high".to_string(), line_index)
+        }
+        if block_coordinator.get_indentation() >= 1
+            && indentation == block_coordinator.get_indentation() - 1 {
             let result = block_coordinator.on_exit(&memory_managers, &symbol_line);
             if result.is_err() { return create_line_error(result.unwrap_err(), line_index); }
             if result.unwrap() == false { continue }
         }
-        else if block_coordinator.get_indentation() >= 2 && indentation <= block_coordinator.get_indentation() - 2 {
+        else if block_coordinator.get_indentation() >= 2
+            && indentation <= block_coordinator.get_indentation() - 2 {
             let result = block_coordinator.on_forced_exit(&memory_managers, &symbol_line);
             if result.is_err() { return create_line_error(result.unwrap_err(), line_index); }
         }
         // START
 
 
-        let r = VariableInitialisationLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator)
+        let r =
+            VariableInitialisationLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator)
             .or_else(|| VariableAssignmentLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator));
 
 
@@ -75,7 +80,8 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
             return create_line_error(r.get_error(), line_index);
         }
         else if r.is_unmatched() {
-            return create_line_error("Line didn't match any known patterns".to_string(), line_index);
+            return create_line_error("Line didn't match any known patterns".to_string(),
+                                     line_index);
         }
     }
 

@@ -8,8 +8,12 @@ use super::LineHandler;
 pub struct VariableInitialisationLine {}
 
 impl LineHandler for VariableInitialisationLine {
-    fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers, block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
-        if line.len() == 0 || !matches!(line[0], Symbol::Type(_)) { return ProcessingResult::Unmatched; }
+    fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,
+                    block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
+
+        if line.len() == 0 || !matches!(line[0], Symbol::Type(_)) {
+            return ProcessingResult::Unmatched;
+        }
 
         if line.len() < 4 {
             return ProcessingResult::Failure(
@@ -23,7 +27,8 @@ impl LineHandler for VariableInitialisationLine {
                     "Type must be followed by a Name to initialise a variable".to_string())
         };
 
-        let mut object = match handle_arithmetic_section(memory_managers, block_coordinator, &line[3..], None) {
+        let mut object = match handle_arithmetic_section(memory_managers, block_coordinator,
+                                                         &line[3..], None) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(value) => value.unwrap()
         };

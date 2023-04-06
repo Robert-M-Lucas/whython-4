@@ -15,7 +15,9 @@ impl BooleanType {
 }
 
 impl TypeTrait for BooleanType {
-    fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers, literal: &Literal) -> Result<(), String> {
+    fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers,
+                             literal: &Literal) -> Result<(), String> {
+
         let value: bool;
         match literal
         {
@@ -25,7 +27,8 @@ impl TypeTrait for BooleanType {
                 else if *integer == 1 { value = true; }
                 else {
                     return Err(format!("{} can only be assigned {} '0' or '1'",
-                                          self.get_type().get_name(), Literal::IntLiteral(0).get_name()))
+                                       self.get_type().get_name(),
+                                       Literal::IntLiteral(0).get_name()))
                 }
             }
             unhandled_literal => {
@@ -42,7 +45,8 @@ impl TypeTrait for BooleanType {
             constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_FALSE); // Reserve for constant
         }
 
-        CopyInstruction::new_alloc(memory_managers, constant_address, _super.get_address(), self.get_size());
+        CopyInstruction::new_alloc(memory_managers, constant_address,
+                                   _super.get_address(), self.get_size());
 
         Ok(())
     }
@@ -51,11 +55,14 @@ impl TypeTrait for BooleanType {
 
     fn get_size(&self) -> usize { 1 }
 
-    fn operate(&self, lhs: &Type, _memory_managers: &mut MemoryManagers, operator: Operator, rhs: Option<&Type>, _destination: &Type) -> Result<(), String> {
+    fn operate(&self, lhs: &Type, _memory_managers: &mut MemoryManagers, operator: Operator,
+               rhs: Option<&Type>, _destination: &Type) -> Result<(), String> {
         if rhs.is_none() {
             return match operator {
                 Operator::Not => {
-                    InvertInstruction::new_alloc(_memory_managers, lhs.get_address(), _destination.get_address());
+                    InvertInstruction::new_alloc(_memory_managers,
+                                                 lhs.get_address(),
+                                                 _destination.get_address());
                     Ok(())
                 },
                 _ => create_op_not_impl_error(operator, self.get_type(), rhs)

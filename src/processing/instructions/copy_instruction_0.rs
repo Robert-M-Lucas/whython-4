@@ -9,7 +9,9 @@ pub struct CopyInstruction {
 pub const COPY_INSTRUCTION_CODE: u16 = 0;
 
 impl CopyInstruction {
-    pub fn new_alloc(memory_managers: &mut MemoryManagers, from: usize, to: usize, length: usize) -> Self {
+    pub fn new_alloc(memory_managers: &mut MemoryManagers, from: usize, to: usize, length: usize)
+        -> Self {
+
         let mut instruction_memory = vec![];
         instruction_memory.extend(COPY_INSTRUCTION_CODE.to_le_bytes());
         instruction_memory.extend(from.to_le_bytes());
@@ -29,9 +31,12 @@ impl CopyInstruction {
 
     pub(crate) fn get_debug(data: &[u8]) -> String {
         format!("COPY [{}] (len:{}) to [{}]",
-                usize::from_le_bytes((&data[0..size_of::<usize>()]).try_into().unwrap()),
-                usize::from_le_bytes((&data[size_of::<usize>() * 2..]).try_into().unwrap()),
-                usize::from_le_bytes((&data[size_of::<usize>()..size_of::<usize>() * 2]).try_into().unwrap()),
+                usize::from_le_bytes((&data[0..size_of::<usize>()])
+                    .try_into().unwrap()),
+                usize::from_le_bytes((&data[size_of::<usize>() * 2..])
+                    .try_into().unwrap()),
+                usize::from_le_bytes((&data[size_of::<usize>()..size_of::<usize>() * 2])
+                    .try_into().unwrap()),
         )
     }
 }

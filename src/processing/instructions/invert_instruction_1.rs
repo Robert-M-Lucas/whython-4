@@ -29,8 +29,10 @@ impl InvertInstruction {
 
     pub fn get_debug(data: &[u8]) -> String {
         format!("INVERT [{}] dest [{}]",
-                usize::from_le_bytes((&data[0..size_of::<usize>()]).try_into().unwrap()),
-                usize::from_le_bytes((&data[size_of::<usize>()..size_of::<usize>() * 2]).try_into().unwrap()),
+                usize::from_le_bytes((&data[0..size_of::<usize>()])
+                    .try_into().unwrap()),
+                usize::from_le_bytes((&data[size_of::<usize>()..size_of::<usize>() * 2])
+                    .try_into().unwrap()),
         )
     }
 }

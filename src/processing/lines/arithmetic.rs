@@ -4,7 +4,8 @@ use crate::processing::symbols::Symbol;
 use crate::processing::types::{get_type, get_type_from_literal, Type};
 
 /// Returns Ok(Some(Type))/Err if to_overwrite is None. If to_overwrite is Some, returns Ok(None)/Err
-pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coordinator: &BlockCoordinator,
+pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
+                                 block_coordinator: &BlockCoordinator,
                                  section: &[Symbol], to_overwrite: Option<&Type>)
                                  -> Result<Option<Type>, String> {
 
@@ -39,7 +40,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
                 _lhs_holder.as_ref().unwrap()
             },
             Symbol::ArithmeticBlock(symbols) => {
-                match handle_arithmetic_section(memory_managers, block_coordinator, symbols, None) {
+                match handle_arithmetic_section(memory_managers, block_coordinator,
+                                                symbols, None) {
                     Err(e) => return Err(e),
                     Ok(object) => {
                         _lhs_holder = Some(object.unwrap());
@@ -47,7 +49,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
                     }
                 }
             },
-            _ => return Err("LHS must be a Name, Literal or an operation within brackets".to_string())
+            _ => return Err("LHS must be a Name, Literal or an operation within brackets"
+                .to_string())
         };
 
         let mut _rhs_holder = None;
@@ -68,7 +71,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
                 _rhs_holder.as_ref().unwrap()
             },
             Symbol::ArithmeticBlock(symbols) => {
-                match handle_arithmetic_section(memory_managers, block_coordinator, symbols, None) {
+                match handle_arithmetic_section(memory_managers, block_coordinator,
+                                                symbols, None) {
                     Err(e) => return Err(e),
                     Ok(object) => {
                         _rhs_holder = Some(object.unwrap());
@@ -76,7 +80,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
                     }
                 }
             },
-            _ => return Err("RHS must be a Name, Literal or an operation within brackets".to_string())
+            _ => return Err("RHS must be a Name, Literal or an operation within brackets"
+                .to_string())
         };
 
         if to_overwrite.is_none() {
@@ -89,7 +94,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
             return Ok(Some(result));
         }
         else {
-            match lhs.operate(memory_managers, operator, Some(rhs), to_overwrite.unwrap()) {
+            match lhs.operate(memory_managers, operator, Some(rhs),
+                              to_overwrite.unwrap()) {
                 Err(e) => return Err(e),
                 Ok(_) => {}
             }
@@ -123,7 +129,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
                 _lhs_holder.as_ref().unwrap()
             },
             Symbol::ArithmeticBlock(symbols) => {
-                match handle_arithmetic_section(memory_managers, block_coordinator, symbols, None) {
+                match handle_arithmetic_section(memory_managers, block_coordinator,
+                                                symbols, None) {
                     Err(e) => return Err(e),
                     Ok(object) => {
                         _lhs_holder = Some(object.unwrap());
@@ -131,7 +138,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
                     }
                 }
             },
-            _ => return Err("Operand must be a Name, Literal or an operation within brackets".to_string())
+            _ => return Err("Operand must be a Name, Literal or an operation within brackets"
+                .to_string())
         };
 
         if to_overwrite.is_none() {
@@ -144,7 +152,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
             return Ok(Some(result));
         }
         else {
-            match lhs.operate(memory_managers, operator, None, to_overwrite.unwrap()) {
+            match lhs.operate(memory_managers, operator,
+                              None, to_overwrite.unwrap()) {
                 Err(e) => return Err(e),
                 Ok(_) => {}
             }
@@ -159,7 +168,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
                     Err(e) => return Err(e),
                     Ok(value) => {
                         if to_overwrite.is_none() {
-                            let object = get_type(&value.get_type(), memory_managers);
+                            let object =
+                                get_type(&value.get_type(), memory_managers);
                             match object.static_assign_clone(memory_managers, value) {
                                 Err(e) => return Err(e),
                                 Ok(_) => {}
@@ -194,7 +204,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers, block_coo
                 }
             },
             Symbol::ArithmeticBlock(symbols) => {
-                handle_arithmetic_section(memory_managers, block_coordinator, symbols, to_overwrite)
+                handle_arithmetic_section(memory_managers, block_coordinator,
+                                          symbols, to_overwrite)
             },
             _ => return Err("Only a name or literal can stand alone".to_string())
         }

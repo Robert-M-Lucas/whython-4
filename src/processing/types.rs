@@ -9,7 +9,9 @@ use crate::processing::types::boolean::BooleanType;
 pub fn get_type(type_symbol: &TypeSymbol, memory_managers: &mut MemoryManagers) -> Type {
     match type_symbol
     {
-        TypeSymbol::Boolean => { Type::new(Box::new(BooleanType::create_empty()), memory_managers) },
+        TypeSymbol::Boolean => {
+            Type::new(Box::new(BooleanType::create_empty()), memory_managers)
+        },
         _ => panic!("Type not implemented!")
     }
 }
@@ -62,7 +64,8 @@ pub struct Type {
 
 impl Type {
     pub fn new(internal_type: Box<dyn TypeTrait>, memory_managers: &mut MemoryManagers) -> Self {
-        let address = memory_managers.variable_memory.reserve(internal_type.get_size());
+        let address =
+            memory_managers.variable_memory.reserve(internal_type.get_size());
 
         Self {
             internal_type,
@@ -79,11 +82,13 @@ impl Type {
         self.name.clone().unwrap()
     }
 
-    pub fn static_assign_clone(&self, memory_managers: &mut MemoryManagers, to_clone: &Type) -> Result<(), String> {
+    pub fn static_assign_clone(&self, memory_managers: &mut MemoryManagers,
+                               to_clone: &Type) -> Result<(), String> {
         self.internal_type.static_assign_clone(self, memory_managers, to_clone)
     }
 
-    pub fn static_assign_literal(&self, memory_managers: &mut MemoryManagers, literal: &Literal) -> Result<(), String> {
+    pub fn static_assign_literal(&self, memory_managers: &mut MemoryManagers,
+                                 literal: &Literal) -> Result<(), String> {
         self.internal_type.static_assign_literal(self, memory_managers, literal)
     }
 
@@ -99,24 +104,28 @@ impl Type {
         self.internal_type.get_size()
     }
 
-    pub fn operate(&self, memory_managers: &mut MemoryManagers, operator: Operator, rhs: Option<&Type>, destination: &Type) -> Result<(), String> {
+    pub fn operate(&self, memory_managers: &mut MemoryManagers, operator: Operator,
+                   rhs: Option<&Type>, destination: &Type) -> Result<(), String> {
         self.internal_type.operate(self, memory_managers, operator, rhs, destination)
     }
 }
 
 pub trait TypeTrait {
-    fn static_assign_clone(&self, _super: &Type, memory_managers: &mut MemoryManagers, to_clone: &Type) -> Result<(), String> {
+    fn static_assign_clone(&self, _super: &Type, memory_managers: &mut MemoryManagers,
+                           to_clone: &Type) -> Result<(), String> {
         if self.get_type() != to_clone.get_type() {
             return Err(format!("Mismatching types for assignment: {} -> {}",
                                to_clone.get_type().get_name(), self.get_type().get_name()))
         }
 
-        CopyInstruction::new_alloc(memory_managers, to_clone.get_address(), _super.get_address(), self.get_size());
+        CopyInstruction::new_alloc(memory_managers, to_clone.get_address(),
+                                   _super.get_address(), self.get_size());
 
         Ok(())
     }
 
-    fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers, _literal: &Literal) -> Result<(), String> {
+    fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers,
+                             _literal: &Literal) -> Result<(), String> {
         Err(format!("Assignment from literals not implemented for {}", self.get_type().get_name()))
     }
 
