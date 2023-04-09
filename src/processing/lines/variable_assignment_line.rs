@@ -1,4 +1,4 @@
-use crate::processing::block_handler::BlockCoordinator;
+use crate::processing::blocks::BlockCoordinator;
 use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::lines::LineHandler;
 use crate::processing::processor::{MemoryManagers, ProcessingResult};
@@ -31,7 +31,7 @@ impl LineHandler for VariableAssignmentLine {
 
         let to_evaluate = assigner.get_equivalent(line[0].clone(), rhs);
 
-        match handle_arithmetic_section(memory_managers, block_coordinator,
+        match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
                                         &to_evaluate, Some(object)) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(_) => { },

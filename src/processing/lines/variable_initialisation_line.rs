@@ -1,4 +1,4 @@
-use crate::processing::block_handler::BlockCoordinator;
+use crate::processing::blocks::BlockCoordinator;
 use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::processor::ProcessingResult;
@@ -27,14 +27,14 @@ impl LineHandler for VariableInitialisationLine {
                     "Type must be followed by a Name to initialise a variable".to_string())
         };
 
-        let mut object = match handle_arithmetic_section(memory_managers, block_coordinator,
+        let mut object = match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
                                                          &line[3..], None) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(value) => value.unwrap()
         };
 
         object.set_name(name.clone());
-        match block_coordinator.register_variable(object, name.clone()) {
+        match block_coordinator.get_reference_stack_mut().register_variable(object, name.clone()) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(_) => { }
         };

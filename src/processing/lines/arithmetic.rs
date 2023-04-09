@@ -1,11 +1,11 @@
-use crate::processing::block_handler::BlockCoordinator;
 use crate::processing::processor::MemoryManagers;
+use crate::processing::reference_manager::ReferenceStack;
 use crate::processing::symbols::Symbol;
 use crate::processing::types::{get_type, get_type_from_literal, Type};
 
 /// Returns Ok(Some(Type))/Err if to_overwrite is None. If to_overwrite is Some, returns Ok(None)/Err
 pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
-                                 block_coordinator: &BlockCoordinator,
+                                 reference_stack: &ReferenceStack,
                                  section: &[Symbol], to_overwrite: Option<&Type>)
                                  -> Result<Option<Type>, String> {
 
@@ -25,7 +25,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         let mut _lhs_holder = None;
         let lhs = match &section[0] {
             Symbol::Name(name) => {
-                match block_coordinator.get_variable(name) {
+                match reference_stack.get_variable(name) {
                     Err(e) => return Err(e),
                     Ok(value) => value
                 }
@@ -40,7 +40,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 _lhs_holder.as_ref().unwrap()
             },
             Symbol::ArithmeticBlock(symbols) => {
-                match handle_arithmetic_section(memory_managers, block_coordinator,
+                match handle_arithmetic_section(memory_managers, reference_stack,
                                                 symbols, None) {
                     Err(e) => return Err(e),
                     Ok(object) => {
@@ -56,7 +56,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         let mut _rhs_holder = None;
         let rhs = match &section[2] {
             Symbol::Name(name) => {
-                match block_coordinator.get_variable(name) {
+                match reference_stack.get_variable(name) {
                     Err(e) => return Err(e),
                     Ok(value) => value
                 }
@@ -71,7 +71,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 _rhs_holder.as_ref().unwrap()
             },
             Symbol::ArithmeticBlock(symbols) => {
-                match handle_arithmetic_section(memory_managers, block_coordinator,
+                match handle_arithmetic_section(memory_managers, reference_stack,
                                                 symbols, None) {
                     Err(e) => return Err(e),
                     Ok(object) => {
@@ -114,7 +114,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         let mut _lhs_holder = None;
         let lhs = match &section[1] {
             Symbol::Name(name) => {
-                match block_coordinator.get_variable(name) {
+                match reference_stack.get_variable(name) {
                     Err(e) => return Err(e),
                     Ok(value) => value
                 }
@@ -129,7 +129,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 _lhs_holder.as_ref().unwrap()
             },
             Symbol::ArithmeticBlock(symbols) => {
-                match handle_arithmetic_section(memory_managers, block_coordinator,
+                match handle_arithmetic_section(memory_managers, reference_stack,
                                                 symbols, None) {
                     Err(e) => return Err(e),
                     Ok(object) => {
@@ -164,7 +164,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
     else {
         return match &section[0] {
             Symbol::Name(name) => {
-                match block_coordinator.get_variable(name) {
+                match reference_stack.get_variable(name) {
                     Err(e) => return Err(e),
                     Ok(value) => {
                         if to_overwrite.is_none() {
@@ -204,7 +204,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 }
             },
             Symbol::ArithmeticBlock(symbols) => {
-                handle_arithmetic_section(memory_managers, block_coordinator,
+                handle_arithmetic_section(memory_managers, reference_stack,
                                           symbols, to_overwrite)
             },
             _ => return Err("Only a name or literal can stand alone".to_string())

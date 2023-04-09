@@ -124,7 +124,7 @@ pub trait TypeTrait {
         Ok(())
     }
 
-    fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers,
+    fn static_assign_literal(&self, _super: &Type, _memory_managers: &mut MemoryManagers,
                              _literal: &Literal) -> Result<(), String> {
         Err(format!("Assignment from literals not implemented for {}", self.get_type().get_name()))
     }
@@ -133,7 +133,7 @@ pub trait TypeTrait {
 
     fn get_size(&self) -> usize;
 
-    fn operate(&self, lhs: &Type, memory_managers: &mut MemoryManagers, operator: Operator,
+    fn operate(&self, _lhs: &Type, _memory_managers: &mut MemoryManagers, operator: Operator,
                rhs: Option<&Type>, _destination: &Type) -> Result<(), String> {
         create_op_not_impl_error(operator, self.get_type(), rhs)
     }

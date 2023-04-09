@@ -1,4 +1,4 @@
 bool a = true
-bool b = false
-a = b
-b = ! a
+if a
+    a = false
+bool b = a

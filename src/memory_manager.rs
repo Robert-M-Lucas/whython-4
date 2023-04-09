@@ -30,6 +30,12 @@ impl MemoryManager {
         position
     }
 
+    pub fn overwrite(&mut self, position: usize, data: &[u8]) {
+        for (i, b) in data.into_iter().enumerate() {
+            self.memory[position + i] = *b;
+        }
+    }
+
     pub fn reserve(&mut self, amount: usize) -> usize {
         let position = self.get_position();
         self.memory.reserve(amount);

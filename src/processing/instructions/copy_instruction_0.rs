@@ -30,7 +30,7 @@ impl CopyInstruction {
     }
 
     pub(crate) fn get_debug(data: &[u8]) -> String {
-        format!("COPY [{}] (len:{}) to [{}]",
+        format!("COPY [{}] (len:{}) dest [{}]",
                 usize::from_le_bytes((&data[0..size_of::<usize>()])
                     .try_into().unwrap()),
                 usize::from_le_bytes((&data[size_of::<usize>() * 2..])
