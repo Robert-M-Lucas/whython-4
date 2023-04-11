@@ -1,3 +1,4 @@
+use crate::processing::types::TypeSymbol;
 use super::Symbol;
 use super::SymbolHandler;
 
@@ -6,6 +7,7 @@ pub enum Literal {
     StringLiteral(String),
     IntLiteral(i32),
     BoolLiteral(bool),
+    ParameterList(Vec<(TypeSymbol, String)>)
 }
 
 pub struct LiteralSymbolHandler {}
@@ -65,7 +67,8 @@ impl Literal {
         return match self {
             Literal::StringLiteral(_) => "StringLiteral",
             Literal::IntLiteral(_) => "IntLiteral",
-            Literal::BoolLiteral(_) => "BoolLiteral"
+            Literal::BoolLiteral(_) => "BoolLiteral",
+            Literal::ParameterList(_) => "ParameterList",
         }
     }
 }

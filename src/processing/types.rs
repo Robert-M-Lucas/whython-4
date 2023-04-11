@@ -1,4 +1,5 @@
 mod boolean;
+mod function;
 
 use crate::errors::create_op_not_impl_error;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
@@ -31,6 +32,7 @@ pub enum TypeSymbol {
     Integer,
     Boolean,
     Character,
+    Function,
 }
 
 pub struct TypeSymbolHandler {}
@@ -51,7 +53,8 @@ impl TypeSymbol {
         return match self {
             TypeSymbol::Integer => "Integer",
             TypeSymbol::Boolean => "Boolean",
-            TypeSymbol::Character => "Char"
+            TypeSymbol::Character => "Char",
+            TypeSymbol::Function => "Function"
         }
     }
 }
@@ -82,9 +85,9 @@ impl Type {
         self.name.clone().unwrap()
     }
 
-    pub fn static_assign_clone(&self, memory_managers: &mut MemoryManagers,
-                               to_clone: &Type) -> Result<(), String> {
-        self.internal_type.static_assign_clone(self, memory_managers, to_clone)
+    pub fn assign_clone(&self, memory_managers: &mut MemoryManagers,
+                        to_clone: &Type) -> Result<(), String> {
+        self.internal_type.assign_clone(self, memory_managers, to_clone)
     }
 
     pub fn static_assign_literal(&self, memory_managers: &mut MemoryManagers,
@@ -104,15 +107,20 @@ impl Type {
         self.internal_type.get_size()
     }
 
+    pub fn call(&self, arguments: Vec<&Type>, destination: &Type) -> Result<(), String> {
+        self.internal_type.call(arguments, destination)
+    }
+    
     pub fn operate(&self, memory_managers: &mut MemoryManagers, operator: Operator,
                    rhs: Option<&Type>, destination: &Type) -> Result<(), String> {
-        self.internal_type.operate(self, memory_managers, operator, rhs, destination)
+        self.internal_type.operate(self, memory_managers, 
+                                   operator, rhs, destination)
     }
 }
 
 pub trait TypeTrait {
-    fn static_assign_clone(&self, _super: &Type, memory_managers: &mut MemoryManagers,
-                           to_clone: &Type) -> Result<(), String> {
+    fn assign_clone(&self, _super: &Type, memory_managers: &mut MemoryManagers,
+                    to_clone: &Type) -> Result<(), String> {
         if self.get_type() != to_clone.get_type() {
             return Err(format!("Mismatching types for assignment: {} -> {}",
                                to_clone.get_type().get_name(), self.get_type().get_name()))
@@ -132,6 +140,10 @@ pub trait TypeTrait {
     fn get_type(&self) -> TypeSymbol;
 
     fn get_size(&self) -> usize;
+    
+    fn call(&self, _arguments: Vec<&Type>, _destination: &Type) -> Result<(), String> {
+        Err(format!("{} cannot be called", self.get_type().get_name()))
+    }
 
     fn operate(&self, _lhs: &Type, _memory_managers: &mut MemoryManagers, operator: Operator,
                rhs: Option<&Type>, _destination: &Type) -> Result<(), String> {

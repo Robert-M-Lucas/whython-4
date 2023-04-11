@@ -4,6 +4,7 @@ mod memory_manager;
 mod processing;
 mod errors;
 mod translator;
+mod execution;
 
 use std::fs;
 use std::mem::size_of;
@@ -46,6 +47,6 @@ fn main() {
 
     translate(&m.program_memory.memory);
 
-    m.variable_memory.dump_bytes();
-    m.program_memory.dump_bytes();
+    m.variable_memory.dump_bytes("VariableMemory".to_string());
+    m.program_memory.dump_bytes("ProgramMemory".to_string());
 }

@@ -42,8 +42,8 @@ pub struct MemoryManagers {
 
 pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManagers, String> {
     let mut memory_managers =  MemoryManagers {
-        program_memory: MemoryManager::new_named("ProgramMemory".to_string()),
-        variable_memory: MemoryManager::new_named("VariableMemory".to_string())
+        program_memory: MemoryManager::new(),
+        variable_memory: MemoryManager::new()
     };
 
     let mut block_coordinator = BlockCoordinator::new();

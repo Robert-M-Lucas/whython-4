@@ -170,14 +170,14 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                         if to_overwrite.is_none() {
                             let object =
                                 get_type(&value.get_type(), memory_managers);
-                            match object.static_assign_clone(memory_managers, value) {
+                            match object.assign_clone(memory_managers, value) {
                                 Err(e) => return Err(e),
                                 Ok(_) => {}
                             }
                             Ok(Some(object))
                         }
                         else {
-                            match to_overwrite.unwrap().static_assign_clone(memory_managers, value) {
+                            match to_overwrite.unwrap().assign_clone(memory_managers, value) {
                                 Err(e) => return Err(e),
                                 Ok(_) => { }
                             };

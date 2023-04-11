@@ -3,17 +3,12 @@ use std::io::Write;
 use num_format::{Locale, ToFormattedString};
 
 pub struct MemoryManager {
-    pub name: String,
     pub memory: Vec<u8>
 }
 
 impl MemoryManager {
     pub fn new() -> Self {
-        Self { name: "memory".to_string(), memory: Vec::new() }
-    }
-
-    pub fn new_named(name: String) -> Self {
-        Self { name, memory: Vec::new() }
+        Self { memory: Vec::new() }
     }
 
     pub fn get_position(&self) -> usize { self.memory.len() }
@@ -45,8 +40,8 @@ impl MemoryManager {
         position
     }
 
-    pub fn dump_bytes(&self) {
-        let name = self.name.clone() + " - dump.b";
+    pub fn dump_bytes(&self, name: String) {
+        let name = name + " - dump.b";
         println!("Dumping memory to file '{}' [{} bytes]",
                  name.clone(), self.memory.len().to_formatted_string(&Locale::en));
 

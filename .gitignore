@@ -1,2 +1,4 @@
 /target
 Cargo.lock
+ProgramMemory - dump.b
+VariableMemory - dump.b
