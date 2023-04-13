@@ -1,5 +1,7 @@
 use std::mem::size_of;
+use crate::execution::get_usize;
 use crate::processing::processor::MemoryManagers;
+use crate::processing::types::boolean::{BOOLEAN_FALSE, BOOLEAN_TRUE};
 use super::Instruction;
 
 pub struct InvertInstruction {
@@ -34,6 +36,17 @@ impl InvertInstruction {
                 usize::from_le_bytes((&data[size_of::<usize>()..size_of::<usize>() * 2])
                     .try_into().unwrap()),
         )
+    }
+
+    pub fn execute(pointer: &mut usize, memory_managers: &mut MemoryManagers) {
+        let variable = get_usize(pointer, memory_managers);
+        if memory_managers.variable_memory.memory[variable] == BOOLEAN_TRUE {
+            memory_managers.variable_memory.memory[variable] = BOOLEAN_FALSE;
+        }
+        else {
+            memory_managers.variable_memory.memory[variable] = BOOLEAN_TRUE;
+        }
+        *pointer += size_of::<usize>();
     }
 }
 

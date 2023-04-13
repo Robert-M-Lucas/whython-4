@@ -1,6 +1,7 @@
 use crate::memory_manager::MemoryManager;
 use crate::errors::create_line_error;
 use crate::processing::blocks::BlockCoordinator;
+use crate::processing::lines::function_line::FunctionLine;
 use crate::processing::lines::if_line::IfLine;
 use crate::processing::lines::LineHandler;
 use crate::processing::lines::variable_assignment_line::VariableAssignmentLine;
@@ -78,7 +79,9 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
         let r =
             VariableInitialisationLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator)
             .or_else(|| VariableAssignmentLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
-            .or_else( || IfLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator));
+            .or_else( || IfLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
+            .or_else( || FunctionLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
+            ;
 
 
         // END
@@ -90,6 +93,8 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
                                      line_index);
         }
     }
+
+    //TODO Handle exiting remaining blocks
 
     Ok(memory_managers)
 }

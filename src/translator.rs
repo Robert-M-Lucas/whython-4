@@ -1,6 +1,7 @@
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::invert_instruction_1::InvertInstruction;
 use crate::processing::instructions::jump_if_instruction_2::JumpIfInstruction;
+use crate::processing::instructions::jump_instruction_3::JumpInstruction;
 
 pub fn translate(data: &Vec<u8>) {
     println!("<------------------------------>");
@@ -18,9 +19,13 @@ pub fn translate(data: &Vec<u8>) {
                  InvertInstruction::get_size())
             },
             2 => {
-                (JumpIfInstruction::get_debug(&data[i..i+InvertInstruction::get_size()]),
+                (JumpIfInstruction::get_debug(&data[i..i+JumpIfInstruction::get_size()]),
                  JumpIfInstruction::get_size())
-            }
+            },
+            3 => {
+                (JumpInstruction::get_debug(&data[i..i+JumpInstruction::get_size()]),
+                 JumpInstruction::get_size())
+            },
             code => panic!("Debug not implemented for code {}", code),
         };
 

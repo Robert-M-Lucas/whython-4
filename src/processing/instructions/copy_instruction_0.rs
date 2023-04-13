@@ -1,4 +1,6 @@
 use std::mem::size_of;
+use num_format::Locale::fr;
+use crate::execution::get_usize;
 use crate::processing::processor::MemoryManagers;
 use super::Instruction;
 
@@ -38,6 +40,20 @@ impl CopyInstruction {
                 usize::from_le_bytes((&data[size_of::<usize>()..size_of::<usize>() * 2])
                     .try_into().unwrap()),
         )
+    }
+
+    pub fn execute(pointer: &mut usize, memory_managers: &mut MemoryManagers) {
+        let from = get_usize(pointer, memory_managers);
+        *pointer += size_of::<usize>();
+        let to = get_usize(pointer, memory_managers);
+        *pointer += size_of::<usize>();
+        let len = get_usize(pointer, memory_managers);
+        *pointer += size_of::<usize>();
+
+        for i in 0..len {
+            memory_managers.variable_memory.memory[to + i] =
+                memory_managers.variable_memory.memory[from + i];
+        }
     }
 }
 

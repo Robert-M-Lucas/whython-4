@@ -7,7 +7,7 @@ pub enum Literal {
     StringLiteral(String),
     IntLiteral(i32),
     BoolLiteral(bool),
-    ParameterList(Vec<(TypeSymbol, String)>)
+    ParameterList(Vec<(TypeSymbol, String)>),
 }
 
 pub struct LiteralSymbolHandler {}

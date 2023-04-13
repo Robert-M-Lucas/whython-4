@@ -7,8 +7,8 @@ use crate::processing::types::{Type, TypeTrait};
 
 pub struct BooleanType {}
 
-const BOOLEAN_FALSE: u8 = 0x00;
-const BOOLEAN_TRUE: u8 = 0xFF;
+pub const BOOLEAN_FALSE: u8 = 0x00;
+pub const BOOLEAN_TRUE: u8 = 0xFF;
 
 impl BooleanType {
     pub(crate) fn create_empty() -> Self { Self {} }
@@ -70,5 +70,9 @@ impl TypeTrait for BooleanType {
         }
 
         create_op_not_impl_error(operator, self.get_type(), rhs)
+    }
+
+    fn clone(&self) -> Box<dyn TypeTrait> {
+        Box::new(Self::create_empty())
     }
 }

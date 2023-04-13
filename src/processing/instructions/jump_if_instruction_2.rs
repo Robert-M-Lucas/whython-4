@@ -1,7 +1,9 @@
 use std::mem::size_of;
+use crate::execution::get_usize;
 use crate::processing::instructions::INSTRUCTION_CODE_LENGTH;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::types::{Type, TypeSymbol};
+use crate::processing::types::boolean::BOOLEAN_TRUE;
 use super::Instruction;
 
 pub struct JumpIfInstruction {
@@ -46,6 +48,20 @@ impl JumpIfInstruction {
                 usize::from_le_bytes((&data[size_of::<usize>()..size_of::<usize>() * 2])
                     .try_into().unwrap()),
         )
+    }
+
+    pub fn execute(pointer: &mut usize, memory_managers: &mut MemoryManagers) {
+        let condition = get_usize(pointer, memory_managers);
+        if memory_managers.variable_memory.memory[condition]
+            == BOOLEAN_TRUE {
+            *pointer += size_of::<usize>();
+            *pointer = get_usize(pointer, memory_managers);
+            *pointer += size_of::<usize>();
+        }
+        else {
+            *pointer += size_of::<usize>() * 2;
+        }
+
     }
 }
 

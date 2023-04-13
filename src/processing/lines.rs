@@ -7,6 +7,7 @@ pub mod variable_initialisation_line;
 pub mod arithmetic;
 pub mod variable_assignment_line;
 pub mod if_line;
+pub mod function_line;
 
 pub trait LineHandler {
     fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,

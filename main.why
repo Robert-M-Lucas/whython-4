@@ -1,4 +1,5 @@
-bool a = true
-if a
-    a = false
-bool b = a
+fn a (bool b) bool false
+    return = b
+
+bool z = true
+bool x = a (z)

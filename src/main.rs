@@ -12,6 +12,7 @@ use std::time::Instant;
 use processing::preprocessor::convert_to_symbols;
 use processing::processor::process_symbols;
 use debugless_unwrap::*;
+use crate::execution::execute;
 use crate::translator::translate;
 
 fn main() {
@@ -49,4 +50,7 @@ fn main() {
 
     m.variable_memory.dump_bytes("VariableMemory".to_string());
     m.program_memory.dump_bytes("ProgramMemory".to_string());
+
+    let r = execute(m);
+    if r.is_err() { println!("Execution failed: {}", r.debugless_unwrap_err()); }
 }

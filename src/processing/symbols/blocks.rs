@@ -8,6 +8,7 @@ pub enum Block {
     If,
     Elif,
     Else,
+    Function,
 }
 
 pub struct BlockSymbolHandler {}
@@ -20,6 +21,7 @@ impl SymbolHandler for BlockSymbolHandler {
             "if" => Some(Symbol::Block(Block::If)),
             "elif" => Some(Symbol::Block(Block::Elif)),
             "else" => Some(Symbol::Block(Block::Else)),
+            "fn" => Some(Symbol::Block(Block::Function)),
             _ => None,
         }
     }

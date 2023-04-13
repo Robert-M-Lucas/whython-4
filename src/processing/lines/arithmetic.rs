@@ -1,6 +1,6 @@
 use crate::processing::processor::MemoryManagers;
 use crate::processing::reference_manager::ReferenceStack;
-use crate::processing::symbols::Symbol;
+use crate::processing::symbols::{Punctuation, Symbol};
 use crate::processing::types::{get_type, get_type_from_literal, Type};
 
 /// Returns Ok(Some(Type))/Err if to_overwrite is None. If to_overwrite is Some, returns Ok(None)/Err
@@ -9,16 +9,20 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                                  section: &[Symbol], to_overwrite: Option<&Type>)
                                  -> Result<Option<Type>, String> {
 
+    fn get_formatting_error() -> String {
+        "Operations must be formatted [LHS] [Operator] [RHS] or [Operator] [Operand] or [Value]"
+            .to_string()
+    }
+
     if section.len() > 3 || section.len() == 0 {
-        return Err("Operations must be formatted [LHS] [Operator] [RHS] or [Operator] [Operand] or [Value]"
-            .to_string());
+        return Err(get_formatting_error());
     }
 
     if section.len() == 3 {
         let operator = match section[1] {
             Symbol::Operator(op) => op,
             _ => return
-                Err("Operations must be formatted [LHS] [Operator] [RHS] or [Operator] [Operand]"
+                Err(get_formatting_error()
                 .to_string())
         };
 
@@ -85,7 +89,10 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         };
 
         if to_overwrite.is_none() {
-            let mut result = get_type(&lhs.get_type(), memory_managers);
+            let mut result = match get_type(&lhs.get_type(), memory_managers) {
+                Err(e) => return Err(e),
+                Ok(value) => value
+            };
             match lhs.operate(memory_managers, operator, Some(rhs), &mut result) {
                 Err(e) => return Err(e),
                 Ok(_) => {}
@@ -104,61 +111,134 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         }
     }
     else if section.len() == 2 {
-        let operator = match section[0] {
-            Symbol::Operator(op) => op,
-            _ => return
-                Err("Operations must be formatted [LHS] [Operator] [RHS] or [Operator] [Operand]"
-                    .to_string())
-        };
+        if matches!(section[1], Symbol::ArithmeticBlock(_)) {
+            let name = match &section[0] {
+                Symbol::Name(name) => name.clone(),
+                _ => return Err("Only a function can be called".to_string())
+            };
 
-        let mut _lhs_holder = None;
-        let lhs = match &section[1] {
-            Symbol::Name(name) => {
-                match reference_stack.get_variable(name) {
+            let function = match reference_stack.get_variable(&name) {
+                Err(e) => return Err(e),
+                Ok(value) => value
+            };
+
+            let arguments = match &section[1] {
+                Symbol::ArithmeticBlock(symbols) => symbols,
+                _ => panic!()
+            };
+
+            let mut i: usize = 0;
+
+            let mut argument_list = Vec::new();
+
+            while i < arguments.len() {
+                argument_list.push(match handle_arithmetic_section(memory_managers, reference_stack, &[arguments[i].clone()], None) {
+                    Err(e) => return Err(e),
+                    Ok(value) => value.unwrap()
+                });
+
+                i += 1;
+
+                if i < arguments.len() {
+                    match arguments[i] {
+                        Symbol::Punctuation(punctuation) => match punctuation {
+                            Punctuation::ListSeparator => {},
+                            _ => return
+                                Err("Arguments must be formatted ([ARGUMENT] , [ARGUMENT] , [...]"
+                                    .to_string())
+                        },
+                        _ => return Err("Arguments must be formatted ([ARGUMENT] , [ARGUMENT] , [...]"
+                            .to_string())
+                    }
+                }
+                i += 1
+            }
+
+            return match to_overwrite {
+                Some(to_overwrite) => {
+                    match function.call(memory_managers, argument_list.iter().collect(), Some(to_overwrite)) {
+                        Err(e) => Err(e),
+                        Ok(_) => Ok(None)
+                    }
+                },
+                None => {
+                    let return_type = match function.get_return_type() {
+                        Err(e) => return Err(e),
+                        Ok(value) => {
+                            match get_type(&value, memory_managers) {
+                                Err(e) => return Err(e),
+                                Ok(value) => value
+                            }
+                        }
+                    };
+
+                    match function.call(memory_managers, argument_list.iter().collect(), Some(&return_type)) {
+                        Err(e) => Err(e),
+                        Ok(_) => Ok(Some(return_type))
+                    }
+                }
+            }
+        }
+        else {
+            let operator = match section[0] {
+                Symbol::Operator(op) => op,
+                _ => return
+                    Err(get_formatting_error()
+                        .to_string())
+            };
+
+            let mut _lhs_holder = None;
+            let lhs = match &section[1] {
+                Symbol::Name(name) => {
+                    match reference_stack.get_variable(name) {
+                        Err(e) => return Err(e),
+                        Ok(value) => value
+                    }
+                },
+                Symbol::Literal(literal) => {
+                    let object = get_type_from_literal(&literal, memory_managers);
+                    match object.static_assign_literal(memory_managers, &literal) {
+                        Err(e) => return Err(e),
+                        Ok(_) => {}
+                    }
+                    _lhs_holder = Some(object);
+                    _lhs_holder.as_ref().unwrap()
+                },
+                Symbol::ArithmeticBlock(symbols) => {
+                    match handle_arithmetic_section(memory_managers, reference_stack,
+                                                    symbols, None) {
+                        Err(e) => return Err(e),
+                        Ok(object) => {
+                            _lhs_holder = Some(object.unwrap());
+                            _lhs_holder.as_ref().unwrap()
+                        }
+                    }
+                },
+                _ => return Err("Operand must be a Name, Literal or an operation within brackets"
+                    .to_string())
+            };
+
+            if to_overwrite.is_none() {
+                let mut result = match get_type(&lhs.get_type(), memory_managers) {
                     Err(e) => return Err(e),
                     Ok(value) => value
-                }
-            },
-            Symbol::Literal(literal) => {
-                let object = get_type_from_literal(&literal, memory_managers);
-                match object.static_assign_literal(memory_managers, &literal) {
+                };
+                match lhs.operate(memory_managers, operator, None, &mut result) {
                     Err(e) => return Err(e),
                     Ok(_) => {}
                 }
-                _lhs_holder = Some(object);
-                _lhs_holder.as_ref().unwrap()
-            },
-            Symbol::ArithmeticBlock(symbols) => {
-                match handle_arithmetic_section(memory_managers, reference_stack,
-                                                symbols, None) {
+
+                return Ok(Some(result));
+            }
+            else {
+                match lhs.operate(memory_managers, operator,
+                                  None, to_overwrite.unwrap()) {
                     Err(e) => return Err(e),
-                    Ok(object) => {
-                        _lhs_holder = Some(object.unwrap());
-                        _lhs_holder.as_ref().unwrap()
-                    }
+                    Ok(_) => {}
                 }
-            },
-            _ => return Err("Operand must be a Name, Literal or an operation within brackets"
-                .to_string())
-        };
 
-        if to_overwrite.is_none() {
-            let mut result = get_type(&lhs.get_type(), memory_managers);
-            match lhs.operate(memory_managers, operator, None, &mut result) {
-                Err(e) => return Err(e),
-                Ok(_) => {}
+                return Ok(None);
             }
-
-            return Ok(Some(result));
-        }
-        else {
-            match lhs.operate(memory_managers, operator,
-                              None, to_overwrite.unwrap()) {
-                Err(e) => return Err(e),
-                Ok(_) => {}
-            }
-
-            return Ok(None);
         }
     }
     else {
@@ -169,7 +249,10 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                     Ok(value) => {
                         if to_overwrite.is_none() {
                             let object =
-                                get_type(&value.get_type(), memory_managers);
+                                match get_type(&value.get_type(), memory_managers) {
+                                    Err(e) => return Err(e),
+                                    Ok(value) => value
+                                };
                             match object.assign_clone(memory_managers, value) {
                                 Err(e) => return Err(e),
                                 Ok(_) => {}

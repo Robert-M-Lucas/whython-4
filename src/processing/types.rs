@@ -1,5 +1,5 @@
-mod boolean;
-mod function;
+pub mod boolean;
+pub mod function;
 
 use crate::errors::create_op_not_impl_error;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
@@ -7,13 +7,14 @@ use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, Symbol, SymbolHandler};
 use crate::processing::types::boolean::BooleanType;
 
-pub fn get_type(type_symbol: &TypeSymbol, memory_managers: &mut MemoryManagers) -> Type {
+pub fn get_type(type_symbol: &TypeSymbol, memory_managers: &mut MemoryManagers) -> Result<Type, String> {
     match type_symbol
     {
         TypeSymbol::Boolean => {
-            Type::new(Box::new(BooleanType::create_empty()), memory_managers)
+            Ok(Type::new(Box::new(BooleanType::create_empty()), memory_managers))
         },
-        _ => panic!("Type not implemented!")
+        _ => panic!(),
+        type_symbol => Err(format!("{:?}(s) cannot be created! (Are you trying to operate on an invalid type?)", type_symbol))
     }
 }
 
@@ -23,11 +24,11 @@ pub fn get_type_from_literal(literal: &Literal, memory_managers: &mut MemoryMana
         Literal::BoolLiteral(_) => {
             Type::new(Box::new(BooleanType::create_empty()), memory_managers)
         },
-        _ => panic!("Type not implemented!")
+        _ => panic!("Literal not implemented!")
     }
 }
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub enum TypeSymbol {
     Integer,
     Boolean,
@@ -99,6 +100,10 @@ impl Type {
         self.internal_type.get_type()
     }
 
+    pub fn get_return_type(&self) -> Result<TypeSymbol, String> {
+        self.internal_type.get_return_type()
+    }
+
     pub fn get_address(&self) -> usize {
         self.address
     }
@@ -107,8 +112,8 @@ impl Type {
         self.internal_type.get_size()
     }
 
-    pub fn call(&self, arguments: Vec<&Type>, destination: &Type) -> Result<(), String> {
-        self.internal_type.call(arguments, destination)
+    pub fn call(&self, memory_managers: &mut MemoryManagers, arguments: Vec<&Type>, destination: Option<&Type>) -> Result<(), String> {
+        self.internal_type.call(memory_managers, arguments, destination)
     }
     
     pub fn operate(&self, memory_managers: &mut MemoryManagers, operator: Operator,
@@ -116,7 +121,16 @@ impl Type {
         self.internal_type.operate(self, memory_managers, 
                                    operator, rhs, destination)
     }
+    
+    pub fn clone(&self) -> Self {
+        Self {
+            internal_type: self.internal_type.clone(),
+            name: self.name.clone(),
+            address: self.address,
+        }
+    }
 }
+
 
 pub trait TypeTrait {
     fn assign_clone(&self, _super: &Type, memory_managers: &mut MemoryManagers,
@@ -139,9 +153,13 @@ pub trait TypeTrait {
 
     fn get_type(&self) -> TypeSymbol;
 
+    fn get_return_type(&self) -> Result<TypeSymbol, String> {
+        Err(format!("{} cannot be called", self.get_type().get_name()))
+    }
+
     fn get_size(&self) -> usize;
     
-    fn call(&self, _arguments: Vec<&Type>, _destination: &Type) -> Result<(), String> {
+    fn call(&self, _memory_managers: &mut MemoryManagers, _arguments: Vec<&Type>, _destination: Option<&Type>) -> Result<(), String> {
         Err(format!("{} cannot be called", self.get_type().get_name()))
     }
 
@@ -149,4 +167,6 @@ pub trait TypeTrait {
                rhs: Option<&Type>, _destination: &Type) -> Result<(), String> {
         create_op_not_impl_error(operator, self.get_type(), rhs)
     }
+    
+    fn clone(&self) -> Box<dyn TypeTrait>;
 }

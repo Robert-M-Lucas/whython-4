@@ -1,4 +1,5 @@
 pub mod if_block;
+pub mod function_block;
 
 use crate::processing::processor::MemoryManagers;
 use crate::processing::reference_manager::ReferenceStack;
@@ -10,9 +11,13 @@ pub trait BlockHandler {
                 block_coordinator: &mut ReferenceStack,
                 symbol_line: &Vec<Symbol>) -> Result<(), String>;
 
-    fn on_exit(&mut self, memory_managers: &mut MemoryManagers,
-               block_coordinator: &mut ReferenceStack,
-               symbol_line: &Vec<Symbol>) -> Result<bool, String>;
+    fn on_exit(&mut self, memory_managers: &mut MemoryManagers, _reference_stack: &mut ReferenceStack, 
+               _symbol_line: &Vec<Symbol>) -> Result<bool, String> {
+        match self.on_forced_exit(memory_managers, _reference_stack, _symbol_line) {
+            Ok(_) => Ok(true),
+            Err(e) => Err(e),
+        }
+    }
 
     fn on_forced_exit(&mut self, memory_managers: &mut MemoryManagers,
                       block_coordinator: &mut ReferenceStack,
@@ -32,9 +37,9 @@ impl BlockCoordinator {
     pub fn add_block_handler(&mut self, mut handler: Box<dyn BlockHandler>, memory_managers: &mut MemoryManagers,
                              symbol_line: &Vec<Symbol>) -> Result<(), String> {
 
+        self.reference_stack.add_handler();
         let r = handler.on_entry(memory_managers, self.get_reference_stack_mut(), symbol_line);
         self.stack.push(handler);
-        self.reference_stack.add_handler();
         r
     }
 

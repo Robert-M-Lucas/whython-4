@@ -13,6 +13,11 @@ impl ReferenceStack {
         return self.stack.last_mut().unwrap().register_variable(variable, name);
     }
 
+    pub fn register_variable_with_offset(&mut self, variable: Type, name: String, offset: usize) -> Result<(), String> {
+        let len = self.stack.len();
+        self.stack[(len - 1) - offset].register_variable(variable, name)
+    }
+
     pub fn get_variable(&self, name: &String) -> Result<&Type, String> {
         let mut i = self.stack.len() - 1;
         let mut reference_manager = &self.stack[i];
