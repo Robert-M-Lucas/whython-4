@@ -3,27 +3,29 @@ use crate::execution::get_usize;
 use crate::processing::instructions::INSTRUCTION_CODE_LENGTH;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::types::{Type, TypeSymbol};
-use crate::processing::types::boolean::BOOLEAN_TRUE;
+use crate::processing::types::boolean::{BOOLEAN_FALSE, BOOLEAN_TRUE};
 use super::Instruction;
 
-pub struct JumpIfInstruction {
+pub struct JumpIfNotInstruction {
     address: usize
 }
 
-pub const JUMP_IF_INSTRUCTION_CODE: u16 = 2;
+pub const JUMP_IF_NOT_INSTRUCTION_CODE: u16 = 2;
 
-impl JumpIfInstruction {
+impl JumpIfNotInstruction {
     pub fn new_alloc(memory_managers: &mut MemoryManagers, condition_boolean: Type, dest: usize) -> Self {
         if condition_boolean.get_type() != TypeSymbol::Boolean {
             panic!("Jump If instruction can only be created with a boolean condition")
         }
 
         let mut instruction_memory = vec![];
-        instruction_memory.extend(JUMP_IF_INSTRUCTION_CODE.to_le_bytes());
+        instruction_memory.extend(JUMP_IF_NOT_INSTRUCTION_CODE.to_le_bytes());
         instruction_memory.extend(condition_boolean.get_address().to_le_bytes());
         instruction_memory.extend(dest.to_le_bytes());
 
-        let address = memory_managers.program_memory.append(instruction_memory);
+        assert_eq!(instruction_memory.len() - 2, Self::get_size());
+
+        let address = memory_managers.program_memory.append(&instruction_memory);
 
         Self { address }
     }
@@ -35,28 +37,25 @@ impl JumpIfInstruction {
         )
     }
 
-    pub fn get_code() -> u16 { JUMP_IF_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 { JUMP_IF_NOT_INSTRUCTION_CODE }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 2 // Condition, dest
     }
 
     pub fn get_debug(data: &[u8]) -> String {
-        format!("JUMP IF [{}] goto [{}]",
-                usize::from_le_bytes((&data[0..size_of::<usize>()])
-                    .try_into().unwrap()),
-                usize::from_le_bytes((&data[size_of::<usize>()..size_of::<usize>() * 2])
-                    .try_into().unwrap()),
+        format!("JUMP IF NOT [{}] goto [{}]",
+                get_usize(&0, data),
+                get_usize(&size_of::<usize>(), data),
         )
     }
 
     pub fn execute(pointer: &mut usize, memory_managers: &mut MemoryManagers) {
-        let condition = get_usize(pointer, memory_managers);
+        let condition = get_usize(pointer, &memory_managers.program_memory.memory);
         if memory_managers.variable_memory.memory[condition]
-            == BOOLEAN_TRUE {
+            == BOOLEAN_FALSE {
             *pointer += size_of::<usize>();
-            *pointer = get_usize(pointer, memory_managers);
-            *pointer += size_of::<usize>();
+            *pointer = get_usize(pointer, &memory_managers.program_memory.memory);
         }
         else {
             *pointer += size_of::<usize>() * 2;
@@ -65,7 +64,7 @@ impl JumpIfInstruction {
     }
 }
 
-impl Instruction for JumpIfInstruction {
+impl Instruction for JumpIfNotInstruction {
     fn get_address(&self) -> usize {
         self.address
     }

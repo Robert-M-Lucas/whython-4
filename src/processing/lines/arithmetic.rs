@@ -1,3 +1,4 @@
+use num_format::Locale::el;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::reference_manager::ReferenceStack;
 use crate::processing::symbols::{Punctuation, Symbol};
@@ -6,7 +7,8 @@ use crate::processing::types::{get_type, get_type_from_literal, Type};
 /// Returns Ok(Some(Type))/Err if to_overwrite is None. If to_overwrite is Some, returns Ok(None)/Err
 pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                                  reference_stack: &ReferenceStack,
-                                 section: &[Symbol], to_overwrite: Option<&Type>)
+                                 section: &[Symbol], to_overwrite: Option<&Type>,
+                                 must_evaluate: bool)
                                  -> Result<Option<Type>, String> {
 
     fn get_formatting_error() -> String {
@@ -45,7 +47,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             },
             Symbol::ArithmeticBlock(symbols) => {
                 match handle_arithmetic_section(memory_managers, reference_stack,
-                                                symbols, None) {
+                                                symbols, None,
+                                                true) {
                     Err(e) => return Err(e),
                     Ok(object) => {
                         _lhs_holder = Some(object.unwrap());
@@ -76,7 +79,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             },
             Symbol::ArithmeticBlock(symbols) => {
                 match handle_arithmetic_section(memory_managers, reference_stack,
-                                                symbols, None) {
+                                                symbols, None,
+                                                true) {
                     Err(e) => return Err(e),
                     Ok(object) => {
                         _rhs_holder = Some(object.unwrap());
@@ -132,7 +136,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             let mut argument_list = Vec::new();
 
             while i < arguments.len() {
-                argument_list.push(match handle_arithmetic_section(memory_managers, reference_stack, &[arguments[i].clone()], None) {
+                argument_list.push(match handle_arithmetic_section(memory_managers, reference_stack, &[arguments[i].clone()], None, true) {
                     Err(e) => return Err(e),
                     Ok(value) => value.unwrap()
                 });
@@ -162,19 +166,27 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                     }
                 },
                 None => {
-                    let return_type = match function.get_return_type() {
-                        Err(e) => return Err(e),
-                        Ok(value) => {
-                            match get_type(&value, memory_managers) {
-                                Err(e) => return Err(e),
-                                Ok(value) => value
+                    return if must_evaluate {
+                        let return_type = match function.get_return_type() {
+                            Err(e) => return Err(e),
+                            Ok(value) => {
+                                match get_type(&value, memory_managers) {
+                                    Err(e) => return Err(e),
+                                    Ok(value) => value
+                                }
                             }
-                        }
-                    };
+                        };
 
-                    match function.call(memory_managers, argument_list.iter().collect(), Some(&return_type)) {
-                        Err(e) => Err(e),
-                        Ok(_) => Ok(Some(return_type))
+                        match function.call(memory_managers, argument_list.iter().collect(), Some(&return_type)) {
+                            Err(e) => Err(e),
+                            Ok(_) => Ok(Some(return_type))
+                        }
+                    }
+                    else {
+                        match function.call(memory_managers, argument_list.iter().collect(), None) {
+                            Err(e) => Err(e),
+                            Ok(_) => Ok(None)
+                        }
                     }
                 }
             }
@@ -206,7 +218,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 },
                 Symbol::ArithmeticBlock(symbols) => {
                     match handle_arithmetic_section(memory_managers, reference_stack,
-                                                    symbols, None) {
+                                                    symbols, None,
+                                                    true) {
                         Err(e) => return Err(e),
                         Ok(object) => {
                             _lhs_holder = Some(object.unwrap());
@@ -288,7 +301,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             },
             Symbol::ArithmeticBlock(symbols) => {
                 handle_arithmetic_section(memory_managers, reference_stack,
-                                          symbols, to_overwrite)
+                                          symbols, to_overwrite,
+                                          true)
             },
             _ => return Err("Only a name or literal can stand alone".to_string())
         }

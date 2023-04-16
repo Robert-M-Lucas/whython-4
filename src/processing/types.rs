@@ -13,7 +13,6 @@ pub fn get_type(type_symbol: &TypeSymbol, memory_managers: &mut MemoryManagers) 
         TypeSymbol::Boolean => {
             Ok(Type::new(Box::new(BooleanType::create_empty()), memory_managers))
         },
-        _ => panic!(),
         type_symbol => Err(format!("{:?}(s) cannot be created! (Are you trying to operate on an invalid type?)", type_symbol))
     }
 }

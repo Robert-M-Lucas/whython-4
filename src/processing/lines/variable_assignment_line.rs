@@ -32,7 +32,8 @@ impl LineHandler for VariableAssignmentLine {
         let to_evaluate = assigner.get_equivalent(line[0].clone(), rhs);
 
         match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
-                                        &to_evaluate, Some(object)) {
+                                        &to_evaluate, Some(object),
+                                        true) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(_) => { },
         };

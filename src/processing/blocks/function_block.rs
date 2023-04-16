@@ -1,5 +1,8 @@
+use std::mem::size_of;
 use crate::processing::blocks::BlockHandler;
-use crate::processing::instructions::jump_if_instruction_2::JumpIfInstruction;
+use crate::processing::instructions::jump_if_not_instruction_2::JumpIfNotInstruction;
+use crate::processing::instructions::jump_instruction_3::JumpInstruction;
+use crate::processing::instructions::jump_variable_instruction_4::JumpVariableInstruction;
 use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::reference_manager::ReferenceStack;
@@ -8,14 +11,16 @@ use crate::processing::types::{get_type, Type, TypeSymbol};
 use crate::processing::types::function::FunctionType;
 
 pub struct FunctionBlock {
-    jump_instruction: Option<JumpIfInstruction>
+    jump_variable: Option<usize>,
+    skip_instruction: Option<JumpInstruction>,
 }
 
 impl FunctionBlock {
     pub fn new() -> Box<dyn BlockHandler> {
         Box::new(
             Self {
-                jump_instruction: None
+                jump_variable: None,
+                skip_instruction: None
             }
         )
     }
@@ -27,6 +32,10 @@ impl BlockHandler for FunctionBlock {
             "Function declaration must be formatted 'fn [FUNCTION NAME] ([PARAMETER LIST]) {OPTIONAL [RETURN TYPE] [DEFAULT RETURN VALUE]}'"
                 .to_string()
         }
+
+        //? Insert skip instruction
+
+        self.skip_instruction = Some(JumpInstruction::new_alloc(memory_managers, 0));
 
         //? Extract name and parameters
         if symbol_line.len() != 3 && symbol_line.len() != 5 {
@@ -102,13 +111,19 @@ impl BlockHandler for FunctionBlock {
                 _ => {},
             };
         }
-        
+
+        self.jump_variable = Some(memory_managers.variable_memory.reserve(size_of::<usize>()));
+
         //? Register function in above handler
         let function = 
             FunctionType::create_empty(to_assign,
                                        return_type,
-                                       memory_managers.program_memory.get_position());
-        
+                                       memory_managers.program_memory.get_position(),
+                                        self.jump_variable.unwrap()
+            );
+
+
+
         match reference_stack.register_variable_with_offset(
             Type::new(Box::new(function), memory_managers), name, 1) {
             Err(e) => return Err(e),
@@ -118,12 +133,10 @@ impl BlockHandler for FunctionBlock {
         Ok(())
     }
 
-    fn on_forced_exit(&mut self, _memory_managers: &mut MemoryManagers, _reference_stack: &mut ReferenceStack, _symbol_line: &Vec<Symbol>) -> Result<(), String> {
-        //? Remove local parameter handler
+    fn on_forced_exit(&mut self, memory_managers: &mut MemoryManagers, _reference_stack: &mut ReferenceStack) -> Result<(), String> {
+        JumpVariableInstruction::new_alloc(memory_managers, self.jump_variable.unwrap());
 
-        //? Save local parameters in function type
-
-        //? Add function type to outer reference stack
+        self.skip_instruction.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());
 
         Ok(())
     }

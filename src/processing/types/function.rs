@@ -1,3 +1,6 @@
+use std::mem::size_of;
+use num_format::Locale::se;
+use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::jump_instruction_3::JumpInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, TypeSymbol};
@@ -6,12 +9,13 @@ use crate::processing::types::{Type, TypeTrait};
 pub struct FunctionType {
     parameters: Vec<Type>,
     return_type: Option<Type>,
-    start_address: usize
+    start_address: usize,
+    jump_variable_address: usize,
 }
 
 impl FunctionType {
-    pub(crate) fn create_empty(parameters: Vec<Type>, return_type: Option<Type>, start_address: usize) -> Self {
-        Self { parameters, return_type, start_address } 
+    pub(crate) fn create_empty(parameters: Vec<Type>, return_type: Option<Type>, start_address: usize, jump_variable_address: usize) -> Self {
+        Self { parameters, return_type, start_address, jump_variable_address }
     }
 }
 
@@ -47,8 +51,20 @@ impl TypeTrait for FunctionType {
             }
         }
 
+        let static_jump_back_address =
+            memory_managers.variable_memory.append(
+                &(memory_managers.program_memory.get_position() + CopyInstruction::get_size() + 2
+                    + JumpInstruction::get_size() + 2)
+                    .to_le_bytes()
+            );
+
+        CopyInstruction::new_alloc(memory_managers, static_jump_back_address,
+                                   self.jump_variable_address,
+                                   size_of::<usize>());
+
         JumpInstruction::new_alloc(memory_managers, self.start_address);
-        
+
+
         if destination.is_some() {
             if self.return_type.is_none() {
                 return Err("Function does not return a value".to_string());

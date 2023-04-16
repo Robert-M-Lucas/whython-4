@@ -11,17 +11,16 @@ pub trait BlockHandler {
                 block_coordinator: &mut ReferenceStack,
                 symbol_line: &Vec<Symbol>) -> Result<(), String>;
 
-    fn on_exit(&mut self, memory_managers: &mut MemoryManagers, _reference_stack: &mut ReferenceStack, 
+    fn on_exit(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack,
                _symbol_line: &Vec<Symbol>) -> Result<bool, String> {
-        match self.on_forced_exit(memory_managers, _reference_stack, _symbol_line) {
+        match self.on_forced_exit(memory_managers, reference_stack) {
             Ok(_) => Ok(true),
             Err(e) => Err(e),
         }
     }
 
     fn on_forced_exit(&mut self, memory_managers: &mut MemoryManagers,
-                      block_coordinator: &mut ReferenceStack,
-                      symbol_line: &Vec<Symbol>) -> Result<(), String>;
+                      block_coordinator: &mut ReferenceStack) -> Result<(), String>;
 }
 
 pub struct BlockCoordinator {
@@ -67,15 +66,15 @@ impl BlockCoordinator {
         result
     }
 
-    pub fn force_exit_block_handler(&mut self, memory_managers: &mut MemoryManagers,
-                              symbol_line: &Vec<Symbol>)  -> Result<(), String> {
+    pub fn force_exit_block_handler(&mut self, memory_managers: &mut MemoryManagers
+        )  -> Result<(), String> {
 
         if self.stack.len() == 0 { panic!("Called on_exit when not BlockHandler exists on stack!") }
 
         let mut handler = self.stack.pop().unwrap();
 
         let result =
-            handler.on_forced_exit(memory_managers, self.get_reference_stack_mut(), symbol_line);
+            handler.on_forced_exit(memory_managers, self.get_reference_stack_mut());
 
         result
     }

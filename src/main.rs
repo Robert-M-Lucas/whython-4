@@ -44,13 +44,14 @@ fn main() {
 
     println!("Compilation (post) completed [{:?}]", start.elapsed());
 
-    let m = r.unwrap();
+    let mut m = r.unwrap();
 
     translate(&m.program_memory.memory);
 
-    m.variable_memory.dump_bytes("VariableMemory".to_string());
+    m.variable_memory.dump_bytes("VariableMemory - Compiled".to_string());
     m.program_memory.dump_bytes("ProgramMemory".to_string());
 
-    let r = execute(m);
+    let r = execute(&mut m);
     if r.is_err() { println!("Execution failed: {}", r.debugless_unwrap_err()); }
+    m.variable_memory.dump_bytes("VariableMemory - Executed".to_string());
 }

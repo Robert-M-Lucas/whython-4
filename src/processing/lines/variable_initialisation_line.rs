@@ -28,7 +28,8 @@ impl LineHandler for VariableInitialisationLine {
         };
 
         let mut object = match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
-                                                         &line[3..], None) {
+                                                         &line[3..], None,
+                                                         true) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(value) => value.unwrap()
         };

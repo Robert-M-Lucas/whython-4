@@ -1,6 +1,7 @@
+use debugless_unwrap::DebuglessUnwrapErr;
 use crate::errors::create_line_error;
-use crate::processing::symbols::{get_symbol, STRING_DELIMITERS, Symbol};
-use crate::processing::symbols::Symbol::ArithmeticBlock;
+use crate::processing::symbols::{get_symbol, Punctuation, STRING_DELIMITERS, Symbol};
+use crate::processing::symbols::Symbol::{ArithmeticBlock};
 
 pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     let mut symbol_line = Vec::new();
@@ -9,17 +10,88 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     let mut in_string = false;
     let mut bracket_depth = 0;
 
-    for c in line.chars() {
-        if c == ' ' && bracket_depth == 0 && !in_string {
-            if buffer.is_empty() { continue; }
+    fn process_buffer(buffer: &mut String, symbol_line: &mut Vec<Symbol>) -> Result<(), String> {
+        if buffer.is_empty() {
+            return Ok(())
+        }
 
-            let symbol = get_symbol(&buffer);
-            if symbol.is_none() {
-                return Err(format!("Symbol '{}' not found", buffer));
+        let symbol = get_symbol(&buffer);
+        if symbol.is_none() {
+            return Err(format!("Symbol '{}' not found", buffer));
+        }
+        symbol_line.push(symbol.unwrap());
+        buffer.clear();
+        Ok(())
+    }
+
+    for c in line.chars() {
+        if bracket_depth == 0 && !in_string {
+            //? Process buffer and ignore c
+            match
+                match c {
+                    ' ' => Some(process_buffer(&mut buffer, &mut symbol_line)),
+                    _ => None
+                }
+            {
+                Some(value) => match value {
+                    Err(e) => return Err(e),
+                    Ok(_) => continue
+                },
+                None => {}
             }
-            symbol_line.push(symbol.unwrap());
-            buffer.clear();
-            continue;
+
+            //? Process buffer and then treat c normally
+            match
+                match c {
+                    '(' => Some(process_buffer(&mut buffer, &mut symbol_line)),
+                    _ => None
+                }
+            {
+                Some(value) => match value {
+                    Err(e) => return Err(e),
+                    Ok(_) => {}
+                },
+                None => {}
+            }
+
+            //? If buffer is empty, process character alone
+            match
+                match c {
+                    '!' => {
+                        if buffer.len() != 0 { None }
+                        else {
+                            buffer.push(c);
+                            Some(process_buffer(&mut buffer, &mut symbol_line))
+                        }
+                    },
+                    _ => None
+                }
+            {
+                Some(value) => match value {
+                    Err(e) => return Err(e),
+                    Ok(_) => continue
+                },
+                None => {}
+            }
+
+            //? Process character alone
+            match
+            match c {
+                ',' => {
+                    let r = process_buffer(&mut buffer, &mut symbol_line);
+                    if r.is_err() { return Err(r.debugless_unwrap_err()); }
+                    buffer.push(c);
+                    Some(process_buffer(&mut buffer, &mut symbol_line))
+                },
+                _ => None
+            }
+            {
+                Some(value) => match value {
+                    Err(e) => return Err(e),
+                    Ok(_) => continue
+                },
+                None => {}
+            }
         }
 
         if c == ')' && !in_string {

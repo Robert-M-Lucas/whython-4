@@ -1,6 +1,9 @@
 use crate::errors::create_op_not_impl_error;
+use crate::processing::instructions::and_instruction_6::AndInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
+use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::instructions::invert_instruction_1::InvertInstruction;
+use crate::processing::instructions::or_instruction_8::OrInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
 use crate::processing::types::{Type, TypeTrait};
@@ -55,21 +58,36 @@ impl TypeTrait for BooleanType {
 
     fn get_size(&self) -> usize { 1 }
 
-    fn operate(&self, lhs: &Type, _memory_managers: &mut MemoryManagers, operator: Operator,
-               rhs: Option<&Type>, _destination: &Type) -> Result<(), String> {
+    fn operate(&self, lhs: &Type, memory_managers: &mut MemoryManagers, operator: Operator,
+               rhs: Option<&Type>, destination: &Type) -> Result<(), String> {
+
         if rhs.is_none() {
             return match operator {
                 Operator::Not => {
-                    InvertInstruction::new_alloc(_memory_managers,
+                    InvertInstruction::new_alloc(memory_managers,
                                                  lhs.get_address(),
-                                                 _destination.get_address());
+                                                 destination.get_address());
                     Ok(())
                 },
                 _ => create_op_not_impl_error(operator, self.get_type(), rhs)
-            }
+            };
         }
 
-        create_op_not_impl_error(operator, self.get_type(), rhs)
+        match operator {
+            Operator::And => {
+                AndInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), destination.get_address());
+                Ok(())
+            },
+            Operator::Equal => {
+                EqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), self.get_size(), destination.get_address());
+                Ok(())
+            },
+            Operator::Or => {
+                OrInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), destination.get_address());
+                Ok(())
+            },
+            _ => create_op_not_impl_error(operator, self.get_type(), rhs)
+        }
     }
 
     fn clone(&self) -> Box<dyn TypeTrait> {

@@ -3,19 +3,20 @@ use crate::execution::get_usize;
 use crate::processing::instructions::INSTRUCTION_CODE_LENGTH;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::types::{Type, TypeSymbol};
+use crate::processing::types::boolean::BOOLEAN_TRUE;
 use super::Instruction;
 
-pub struct JumpInstruction {
+pub struct JumpVariableInstruction {
     address: usize
 }
 
-pub const JUMP_INSTRUCTION_CODE: u16 = 3;
+pub const JUMP_VARIABLE_INSTRUCTION_CODE: u16 = 4;
 
-impl JumpInstruction {
-    pub fn new_alloc(memory_managers: &mut MemoryManagers, dest: usize) -> Self {
+impl JumpVariableInstruction {
+    pub fn new_alloc(memory_managers: &mut MemoryManagers, dest_variable: usize) -> Self {
         let mut instruction_memory = vec![];
-        instruction_memory.extend(JUMP_INSTRUCTION_CODE.to_le_bytes());
-        instruction_memory.extend(dest.to_le_bytes());
+        instruction_memory.extend(JUMP_VARIABLE_INSTRUCTION_CODE.to_le_bytes());
+        instruction_memory.extend(dest_variable.to_le_bytes());
 
         assert_eq!(instruction_memory.len() - 2, Self::get_size());
 
@@ -26,29 +27,30 @@ impl JumpInstruction {
 
     pub fn set_destination(&self, memory_managers: &mut MemoryManagers, dest: usize) {
         memory_managers.program_memory.overwrite(
-            self.address + INSTRUCTION_CODE_LENGTH,
+            self.address + INSTRUCTION_CODE_LENGTH + size_of::<usize>(),
             &dest.to_le_bytes()
         )
     }
 
-    pub fn get_code() -> u16 { JUMP_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 { JUMP_VARIABLE_INSTRUCTION_CODE }
 
     pub fn get_size() -> usize {
-        size_of::<usize>() * 1 // dest
+        size_of::<usize>() // Variable
     }
 
     pub fn get_debug(data: &[u8]) -> String {
-        format!("JUMP [{}]",
+        format!("JUMP to variable [{}]",
                 get_usize(&0, data),
         )
     }
 
     pub fn execute(pointer: &mut usize, memory_managers: &mut MemoryManagers) {
-        *pointer = get_usize(pointer, &memory_managers.program_memory.memory);
+        let destination_variable = get_usize(pointer, &memory_managers.program_memory.memory);
+        *pointer = get_usize(&destination_variable, &memory_managers.variable_memory.memory);
     }
 }
 
-impl Instruction for JumpInstruction {
+impl Instruction for JumpVariableInstruction {
     fn get_address(&self) -> usize {
         self.address
     }

@@ -1,9 +1,11 @@
 use crate::memory_manager::MemoryManager;
 use crate::errors::create_line_error;
 use crate::processing::blocks::BlockCoordinator;
+use crate::processing::lines::call_line::CallLine;
 use crate::processing::lines::function_line::FunctionLine;
 use crate::processing::lines::if_line::IfLine;
 use crate::processing::lines::LineHandler;
+use crate::processing::lines::print_line::PrintLine;
 use crate::processing::lines::variable_assignment_line::VariableAssignmentLine;
 use crate::processing::lines::variable_initialisation_line::VariableInitialisationLine;
 use crate::processing::symbols::Symbol;
@@ -49,6 +51,8 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
 
     let mut block_coordinator = BlockCoordinator::new();
 
+    let line_count = symbols.len();
+
     'line_iterator: for (line_index, line) in symbols.into_iter().enumerate() {
         if line.1.len() == 0 { continue; }
 
@@ -60,11 +64,11 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
         }
 
         while block_coordinator.get_indentation() >= 1
-            && indentation == block_coordinator.get_indentation() - 1 {
+            && indentation <= block_coordinator.get_indentation() - 1 {
 
             if block_coordinator.get_indentation() >= 2
                 && indentation <= block_coordinator.get_indentation() - 2 {
-                let result = block_coordinator.force_exit_block_handler(&mut memory_managers, &symbol_line);
+                let result = block_coordinator.force_exit_block_handler(&mut memory_managers);
                 if result.is_err() { return create_line_error(result.unwrap_err(), line_index); }
             }
             else {
@@ -78,9 +82,11 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
 
         let r =
             VariableInitialisationLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator)
-            .or_else(|| VariableAssignmentLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
-            .or_else( || IfLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
-            .or_else( || FunctionLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
+                .or_else( || CallLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
+                .or_else(|| VariableAssignmentLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
+                .or_else( || IfLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
+                .or_else( || FunctionLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
+                .or_else( || PrintLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
             ;
 
 
@@ -94,7 +100,12 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
         }
     }
 
-    //TODO Handle exiting remaining blocks
+    //TODO: Don't duplicate code
+
+    while block_coordinator.get_indentation() >= 1 {
+        let result = block_coordinator.force_exit_block_handler(&mut memory_managers);
+        if result.is_err() { return create_line_error(result.unwrap_err(), line_count); }
+    }
 
     Ok(memory_managers)
 }

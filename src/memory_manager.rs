@@ -19,7 +19,7 @@ impl MemoryManager {
         position
     }
 
-    pub fn append(&mut self, data: Vec<u8>) -> usize {
+    pub fn append(&mut self, data: &[u8]) -> usize {
         let position = self.get_position();
         self.memory.extend(data);
         position
