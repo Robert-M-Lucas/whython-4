@@ -2,7 +2,6 @@ use std::mem::size_of;
 use crate::execution::get_usize;
 use crate::processing::instructions::INSTRUCTION_CODE_LENGTH;
 use crate::processing::processor::MemoryManagers;
-use crate::processing::types::{Type, TypeSymbol};
 use super::Instruction;
 
 pub struct JumpInstruction {

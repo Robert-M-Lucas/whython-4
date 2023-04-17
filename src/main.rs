@@ -11,47 +11,48 @@ use std::mem::size_of;
 use std::time::Instant;
 use processing::preprocessor::convert_to_symbols;
 use processing::processor::process_symbols;
-use debugless_unwrap::*;
 use crate::execution::execute;
-use crate::translator::translate;
+
 
 fn main() {
     println!("Platform pointer length: {} [{}-bit]", size_of::<usize>(), size_of::<usize>() * 8);
 
-    let input = fs::read_to_string("main.why");
-    if input.is_err() {
-        println!("File read error");
-        return;
-    }
-    let input = input.unwrap();
+    let input = match fs::read_to_string("main.why") {
+        Err(_) => { return println!("File read error"); }
+        Ok(value) => value,
+    };
 
     let start = Instant::now();
-    let r = convert_to_symbols(input);
-    if r.is_err() {
-        let s = r.debugless_unwrap_err();
-        println!("Compilation (pre) failed [{:?}]:\n\t{}", start.elapsed(), s);
-        return;
-    }
+    let r = match convert_to_symbols(input) {
+        Err(e) => {
+            println!("Compilation (pre) failed [{:?}]:\n\t{}", start.elapsed(), e);
+            return;
+        },
+        Ok(value) => value
+    };
+
     println!("Compilation (pre) completed [{:?}]", start.elapsed());
 
     let start = Instant::now();
-    let r = process_symbols(r.unwrap());
-    if r.is_err() {
-        let s = r.debugless_unwrap_err();
-        println!("Compilation (post) failed [{:?}]:\n\t{}", start.elapsed(), s);
-        return;
-    }
+    let mut memory = match process_symbols(r) {
+        Err(e) => {
+            println!("Compilation (post) failed [{:?}]:\n\t{}", start.elapsed(), e);
+            return;
+        },
+        Ok(value) => value
+    };
 
     println!("Compilation (post) completed [{:?}]", start.elapsed());
 
-    let mut m = r.unwrap();
+    // translate(&m.program_memory.memory);
 
-    translate(&m.program_memory.memory);
+    memory.variable_memory.dump_bytes("VariableMemory - Compiled".to_string());
+    memory.program_memory.dump_bytes("ProgramMemory".to_string());
 
-    m.variable_memory.dump_bytes("VariableMemory - Compiled".to_string());
-    m.program_memory.dump_bytes("ProgramMemory".to_string());
+    match execute(&mut memory) {
+        Err(e) => println!("Execution failed: {}", e),
+        Ok(_) => {}
+    };
 
-    let r = execute(&mut m);
-    if r.is_err() { println!("Execution failed: {}", r.debugless_unwrap_err()); }
-    m.variable_memory.dump_bytes("VariableMemory - Executed".to_string());
+    memory.variable_memory.dump_bytes("VariableMemory - Executed".to_string());
 }

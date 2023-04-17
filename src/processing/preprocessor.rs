@@ -1,6 +1,6 @@
 use debugless_unwrap::DebuglessUnwrapErr;
 use crate::errors::create_line_error;
-use crate::processing::symbols::{get_symbol, Punctuation, STRING_DELIMITERS, Symbol};
+use crate::processing::symbols::{get_symbol, STRING_DELIMITERS, Symbol};
 use crate::processing::symbols::Symbol::{ArithmeticBlock};
 
 pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {

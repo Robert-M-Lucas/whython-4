@@ -1,5 +1,4 @@
 use std::mem::size_of;
-use num_format::Locale::fr;
 use crate::execution::get_usize;
 use crate::processing::processor::MemoryManagers;
 use super::Instruction;

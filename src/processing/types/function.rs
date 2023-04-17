@@ -1,5 +1,4 @@
 use std::mem::size_of;
-use num_format::Locale::se;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::jump_instruction_3::JumpInstruction;
 use crate::processing::processor::MemoryManagers;

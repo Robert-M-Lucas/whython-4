@@ -1,5 +1,4 @@
 use crate::processing::blocks::BlockCoordinator;
-use crate::processing::blocks::if_block::IfBlock;
 use crate::processing::instructions::print_instruction_5::PrintInstruction;
 use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::lines::LineHandler;

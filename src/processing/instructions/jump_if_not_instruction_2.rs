@@ -3,7 +3,7 @@ use crate::execution::get_usize;
 use crate::processing::instructions::INSTRUCTION_CODE_LENGTH;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::types::{Type, TypeSymbol};
-use crate::processing::types::boolean::{BOOLEAN_FALSE, BOOLEAN_TRUE};
+use crate::processing::types::boolean::{BOOLEAN_FALSE};
 use super::Instruction;
 
 pub struct JumpIfNotInstruction {

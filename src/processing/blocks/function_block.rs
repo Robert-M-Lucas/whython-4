@@ -1,13 +1,11 @@
 use std::mem::size_of;
 use crate::processing::blocks::BlockHandler;
-use crate::processing::instructions::jump_if_not_instruction_2::JumpIfNotInstruction;
 use crate::processing::instructions::jump_instruction_3::JumpInstruction;
 use crate::processing::instructions::jump_variable_instruction_4::JumpVariableInstruction;
-use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::reference_manager::ReferenceStack;
 use crate::processing::symbols::{Literal, Symbol, try_arithmetic_block_into_parameters};
-use crate::processing::types::{get_type, Type, TypeSymbol};
+use crate::processing::types::{get_type, Type};
 use crate::processing::types::function::FunctionType;
 
 pub struct FunctionBlock {

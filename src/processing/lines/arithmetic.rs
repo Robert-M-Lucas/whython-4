@@ -1,4 +1,3 @@
-use num_format::Locale::el;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::reference_manager::ReferenceStack;
 use crate::processing::symbols::{Punctuation, Symbol};
@@ -144,7 +143,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 i += 1;
 
                 if i < arguments.len() {
-                    match arguments[i] {
+                    #[allow(unreachable_patterns)] match arguments[i] {
                         Symbol::Punctuation(punctuation) => match punctuation {
                             Punctuation::ListSeparator => {},
                             _ => return

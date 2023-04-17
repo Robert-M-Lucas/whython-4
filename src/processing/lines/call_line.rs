@@ -1,4 +1,3 @@
-use std::result;
 use crate::processing::blocks::BlockCoordinator;
 use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::lines::LineHandler;
