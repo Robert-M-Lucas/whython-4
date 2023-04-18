@@ -41,7 +41,7 @@ impl MemoryManager {
     }
 
     pub fn dump_bytes(&self, name: String) {
-        let name = name + " - dump.b";
+        let name = name + ".b";
         println!("Dumping memory to file '{}' [{} bytes]",
                  name.clone(), self.memory.len().to_formatted_string(&Locale::en));
 

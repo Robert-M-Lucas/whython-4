@@ -1,52 +1,44 @@
 use crate::errors::create_op_not_impl_error;
-use crate::processing::instructions::and_instruction_6::AndInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::equal_instruction_7::EqualInstruction;
-use crate::processing::instructions::invert_instruction_1::InvertInstruction;
-use crate::processing::instructions::or_instruction_8::OrInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
-use crate::processing::types::{Type, TypeTrait};
+use crate::processing::types::{get_type, Type, TypeTrait};
 
-pub struct BooleanType {}
+pub struct CharType {}
 
-pub const BOOLEAN_FALSE: u8 = 0x00;
-pub const BOOLEAN_TRUE: u8 = 0xFF;
-
-impl BooleanType {
+impl CharType {
     pub(crate) fn create_empty() -> Self { Self {} }
 }
 
-impl TypeTrait for BooleanType {
+impl TypeTrait for CharType {
     fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers,
                              literal: &Literal) -> Result<(), String> {
 
-        let value: bool;
+        let value: u8;
         match literal
         {
-            Literal::BoolLiteral(boolean) => { value = *boolean },
-            Literal::IntLiteral(integer) => {
-                if *integer == 0 { value = false; }
-                else if *integer == 1 { value = true; }
-                else {
-                    return Err(format!("{} can only be assigned {} '0' or '1'",
-                                       self.get_type().get_name(),
-                                       Literal::IntLiteral(0).get_name()))
+            Literal::StringLiteral(string) => {
+                if string.len() != 1 {
+                    return Err("Chars can only be assigned from StringLiterals of length 1".to_string());
                 }
+
+                value = string.chars().nth(0).unwrap() as u8;
             }
+            Literal::IntLiteral(integer) => {
+                if *integer < 0 || *integer > 255 {
+                    return Err("Char can be assigned from IntLiterals 0-255 only".to_string());
+                }
+
+                value = *integer as u8;
+            },
             unhandled_literal => {
                 return Err(format!("{} not supported for {} assignment",
                                         unhandled_literal.get_name(), self.get_type().get_name()))
             }
         }
 
-        let constant_address;
-        if value {
-            constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_TRUE); // Reserve for constant
-        }
-        else {
-            constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_FALSE); // Reserve for constant
-        }
+        let constant_address = memory_managers.variable_memory.append_byte(value);
 
         CopyInstruction::new_alloc(memory_managers, constant_address,
                                    _super.get_address(), self.get_size());
@@ -54,35 +46,25 @@ impl TypeTrait for BooleanType {
         Ok(())
     }
 
-    fn get_type(&self) -> TypeSymbol { TypeSymbol::Boolean }
+    fn get_type(&self) -> TypeSymbol { TypeSymbol::Character }
 
     fn get_size(&self) -> usize { 1 }
 
     fn get_operation_type(&self, _lhs: &Type, operator: &Operator, rhs: Option<&Type>) -> Result<TypeSymbol, String> {
-
         if rhs.is_none() {
             return match operator {
-                Operator::Not => {
-                    Ok(self.get_type())
-                },
                 _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
             };
         }
 
         match rhs.as_ref().unwrap().get_type() {
-            TypeSymbol::Boolean => {},
+            TypeSymbol::Character => {},
             _ => return create_op_not_impl_error(&operator, self.get_type(), rhs)
         };
 
         match operator {
-            Operator::And => {
-                Ok(self.get_type())
-            },
             Operator::Equal => {
-                Ok(self.get_type())
-            },
-            Operator::Or => {
-                Ok(self.get_type())
+                Ok(TypeSymbol::Boolean)
             },
             _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
         }
@@ -93,32 +75,18 @@ impl TypeTrait for BooleanType {
 
         if rhs.is_none() {
             return match operator {
-                Operator::Not => {
-                    InvertInstruction::new_alloc(memory_managers,
-                                                 lhs.get_address(),
-                                                 destination.get_address());
-                    Ok(())
-                },
                 _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
             };
         }
 
         match rhs.as_ref().unwrap().get_type() {
-            TypeSymbol::Boolean => {},
+            TypeSymbol::Character => {},
             _ => return create_op_not_impl_error(&operator, self.get_type(), rhs)
         };
 
         match operator {
-            Operator::And => {
-                AndInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), destination.get_address());
-                Ok(())
-            },
             Operator::Equal => {
                 EqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), self.get_size(), destination.get_address());
-                Ok(())
-            },
-            Operator::Or => {
-                OrInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), destination.get_address());
                 Ok(())
             },
             _ => create_op_not_impl_error(&operator, self.get_type(), rhs)

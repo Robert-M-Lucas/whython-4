@@ -92,7 +92,12 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         };
 
         if to_overwrite.is_none() {
-            let mut result = match get_type(&lhs.get_type(), memory_managers) {
+            let result_type = match lhs.get_operation_type(&operator, Some(rhs)) {
+                Err(e) => return Err(e),
+                Ok(value) => value
+            };
+
+            let mut result = match get_type(&result_type, memory_managers) {
                 Err(e) => return Err(e),
                 Ok(value) => value
             };
@@ -231,7 +236,12 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             };
 
             if to_overwrite.is_none() {
-                let mut result = match get_type(&lhs.get_type(), memory_managers) {
+                let result_type = match lhs.get_operation_type(&operator, None) {
+                    Err(e) => return Err(e),
+                    Ok(value) => value
+                };
+
+                let mut result = match get_type(&result_type, memory_managers) {
                     Err(e) => return Err(e),
                     Ok(value) => value
                 };

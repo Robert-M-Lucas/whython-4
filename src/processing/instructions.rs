@@ -7,6 +7,7 @@ pub mod print_instruction_5;
 pub mod and_instruction_6;
 pub mod equal_instruction_7;
 pub mod or_instruction_8;
+pub mod print_chars_instruction_9;
 
 pub const INSTRUCTION_CODE_LENGTH: usize = 2;
 

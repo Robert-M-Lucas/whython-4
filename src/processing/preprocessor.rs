@@ -25,6 +25,10 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     }
 
     for c in line.chars() {
+        if c == '#' && !in_string {
+            break;
+        }
+
         if bracket_depth == 0 && !in_string {
             //? Process buffer and ignore c
             match

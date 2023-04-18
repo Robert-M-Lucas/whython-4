@@ -6,9 +6,10 @@ b = a & b
 fn foo()
     print true
 
-foo()
+if false
+    foo()
 
-fn bar(bool a, bool b) bool false
+fn bar(bool a, bool b) bool false # fn func_name(arg1_type arg1, arg2_type arg2) return_type default_return
     return = a == b
 
 bool c = bar(a, b)
@@ -17,3 +18,12 @@ print c
 
 if !c
     print true
+
+char d = "_"
+
+printc d
+
+fn to_bool(char in) bool false
+    return = ((in == "y") | (in == "t"))
+
+print(to_bool("t"))

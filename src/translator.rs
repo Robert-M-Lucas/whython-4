@@ -6,6 +6,7 @@ use crate::processing::instructions::jump_if_not_instruction_2::JumpIfNotInstruc
 use crate::processing::instructions::jump_instruction_3::JumpInstruction;
 use crate::processing::instructions::jump_variable_instruction_4::JumpVariableInstruction;
 use crate::processing::instructions::or_instruction_8::OrInstruction;
+use crate::processing::instructions::print_chars_instruction_9::PrintCharsInstruction;
 use crate::processing::instructions::print_instruction_5::PrintInstruction;
 
 pub fn translate(data: &Vec<u8>) {
@@ -52,6 +53,10 @@ pub fn translate(data: &Vec<u8>) {
             8 => {
                 (OrInstruction::get_debug(&data[i..i+OrInstruction::get_size()]),
                  OrInstruction::get_size())
+            },
+            9 => {
+                (PrintCharsInstruction::get_debug(&data[i..i+PrintCharsInstruction::get_size()]),
+                 PrintCharsInstruction::get_size())
             },
             code => panic!("Debug not implemented for code {}", code),
         };

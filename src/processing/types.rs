@@ -1,11 +1,13 @@
 pub mod boolean;
 pub mod function;
+pub mod char;
 
 use crate::errors::create_op_not_impl_error;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, Symbol, SymbolHandler};
 use crate::processing::types::boolean::BooleanType;
+use crate::processing::types::char::CharType;
 
 pub fn get_type(type_symbol: &TypeSymbol, memory_managers: &mut MemoryManagers) -> Result<Type, String> {
     match type_symbol
@@ -13,6 +15,9 @@ pub fn get_type(type_symbol: &TypeSymbol, memory_managers: &mut MemoryManagers) 
         TypeSymbol::Boolean => {
             Ok(Type::new(Box::new(BooleanType::create_empty()), memory_managers))
         },
+        TypeSymbol::Character => {
+            Ok(Type::new(Box::new(CharType::create_empty()), memory_managers))
+        }
         type_symbol => Err(format!("{:?}(s) cannot be created! (Are you trying to operate on an invalid type?)", type_symbol))
     }
 }
@@ -23,7 +28,10 @@ pub fn get_type_from_literal(literal: &Literal, memory_managers: &mut MemoryMana
         Literal::BoolLiteral(_) => {
             Type::new(Box::new(BooleanType::create_empty()), memory_managers)
         },
-        _ => panic!("Literal not implemented!")
+        Literal::StringLiteral(_) => {
+            Type::new(Box::new(CharType::create_empty()), memory_managers)
+        },
+        _ => panic!("Cannot infer type from this literal!")
     }
 }
 
@@ -114,7 +122,13 @@ impl Type {
     pub fn call(&self, memory_managers: &mut MemoryManagers, arguments: Vec<&Type>, destination: Option<&Type>) -> Result<(), String> {
         self.internal_type.call(memory_managers, arguments, destination)
     }
-    
+
+    pub fn get_operation_type(&self, operator: &Operator,
+                   rhs: Option<&Type>) -> Result<TypeSymbol, String> {
+        self.internal_type.get_operation_type(self,
+                                   operator, rhs)
+    }
+
     pub fn operate(&self, memory_managers: &mut MemoryManagers, operator: Operator,
                    rhs: Option<&Type>, destination: &Type) -> Result<(), String> {
         self.internal_type.operate(self, memory_managers, 
@@ -162,9 +176,14 @@ pub trait TypeTrait {
         Err(format!("{} cannot be called", self.get_type().get_name()))
     }
 
+    fn get_operation_type(&self, _lhs: &Type, operator: &Operator,
+                              rhs: Option<&Type>) -> Result<TypeSymbol, String> {
+        create_op_not_impl_error(&operator, self.get_type(), rhs)
+    }
+
     fn operate(&self, _lhs: &Type, _memory_managers: &mut MemoryManagers, operator: Operator,
                rhs: Option<&Type>, _destination: &Type) -> Result<(), String> {
-        create_op_not_impl_error(operator, self.get_type(), rhs)
+        create_op_not_impl_error(&operator, self.get_type(), rhs)
     }
     
     fn clone(&self) -> Box<dyn TypeTrait>;

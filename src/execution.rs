@@ -8,6 +8,7 @@ use crate::processing::instructions::jump_if_not_instruction_2::JumpIfNotInstruc
 use crate::processing::instructions::jump_instruction_3::JumpInstruction;
 use crate::processing::instructions::jump_variable_instruction_4::JumpVariableInstruction;
 use crate::processing::instructions::or_instruction_8::OrInstruction;
+use crate::processing::instructions::print_chars_instruction_9::PrintCharsInstruction;
 use crate::processing::instructions::print_instruction_5::PrintInstruction;
 use crate::processing::processor::MemoryManagers;
 
@@ -40,6 +41,7 @@ pub fn execute(memory_managers: &mut MemoryManagers) -> Result<(), String> {
             6 => AndInstruction::execute(&mut pointer, memory_managers),
             7 => EqualInstruction::execute(&mut pointer, memory_managers),
             8 => OrInstruction::execute(&mut pointer, memory_managers),
+            9 => PrintCharsInstruction::execute(&mut pointer, memory_managers),
             code => return Err(format!("Unknown code! [{}]", code))
         };
 

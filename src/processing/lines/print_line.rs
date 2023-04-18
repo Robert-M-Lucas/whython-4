@@ -1,4 +1,5 @@
 use crate::processing::blocks::BlockCoordinator;
+use crate::processing::instructions::print_chars_instruction_9::PrintCharsInstruction;
 use crate::processing::instructions::print_instruction_5::PrintInstruction;
 use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::lines::LineHandler;
@@ -21,6 +22,16 @@ impl LineHandler for PrintLine {
                             Err(e) => ProcessingResult::Failure(e),
                             Ok(value) => {
                                 PrintInstruction::new_alloc(memory_managers, &value.unwrap());
+                                ProcessingResult::Success
+                            }
+                        }
+                    },
+                    Builtin::PrintChars => {
+                        if line.len() == 1 { return ProcessingResult::Failure("'printc' must be followed by something to print".to_string()) }
+                        match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(), &line[1..], None, true) {
+                            Err(e) => ProcessingResult::Failure(e),
+                            Ok(value) => {
+                                PrintCharsInstruction::new_alloc(memory_managers, &value.unwrap());
                                 ProcessingResult::Success
                             }
                         }

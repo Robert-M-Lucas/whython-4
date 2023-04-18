@@ -6,18 +6,35 @@ mod errors;
 mod translator;
 mod execution;
 
+use std::env;
 use std::fs;
+use std::io::{Read, stdin, stdout, Write};
 use std::mem::size_of;
 use std::time::Instant;
 use processing::preprocessor::convert_to_symbols;
 use processing::processor::process_symbols;
 use crate::execution::execute;
 
+fn pause() {
+    let mut stdout = stdout();
+    stdout.write(b"Press enter to exit...").unwrap();
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
+}
 
 fn main() {
-    println!("Platform pointer length: {} [{}-bit]", size_of::<usize>(), size_of::<usize>() * 8);
+    wrapped_main();
+    pause();
+}
 
-    let input = match fs::read_to_string("main.why") {
+fn wrapped_main() {
+    let args: Vec<String> = env::args().collect();
+    println!("Platform pointer length: {} [{}-bit]", size_of::<usize>(), size_of::<usize>() * 8);
+    let input_file;
+    if args.len() >= 2 { input_file = args[1].clone(); }
+    else { input_file = "main.why".to_string() }
+
+    let input = match fs::read_to_string(input_file) {
         Err(_) => { return println!("File read error"); }
         Ok(value) => value,
     };
@@ -46,7 +63,7 @@ fn main() {
 
     // translate(&m.program_memory.memory);
 
-    memory.variable_memory.dump_bytes("VariableMemory - Compiled".to_string());
+    memory.variable_memory.dump_bytes("VariableMemory".to_string());
     memory.program_memory.dump_bytes("ProgramMemory".to_string());
 
     match execute(&mut memory) {
@@ -54,5 +71,5 @@ fn main() {
         Ok(_) => {}
     };
 
-    memory.variable_memory.dump_bytes("VariableMemory - Executed".to_string());
+    memory.variable_memory.dump_bytes("VariableMemory - Post execution".to_string());
 }
