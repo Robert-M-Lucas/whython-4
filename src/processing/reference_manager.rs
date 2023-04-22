@@ -47,7 +47,7 @@ impl ReferenceStack {
 }
 
 pub struct ReferenceManager {
-    variables: Vec<Type>
+    variables: Vec<(Type, usize)> // Type, Array Index
 }
 
 impl ReferenceManager {
@@ -60,14 +60,33 @@ impl ReferenceManager {
             return Err(format!("Variable with name '{}' already exists", name));
         }
         variable.set_name(name);
-        self.variables.push(variable);
+        self.variables.push((variable, 0));
+        Ok(())
+    }
+
+    pub fn register_variable_in_array(&mut self, mut variable: Type, name: String, index: usize) -> Result<(), String> {
+        if self.get_variable(name.clone()).is_some() {
+            return Err(format!("Variable with name '{}' already exists", name));
+        }
+        variable.set_name(name);
+        self.variables.push((variable, index));
         Ok(())
     }
 
     pub fn get_variable(&self, name: String) -> Option<&Type> {
         for v in &self.variables {
-            if *v.get_name() == name {
-                return Some(v);
+            if *v.0.get_name() == name {
+                return Some(&v.0);
+            }
+        }
+
+        None
+    }
+
+    pub fn get_variable_with_index(&self, name: String, index: usize) -> Option<&Type> {
+        for v in &self.variables {
+            if *v.0.get_name() == name && v.1 == index {
+                return Some(&v.0);
             }
         }
 

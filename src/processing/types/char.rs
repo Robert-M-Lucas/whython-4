@@ -3,7 +3,7 @@ use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
-use crate::processing::types::{get_type, Type, TypeTrait};
+use crate::processing::types::{Type, TypeTrait};
 
 pub struct CharType {}
 

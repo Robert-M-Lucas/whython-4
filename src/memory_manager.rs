@@ -11,6 +11,8 @@ impl MemoryManager {
         Self { memory: Vec::new() }
     }
 
+    pub fn from_vec(memory: Vec<u8>) -> Self { Self { memory } }
+
     pub fn get_position(&self) -> usize { self.memory.len() }
 
     pub fn append_byte(&mut self, data: u8) -> usize {
@@ -43,7 +45,7 @@ impl MemoryManager {
     pub fn dump_bytes(&self, name: String) {
         let name = name + ".b";
         println!("Dumping memory to file '{}' [{} bytes]",
-                 name.clone(), self.memory.len().to_formatted_string(&Locale::en));
+                 &name, self.memory.len().to_formatted_string(&Locale::en));
 
         let file = fs::OpenOptions::new().write(true)
             .create(true)
