@@ -1,6 +1,7 @@
 pub mod boolean;
 pub mod function;
 pub mod char;
+pub mod pointer;
 
 use crate::errors::create_op_not_impl_error;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
@@ -8,6 +9,7 @@ use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, Symbol, SymbolHandler};
 use crate::processing::types::boolean::BooleanType;
 use crate::processing::types::char::CharType;
+use crate::processing::types::pointer::PointerType;
 
 pub fn get_type(type_symbol: &TypeSymbol, memory_managers: &mut MemoryManagers) -> Result<Type, String> {
     match type_symbol
@@ -17,6 +19,9 @@ pub fn get_type(type_symbol: &TypeSymbol, memory_managers: &mut MemoryManagers) 
         },
         TypeSymbol::Character => {
             Ok(Type::new(Box::new(CharType::create_empty()), memory_managers))
+        },
+        TypeSymbol::Pointer => {
+            Ok(Type::new(Box::new(PointerType::create_empty()), memory_managers))
         }
         type_symbol => Err(format!("{:?}(s) cannot be created! (Are you trying to operate on an invalid type?)", type_symbol))
     }
@@ -31,7 +36,7 @@ pub fn get_type_from_literal(literal: &Literal, memory_managers: &mut MemoryMana
         Literal::StringLiteral(_) => {
             Type::new(Box::new(CharType::create_empty()), memory_managers)
         },
-        _ => panic!("Cannot infer type from this literal!")
+        _ => panic!("Cannot infer type from {}", literal.get_name())
     }
 }
 
@@ -41,6 +46,7 @@ pub enum TypeSymbol {
     Boolean,
     Character,
     Function,
+    Pointer,
 }
 
 pub struct TypeSymbolHandler {}
@@ -51,6 +57,7 @@ impl SymbolHandler for TypeSymbolHandler {
             "int" => Some(Symbol::Type(TypeSymbol::Integer)),
             "bool" => Some(Symbol::Type(TypeSymbol::Boolean)),
             "char" => Some(Symbol::Type(TypeSymbol::Character)),
+            "ptr" => Some(Symbol::Type(TypeSymbol::Pointer)),
             _ => None,
         }
     }
@@ -62,7 +69,8 @@ impl TypeSymbol {
             TypeSymbol::Integer => "Integer",
             TypeSymbol::Boolean => "Boolean",
             TypeSymbol::Character => "Char",
-            TypeSymbol::Function => "Function"
+            TypeSymbol::Function => "Function",
+            TypeSymbol::Pointer => "Pointer",
         }
     }
 }

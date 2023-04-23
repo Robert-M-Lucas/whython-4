@@ -44,6 +44,7 @@ fn wrapped_main() {
         Some(value) => value
     };
 
+    //? Compile
     if extension == "why" {
         let input = match fs::read_to_string(&input_file) {
             Err(e) => {
@@ -77,6 +78,7 @@ fn wrapped_main() {
 
         memory.save_to_compiled("Compiled".to_string());
     }
+    //? Load compiled file
     else if extension == "cwhy" {
         memory = match MemoryManagers::load_from_compiled(input_file) {
             Err(e) => { println!("Loading compiled file failed - {}", e); return; },

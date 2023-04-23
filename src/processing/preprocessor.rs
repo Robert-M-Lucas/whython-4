@@ -9,6 +9,8 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     let mut buffer = String::new();
     let mut in_string = false;
     let mut bracket_depth = 0;
+    let mut in_indexer = false;
+    let mut indexing_start: usize = 0;
 
     fn process_buffer(buffer: &mut String, symbol_line: &mut Vec<Symbol>) -> Result<(), String> {
         if buffer.is_empty() {
@@ -80,15 +82,15 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
 
             //? Process character alone
             match
-            match c {
-                ',' => {
-                    let r = process_buffer(&mut buffer, &mut symbol_line);
-                    if r.is_err() { return Err(r.debugless_unwrap_err()); }
-                    buffer.push(c);
-                    Some(process_buffer(&mut buffer, &mut symbol_line))
-                },
-                _ => None
-            }
+                match c {
+                    ',' => {
+                        let r = process_buffer(&mut buffer, &mut symbol_line);
+                        if r.is_err() { return Err(r.debugless_unwrap_err()); }
+                        buffer.push(c);
+                        Some(process_buffer(&mut buffer, &mut symbol_line))
+                    },
+                    _ => None
+                }
             {
                 Some(value) => match value {
                     Err(e) => return Err(e),
@@ -130,6 +132,43 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
                 buffer.push(c);
             }
             bracket_depth += 1;
+            continue;
+        }
+
+        if c == ']' && !in_string {
+            if !buffer.is_empty() {
+                match process_buffer(&mut buffer, &mut symbol_line) {
+                    Err(e) => return Err(e),
+                    Ok(_) => {}
+                };
+            }
+            if !in_indexer {
+                return Err("Closing indexer bracket found with no corresponding opening bracket".to_string());
+            }
+            if symbol_line.len() - indexing_start > 1 {
+                return Err("Indexers may only contain one symbol".to_string());
+            }
+            if symbol_line.len() - indexing_start < 1 {
+                return Err("Indexer must contain a symbol".to_string());
+            }
+            let symbol = symbol_line.pop().unwrap();
+            symbol_line.push(Symbol::Indexer(Box::new(symbol)));
+            in_indexer = false;
+            continue;
+        }
+
+        if c == '[' && !in_string && in_indexer {
+            if !buffer.is_empty() {
+                match process_buffer(&mut buffer, &mut symbol_line) {
+                    Err(e) => return Err(e),
+                    Ok(_) => {}
+                };
+            }
+            if in_indexer {
+                return Err("Recursive indexing not permitted".to_string());
+            }
+            indexing_start = symbol_line.len();
+            in_indexer = true;
             continue;
         }
 

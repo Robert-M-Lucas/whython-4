@@ -3,6 +3,7 @@ use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::processor::ProcessingResult;
 use crate::processing::symbols::Symbol;
+use crate::processing::types::get_type;
 use super::LineHandler;
 
 pub struct VariableInitialisationLine {}
@@ -27,11 +28,19 @@ impl LineHandler for VariableInitialisationLine {
                     "Type must be followed by a Name to initialise a variable".to_string())
         };
 
-        let mut object = match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
-                                                         &line[3..], None,
+        let mut object = match &line[0] {
+            Symbol::Type(type_symbol) => match get_type(type_symbol, memory_managers) {
+                Err(e) => return ProcessingResult::Failure(e),
+                Ok(value) => value
+            },
+            _ => panic!()
+        };
+
+        match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
+                                                         &line[3..], Some(&object),
                                                          true) {
             Err(e) => return ProcessingResult::Failure(e),
-            Ok(value) => value.unwrap()
+            Ok(_) => {}
         };
 
         object.set_name(name.clone());

@@ -34,6 +34,7 @@ pub enum Symbol {
     Literal(Literal),
     Operator(Operator),
     ArithmeticBlock(Vec<Symbol>),
+    Indexer(Box<Symbol>),
     List(Vec<Symbol>),
     Type(TypeSymbol),
     Block(Block),
