@@ -1,1 +1,1 @@
-ptr a = 12
+char[12] a = "hello"

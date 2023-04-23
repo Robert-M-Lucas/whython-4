@@ -3,7 +3,7 @@ use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
-use crate::processing::types::{Type, TypeTrait};
+use crate::processing::types::{get_type, Type, TypeTrait};
 
 pub struct CharType {}
 
@@ -42,6 +42,38 @@ impl TypeTrait for CharType {
 
         CopyInstruction::new_alloc(memory_managers, constant_address,
                                    _super.get_address(), self.get_size());
+
+        Ok(())
+    }
+
+    fn create_indexed(&self, _super: &Type, memory_managers: &mut MemoryManagers,
+                      argument_literal: &Literal, assignment_literal: &Literal) -> Result<(), String> {
+        let count: usize = match argument_literal {
+            Literal::IntLiteral(count) => match (*count).try_into() {
+                Ok(value) => value,
+                Err(e) => return Err(format!("Initialisation argument '{}' out of range", count))
+            },
+            _ => return Err(format!("This type cannot be created with {} initialisation argument", argument_literal.get_name()))
+        };
+
+        if count == 0 {
+            return Err("Initialisation argument cannot be 0".to_string());
+        }
+
+        let mut assigner = match assignment_literal {
+            Literal::StringLiteral(string) => string.clone(),
+            Literal::None => String::new(),
+            _ => return Err(format!("This type cannot be created with {} assignment argument", assignment_literal.get_name()))
+        };
+
+        assigner += &*"\0".repeat(count - assigner.len());
+
+        self.static_assign_literal(_super ,memory_managers, &Literal::StringLiteral(assigner.chars().nth(0).unwrap().to_string())).unwrap();
+        
+        for i in 1..count {
+            let obj = get_type(&self.get_type(), memory_managers).unwrap();
+            obj.static_assign_literal(memory_managers, &Literal::StringLiteral(assigner.chars().nth(i).unwrap().to_string())).unwrap();
+        }
 
         Ok(())
     }

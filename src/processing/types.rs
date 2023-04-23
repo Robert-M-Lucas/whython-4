@@ -79,6 +79,7 @@ pub struct Type {
     internal_type: Box<dyn TypeTrait>,
     name: Option<String>,
     address: usize,
+    needs_indexing: bool,
 }
 
 impl Type {
@@ -89,7 +90,8 @@ impl Type {
         Self {
             internal_type,
             name: None,
-            address
+            address,
+            needs_indexing: false
         }
     }
 
@@ -101,6 +103,8 @@ impl Type {
         self.name.clone().unwrap()
     }
 
+    pub fn get_indexed(&self) -> bool { self.needs_indexing }
+
     pub fn assign_clone(&self, memory_managers: &mut MemoryManagers,
                         to_clone: &Type) -> Result<(), String> {
         self.internal_type.assign_clone(self, memory_managers, to_clone)
@@ -109,6 +113,13 @@ impl Type {
     pub fn static_assign_literal(&self, memory_managers: &mut MemoryManagers,
                                  literal: &Literal) -> Result<(), String> {
         self.internal_type.static_assign_literal(self, memory_managers, literal)
+    }
+
+    pub fn create_indexed(&mut self, _memory_managers: &mut MemoryManagers,
+                      _argument_literal: &Literal, _assignment_literal: &Literal) -> Result<(), String> {
+        let result = self.internal_type.create_indexed(self, _memory_managers, _argument_literal, _assignment_literal);
+        self.needs_indexing = true;
+        result
     }
 
     pub fn get_type(&self) -> TypeSymbol {
@@ -148,6 +159,7 @@ impl Type {
             internal_type: self.internal_type.clone(),
             name: self.name.clone(),
             address: self.address,
+            needs_indexing: self.needs_indexing
         }
     }
 }
@@ -170,6 +182,11 @@ pub trait TypeTrait {
     fn static_assign_literal(&self, _super: &Type, _memory_managers: &mut MemoryManagers,
                              _literal: &Literal) -> Result<(), String> {
         Err(format!("Assignment from literals not implemented for {}", self.get_type().get_name()))
+    }
+
+    fn create_indexed(&self, _super: &Type, _memory_managers: &mut MemoryManagers,
+                      _argument_literal: &Literal, _assignment_literal: &Literal) -> Result<(), String> {
+        Err(format!("{} cannot be created with initialisation argument", self.get_type().get_name()))
     }
 
     fn get_type(&self) -> TypeSymbol;

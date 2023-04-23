@@ -8,6 +8,7 @@ pub enum Literal {
     IntLiteral(i32),
     BoolLiteral(bool),
     ParameterList(Vec<(TypeSymbol, String)>),
+    None,
 }
 
 pub struct LiteralSymbolHandler {}
@@ -36,6 +37,7 @@ impl SymbolHandler for LiteralSymbolHandler {
             // Boolean
             "true" => Some(Symbol::Literal(Literal::BoolLiteral(true))),
             "false" => Some(Symbol::Literal(Literal::BoolLiteral(false))),
+            "none" => Some(Symbol::Literal(Literal::None)),
             _ => None,
         })
         .or_else(
@@ -69,6 +71,7 @@ impl Literal {
             Literal::IntLiteral(_) => "IntLiteral",
             Literal::BoolLiteral(_) => "BoolLiteral",
             Literal::ParameterList(_) => "ParameterList",
+            Literal::None => "None",
         }
     }
 }

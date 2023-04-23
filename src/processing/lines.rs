@@ -10,6 +10,7 @@ pub mod if_line;
 pub mod function_line;
 pub mod print_line;
 pub mod call_line;
+pub mod variable_initialisation_with_argument_line;
 
 pub trait LineHandler {
     fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,

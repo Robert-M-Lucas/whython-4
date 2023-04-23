@@ -157,7 +157,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
             continue;
         }
 
-        if c == '[' && !in_string && in_indexer {
+        if c == '[' && !in_string {
             if !buffer.is_empty() {
                 match process_buffer(&mut buffer, &mut symbol_line) {
                     Err(e) => return Err(e),

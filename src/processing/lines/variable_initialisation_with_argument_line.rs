@@ -6,29 +6,37 @@ use crate::processing::symbols::{Assigner, Symbol};
 use crate::processing::types::get_type;
 use super::LineHandler;
 
-pub struct VariableInitialisationLine {}
+pub struct VariableInitialisationWithArgumentLine {}
 
-impl LineHandler for VariableInitialisationLine {
+impl LineHandler for VariableInitialisationWithArgumentLine {
     fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,
                     block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
 
-        if line.len() == 0 || !matches!(line[0], Symbol::Type(_)) {
+        if line.len() == 0 || !matches!(line[0], Symbol::Type(_)) || !matches!(line[1], Symbol::Indexer(_)) {
             return ProcessingResult::Unmatched;
         }
 
-        if line.len() < 4 {
+        if line.len() < 5 {
             return ProcessingResult::Failure(
-                "Type must be followed by a Name, '=' and value to initialise a variable"
+                "Type must be followed Indexer, Name, '=' and value to initialise a variable"
                     .to_string());
         }
 
-        let name = match &line[1] {
-            Symbol::Name(name) => name,
-            _ => return ProcessingResult::Failure(
-                    "Type must be followed by a Name to initialise a variable".to_string())
+        let indexer = match &line[1] {
+            Symbol::Indexer(symbol ) => match symbol.as_ref() {
+                Symbol::Literal(literal) => literal.clone(),
+                _ => return ProcessingResult::Failure("Indexer must contain Literal".to_string())
+            },
+            _ => panic!()
         };
 
-        match &line[2] {
+        let name = match &line[2] {
+            Symbol::Name(name) => name,
+            _ => return ProcessingResult::Failure(
+                    "Type and initialiser must be followed by a Name to initialise a variable".to_string())
+        };
+
+        match &line[3] {
             Symbol::Assigner(assigner) => match assigner {
                 Assigner::Setter => {},
                 _ => return ProcessingResult::Failure(
@@ -48,9 +56,12 @@ impl LineHandler for VariableInitialisationLine {
             _ => panic!()
         };
 
-        match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
-                                                         &line[3..], Some(&object),
-                                                         true) {
+        let value = match &line[4] {
+            Symbol::Literal(literal) => literal.clone(),
+            _ => return ProcessingResult::Failure("Can only assign Literals to indexed objects must contain Literal".to_string())
+        };
+
+        match object.create_indexed(memory_managers, &indexer, &value) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(_) => {}
         };
