@@ -9,7 +9,7 @@ pub struct VariableAssignmentLine {}
 impl LineHandler for VariableAssignmentLine {
     fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,
                     block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
-        if line.len() == 0 { return ProcessingResult::Unmatched; }
+        if line.len() < 3 { return ProcessingResult::Unmatched; }
 
         let name = match &line[0] {
             Symbol::Name(name) => name,

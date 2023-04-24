@@ -11,7 +11,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                                  -> Result<Option<Type>, String> {
 
     fn get_formatting_error() -> String {
-        "Operations must be formatted [LHS] [Operator] [RHS] or [Operator] [Operand] or [Value]"
+        "Operations must be formatted [LHS] [Operator] [RHS] or [Operator] [Operand] or [Value] or [Name][Index]"
             .to_string()
     }
 
@@ -36,7 +36,10 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 }
             },
             Symbol::Literal(literal) => {
-                let object = get_type_from_literal(&literal, memory_managers);
+                let object = match get_type_from_literal(&literal, memory_managers) {
+                    Err(e) => return Err(e),
+                    Ok(o) => o
+                };
                 match object.static_assign_literal(memory_managers, &literal) {
                     Err(e) => return Err(e),
                     Ok(_) => {}
@@ -68,7 +71,10 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 }
             },
             Symbol::Literal(literal) => {
-                let object = get_type_from_literal(&literal, memory_managers);
+                let object = match get_type_from_literal(&literal, memory_managers) {
+                    Err(e) => return Err(e),
+                    Ok(o) => o
+                };
                 match object.static_assign_literal(memory_managers, &literal) {
                     Err(e) => return Err(e),
                     Ok(_) => {}
@@ -195,6 +201,59 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 }
             }
         }
+        else if matches!(section[1], Symbol::Indexer(_)) {
+            let to_index = match &section[0] {
+                Symbol::Name(name) => match reference_stack.get_variable(name) {
+                    Err(e) => return Err(e),
+                    Ok(value) => value
+                },
+                _ => return Err("Only a Name can be indexed".to_string())
+            };
+
+            #[allow(unused_assignments)]
+            let mut type_holder = None;
+            let index = match &section[1] {
+                Symbol::Indexer(symbol) => {
+                    match symbol.as_ref() {
+                        Symbol::Name(name) => match reference_stack.get_variable(name) {
+                            Err(e) => return Err(e),
+                            Ok(value) => value,
+                        },
+                        Symbol::Literal(literal) => match get_type_from_literal(literal, memory_managers) {
+                            Err(e) => return Err(e),
+                            Ok(value) => {
+                                match value.static_assign_literal(memory_managers, literal) {
+                                    Err(e) => return Err(e),
+                                    Ok(_) => {}
+                                };
+                                type_holder = Some(value);
+                                type_holder.as_ref().unwrap()
+                            }
+                        },
+                        _ => return Err("Name can only be indexed by a Name or a Literal".to_string())
+                    }
+                },
+                _ => panic!()
+            };
+
+            if to_overwrite.is_some() {
+                return match to_index.get_indexed(memory_managers, index, &to_overwrite.unwrap()) {
+                    Err(e) => return Err(e),
+                    Ok(_) => Ok(None)
+                };
+            }
+            else {
+                let return_type = match get_type(&to_index.get_type(), memory_managers) {
+                    Err(e) => return Err(e),
+                    Ok(value) => value
+                };
+
+                return match to_index.get_indexed(memory_managers, index, &return_type) {
+                    Err(e) => return Err(e),
+                    Ok(_) => Ok(Some(return_type))
+                };
+            }
+        }
         else {
             let operator = match section[0] {
                 Symbol::Operator(op) => op,
@@ -212,7 +271,10 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                     }
                 },
                 Symbol::Literal(literal) => {
-                    let object = get_type_from_literal(&literal, memory_managers);
+                    let object = match get_type_from_literal(&literal, memory_managers) {
+                        Err(e) => return Err(e),
+                        Ok(o) => o
+                    };
                     match object.static_assign_literal(memory_managers, &literal) {
                         Err(e) => return Err(e),
                         Ok(_) => {}
@@ -293,7 +355,10 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             },
             Symbol::Literal(literal) => {
                 if to_overwrite.is_none() {
-                    let object = get_type_from_literal(&literal, memory_managers);
+                    let object = match get_type_from_literal(&literal, memory_managers) {
+                        Err(e) => return Err(e),
+                        Ok(o) => o
+                    };
                     match object.static_assign_literal(memory_managers, &literal) {
                         Err(e) => return Err(e),
                         Ok(_) => { }

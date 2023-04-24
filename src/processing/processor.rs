@@ -9,6 +9,7 @@ use crate::processing::blocks::BlockCoordinator;
 use crate::processing::lines::call_line::CallLine;
 use crate::processing::lines::function_line::FunctionLine;
 use crate::processing::lines::if_line::IfLine;
+use crate::processing::lines::indexed_variable_assignment_line::IndexedVariableAssignmentLine;
 use crate::processing::lines::LineHandler;
 use crate::processing::lines::print_line::PrintLine;
 use crate::processing::lines::variable_assignment_line::VariableAssignmentLine;
@@ -99,6 +100,12 @@ impl MemoryManagers {
     }
 }
 
+macro_rules! process_line {
+    ($line: ident, $symbol_line: expr, $memory_managers: expr, $block_coordinator: expr) => {
+        $line::process_line(&$symbol_line, &mut $memory_managers, &mut $block_coordinator)
+    };
+}
+
 pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManagers, String> {
     let mut memory_managers =  MemoryManagers {
         program_memory: MemoryManager::new(),
@@ -137,13 +144,14 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
 
 
         let r =
-            VariableInitialisationWithArgumentLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator)
-                .or_else( || VariableInitialisationLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
-                .or_else( || CallLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
-                .or_else(|| VariableAssignmentLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
-                .or_else( || IfLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
-                .or_else( || FunctionLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
-                .or_else( || PrintLine::process_line(&symbol_line, &mut memory_managers, &mut block_coordinator))
+            process_line!(VariableInitialisationWithArgumentLine, symbol_line, memory_managers, block_coordinator)
+                .or_else( || process_line!(VariableInitialisationLine, symbol_line, memory_managers, block_coordinator))
+                .or_else( || process_line!(CallLine, symbol_line, memory_managers, block_coordinator))
+                .or_else( || process_line!(IndexedVariableAssignmentLine, symbol_line, memory_managers, block_coordinator))
+                .or_else( || process_line!(VariableAssignmentLine, symbol_line, memory_managers, block_coordinator))
+                .or_else( || process_line!(IfLine, symbol_line, memory_managers, block_coordinator))
+                .or_else( || process_line!(FunctionLine, symbol_line, memory_managers, block_coordinator))
+                .or_else( || process_line!(PrintLine, symbol_line, memory_managers, block_coordinator))
             ;
 
 

@@ -1,5 +1,4 @@
 use crate::processing::blocks::BlockCoordinator;
-use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::processor::ProcessingResult;
 use crate::processing::symbols::{Assigner, Symbol};

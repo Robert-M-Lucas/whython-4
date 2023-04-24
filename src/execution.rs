@@ -2,6 +2,8 @@ use std::mem::size_of;
 use std::time::Instant;
 use crate::processing::instructions::and_instruction_6::AndInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
+use crate::processing::instructions::dynamic_from_copy_instruction_10::DynamicFromCopyInstruction;
+use crate::processing::instructions::dynamic_to_copy_instruction_11::DynamicToCopyInstruction;
 use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::instructions::invert_instruction_1::InvertInstruction;
 use crate::processing::instructions::jump_if_not_instruction_2::JumpIfNotInstruction;
@@ -42,6 +44,8 @@ pub fn execute(memory_managers: &mut MemoryManagers) -> Result<(), String> {
             7 => EqualInstruction::execute(&mut pointer, memory_managers),
             8 => OrInstruction::execute(&mut pointer, memory_managers),
             9 => PrintCharsInstruction::execute(&mut pointer, memory_managers),
+            10 => DynamicFromCopyInstruction::execute(&mut pointer, memory_managers),
+            11 => DynamicToCopyInstruction::execute(&mut pointer, memory_managers),
             code => return Err(format!("Unknown code! [{}]", code))
         };
 

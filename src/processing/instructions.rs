@@ -8,7 +8,7 @@ pub mod and_instruction_6;
 pub mod equal_instruction_7;
 pub mod or_instruction_8;
 pub mod print_chars_instruction_9;
-mod dynamic_from_copy_instruction_10;
+pub mod dynamic_from_copy_instruction_10;
 pub mod dynamic_to_copy_instruction_11;
 
 pub const INSTRUCTION_CODE_LENGTH: usize = 2;

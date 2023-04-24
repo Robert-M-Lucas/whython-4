@@ -51,7 +51,7 @@ impl TypeTrait for CharType {
         let count: usize = match argument_literal {
             Literal::IntLiteral(count) => match (*count).try_into() {
                 Ok(value) => value,
-                Err(e) => return Err(format!("Initialisation argument '{}' out of range", count))
+                Err(_) => return Err(format!("Initialisation argument '{}' out of range", count))
             },
             _ => return Err(format!("This type cannot be created with {} initialisation argument", argument_literal.to_string()))
         };
@@ -68,11 +68,16 @@ impl TypeTrait for CharType {
 
         assigner += &*"\0".repeat(count - assigner.len());
 
-        self.static_assign_literal(_super ,memory_managers, &Literal::StringLiteral(assigner.chars().nth(0).unwrap().to_string())).unwrap();
-        
-        for i in 1..count {
+        let mut objs = Vec::with_capacity(count - 1);
+
+        for _ in 1..count {
             let obj = get_type(&self.get_type(), memory_managers).unwrap();
-            obj.static_assign_literal(memory_managers, &Literal::StringLiteral(assigner.chars().nth(i).unwrap().to_string())).unwrap();
+            objs.push(obj);
+        }
+
+        self.static_assign_literal(_super ,memory_managers, &Literal::StringLiteral(assigner.chars().nth(0).unwrap().to_string())).unwrap();
+        for i in 1..count {
+            objs[i-1].static_assign_literal(memory_managers, &Literal::StringLiteral(assigner.chars().nth(i).unwrap().to_string())).unwrap();
         }
 
         Ok(())

@@ -1,1 +1,6 @@
-char[12] a = 12
+char[12] a = "asd"
+a[1] = a[2]
+
+printc a[0]
+printc a[1]
+printc a[2]

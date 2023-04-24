@@ -5,38 +5,35 @@ pub mod pointer;
 
 use crate::errors::create_op_not_impl_error;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
+use crate::processing::instructions::dynamic_from_copy_instruction_10::DynamicFromCopyInstruction;
+use crate::processing::instructions::dynamic_to_copy_instruction_11::DynamicToCopyInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, Symbol, SymbolHandler};
 use crate::processing::types::boolean::BooleanType;
 use crate::processing::types::char::CharType;
 use crate::processing::types::pointer::PointerType;
 
+macro_rules! create_type {
+    ($internal_type: ident, $memory_managers: expr) => { Type::new(Box::new($internal_type::create_empty()), $memory_managers) };
+}
+
 pub fn get_type(type_symbol: &TypeSymbol, memory_managers: &mut MemoryManagers) -> Result<Type, String> {
     match type_symbol
     {
-        TypeSymbol::Boolean => {
-            Ok(Type::new(Box::new(BooleanType::create_empty()), memory_managers))
-        },
-        TypeSymbol::Character => {
-            Ok(Type::new(Box::new(CharType::create_empty()), memory_managers))
-        },
-        TypeSymbol::Pointer => {
-            Ok(Type::new(Box::new(PointerType::create_empty()), memory_managers))
-        }
+        TypeSymbol::Boolean => Ok(create_type!(BooleanType, memory_managers)),
+        TypeSymbol::Character => Ok(create_type!(CharType, memory_managers)),
+        TypeSymbol::Pointer => Ok(create_type!(PointerType, memory_managers)),
         type_symbol => Err(format!("{:?}(s) cannot be created! (Are you trying to operate on an invalid type?)", type_symbol))
     }
 }
 
-pub fn get_type_from_literal(literal: &Literal, memory_managers: &mut MemoryManagers) -> Type {
+pub fn get_type_from_literal(literal: &Literal, memory_managers: &mut MemoryManagers) -> Result<Type, String> {
     match literal
     {
-        Literal::BoolLiteral(_) => {
-            Type::new(Box::new(BooleanType::create_empty()), memory_managers)
-        },
-        Literal::StringLiteral(_) => {
-            Type::new(Box::new(CharType::create_empty()), memory_managers)
-        },
-        _ => panic!("Cannot infer type from {}", literal.to_string())
+        Literal::BoolLiteral(_) => Ok(create_type!(BooleanType, memory_managers)),
+        Literal::StringLiteral(_) => Ok(create_type!(CharType, memory_managers)),
+        Literal::IntLiteral(_) => Ok(create_type!(PointerType, memory_managers)),
+        _ => Err(format!("Cannot infer type from {}", literal))
     }
 }
 
@@ -91,15 +88,21 @@ impl Type {
         self.name.clone().unwrap()
     }
 
-    pub fn get_indexed(&self) -> bool { self.needs_indexing }
+    pub fn is_indexed(&self) -> bool { self.needs_indexing }
 
     pub fn assign_clone(&self, memory_managers: &mut MemoryManagers,
                         to_clone: &Type) -> Result<(), String> {
+        if self.needs_indexing {
+            return Err("Tried to assign to type that needs indexing".to_string());
+        }
         self.internal_type.assign_clone(self, memory_managers, to_clone)
     }
 
     pub fn static_assign_literal(&self, memory_managers: &mut MemoryManagers,
                                  literal: &Literal) -> Result<(), String> {
+        if self.needs_indexing {
+            return Err("Tried to assign to type that needs indexing".to_string());
+        }
         self.internal_type.static_assign_literal(self, memory_managers, literal)
     }
 
@@ -108,6 +111,24 @@ impl Type {
         let result = self.internal_type.create_indexed(self, _memory_managers, _argument_literal, _assignment_literal);
         self.needs_indexing = true;
         result
+    }
+
+    pub fn get_indexed(&self, memory_managers: &mut MemoryManagers,
+                       index_pointer: &Type, destination: &Type) -> Result<(), String> {
+        if !self.needs_indexing {
+            return Err("Tried to index type that isn't indexed".to_string());
+        }
+
+        self.internal_type.get_index(self, memory_managers, index_pointer, destination)
+    }
+
+    pub fn set_indexed(&self, memory_managers: &mut MemoryManagers,
+                   index_pointer: &Type, source: &Type) -> Result<(), String> {
+        if !self.needs_indexing {
+            return Err("Tried to index type that isn't indexed".to_string());
+        }
+
+        self.internal_type.set_index(self, memory_managers, index_pointer, source)
     }
 
     pub fn get_type(&self) -> TypeSymbol {
@@ -175,6 +196,44 @@ pub trait TypeTrait {
     fn create_indexed(&self, _super: &Type, _memory_managers: &mut MemoryManagers,
                       _argument_literal: &Literal, _assignment_literal: &Literal) -> Result<(), String> {
         Err(format!("{} cannot be created with initialisation argument", self.get_type().to_string()))
+    }
+
+    fn get_index(&self, _super: &Type, memory_managers: &mut MemoryManagers,
+                      index_pointer: &Type, destination: &Type) -> Result<(), String> {
+
+        match index_pointer.get_type() {
+            TypeSymbol::Pointer => {},
+            _ => return Err("Only pointers are supported for indexing this type".to_string())
+        }
+
+        if self.get_type() != destination.get_type() {
+            return Err(format!("Cannot move value from indexed {} into {}", self.get_type(), destination.get_type()))
+        }
+
+        DynamicFromCopyInstruction::new_alloc(memory_managers, _super.get_address(),
+                                              self.get_size(), index_pointer.get_address(),
+                                              destination.address, self.get_size());
+
+        Ok(())
+    }
+
+    fn set_index(&self, _super: &Type, memory_managers: &mut MemoryManagers,
+                 index_pointer: &Type, source: &Type) -> Result<(), String> {
+
+        match index_pointer.get_type() {
+            TypeSymbol::Pointer => {},
+            _ => return Err("Only pointers are supported for indexing this type".to_string())
+        }
+
+        if self.get_type() != source.get_type() {
+            return Err(format!("Cannot move value from {} into indexed {}", source.get_type(), self.get_type()))
+        }
+
+        DynamicToCopyInstruction::new_alloc(memory_managers, _super.get_address(),
+                                              self.get_size(), index_pointer.get_address(),
+                                              source.address, self.get_size());
+
+        Ok(())
     }
 
     fn get_type(&self) -> TypeSymbol;

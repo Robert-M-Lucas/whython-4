@@ -17,6 +17,7 @@ use processing::preprocessor::convert_to_symbols;
 use processing::processor::process_symbols;
 use crate::execution::execute;
 use crate::processing::processor::MemoryManagers;
+use crate::translator::translate;
 
 fn pause() {
     let mut stdout = stdout();
@@ -90,10 +91,10 @@ fn wrapped_main() {
         return;
     }
 
-    // translate(&m.program_memory.memory);
+    translate(&memory.program_memory.memory);
 
-    // memory.variable_memory.dump_bytes("VariableMemory".to_string());
-    // memory.program_memory.dump_bytes("ProgramMemory".to_string());
+    memory.variable_memory.dump_bytes("VariableMemory".to_string());
+    memory.program_memory.dump_bytes("ProgramMemory".to_string());
 
 
     match execute(&mut memory) {
@@ -101,5 +102,5 @@ fn wrapped_main() {
         Ok(_) => {}
     };
 
-    // memory.variable_memory.dump_bytes("VariableMemory - post".to_string());
+    memory.variable_memory.dump_bytes("VariableMemory - post".to_string());
 }
