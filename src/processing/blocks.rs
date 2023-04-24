@@ -5,6 +5,7 @@ use crate::processing::processor::MemoryManagers;
 use crate::processing::reference_manager::ReferenceStack;
 use crate::processing::symbols::Symbol;
 use crate::processing::types::Type;
+use crate::propagate_error;
 
 pub trait BlockHandler {
     fn on_entry(&mut self, memory_managers: &mut MemoryManagers,
@@ -13,10 +14,8 @@ pub trait BlockHandler {
 
     fn on_exit(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack,
                _symbol_line: &Vec<Symbol>) -> Result<bool, String> {
-        match self.on_forced_exit(memory_managers, reference_stack) {
-            Ok(_) => Ok(true),
-            Err(e) => Err(e),
-        }
+        propagate_error!(self.on_forced_exit(memory_managers, reference_stack));
+        Ok(true)
     }
 
     fn on_forced_exit(&mut self, memory_managers: &mut MemoryManagers,

@@ -2,6 +2,7 @@ use crate::processing::processor::MemoryManagers;
 use crate::processing::reference_manager::ReferenceStack;
 use crate::processing::symbols::{Punctuation, Symbol};
 use crate::processing::types::{get_type, get_type_from_literal, Type};
+use crate::propagate_error;
 
 /// Returns Ok(Some(Type))/Err if to_overwrite is None. If to_overwrite is Some, returns Ok(None)/Err
 pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
@@ -30,20 +31,11 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         let mut _lhs_holder = None;
         let lhs = match &section[0] {
             Symbol::Name(name) => {
-                match reference_stack.get_variable(name) {
-                    Err(e) => return Err(e),
-                    Ok(value) => value
-                }
+                propagate_error!(reference_stack.get_variable(name))
             },
             Symbol::Literal(literal) => {
-                let object = match get_type_from_literal(&literal, memory_managers) {
-                    Err(e) => return Err(e),
-                    Ok(o) => o
-                };
-                match object.static_assign_literal(memory_managers, &literal) {
-                    Err(e) => return Err(e),
-                    Ok(_) => {}
-                }
+                let object = propagate_error!(get_type_from_literal(&literal, memory_managers));
+                propagate_error!(object.static_assign_literal(memory_managers, &literal));
                 _lhs_holder = Some(object);
                 _lhs_holder.as_ref().unwrap()
             },
@@ -65,20 +57,14 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         let mut _rhs_holder = None;
         let rhs = match &section[2] {
             Symbol::Name(name) => {
-                match reference_stack.get_variable(name) {
-                    Err(e) => return Err(e),
-                    Ok(value) => value
-                }
+                propagate_error!(reference_stack.get_variable(name))
             },
             Symbol::Literal(literal) => {
                 let object = match get_type_from_literal(&literal, memory_managers) {
                     Err(e) => return Err(e),
                     Ok(o) => o
                 };
-                match object.static_assign_literal(memory_managers, &literal) {
-                    Err(e) => return Err(e),
-                    Ok(_) => {}
-                }
+                propagate_error!(object.static_assign_literal(memory_managers, &literal));
                 _rhs_holder = Some(object);
                 _rhs_holder.as_ref().unwrap()
             },
@@ -98,28 +84,16 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         };
 
         if to_overwrite.is_none() {
-            let result_type = match lhs.get_operation_type(&operator, Some(rhs)) {
-                Err(e) => return Err(e),
-                Ok(value) => value
-            };
+            let result_type = propagate_error!(lhs.get_operation_type(&operator, Some(rhs)));
 
-            let mut result = match get_type(&result_type, memory_managers) {
-                Err(e) => return Err(e),
-                Ok(value) => value
-            };
-            match lhs.operate(memory_managers, operator, Some(rhs), &mut result) {
-                Err(e) => return Err(e),
-                Ok(_) => {}
-            }
+            let mut result = propagate_error!(get_type(&result_type, memory_managers));
+            propagate_error!(lhs.operate(memory_managers, operator, Some(rhs), &mut result));
 
             return Ok(Some(result));
         }
         else {
-            match lhs.operate(memory_managers, operator, Some(rhs),
-                              to_overwrite.unwrap()) {
-                Err(e) => return Err(e),
-                Ok(_) => {}
-            }
+            propagate_error!(lhs.operate(memory_managers, operator, Some(rhs),
+                              to_overwrite.unwrap()));
 
             return Ok(None);
         }
@@ -131,10 +105,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 _ => return Err("Only a function can be called".to_string())
             };
 
-            let function = match reference_stack.get_variable(&name) {
-                Err(e) => return Err(e),
-                Ok(value) => value
-            };
+            let function = propagate_error!(reference_stack.get_variable(&name));
 
             let arguments = match &section[1] {
                 Symbol::ArithmeticBlock(symbols) => symbols,
@@ -146,10 +117,8 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             let mut argument_list = Vec::new();
 
             while i < arguments.len() {
-                argument_list.push(match handle_arithmetic_section(memory_managers, reference_stack, &[arguments[i].clone()], None, true) {
-                    Err(e) => return Err(e),
-                    Ok(value) => value.unwrap()
-                });
+                argument_list.push(propagate_error!(
+                    handle_arithmetic_section(memory_managers, reference_stack, &[arguments[i].clone()], None, true)).unwrap());
 
                 i += 1;
 
@@ -180,10 +149,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                         let return_type = match function.get_return_type() {
                             Err(e) => return Err(e),
                             Ok(value) => {
-                                match get_type(&value, memory_managers) {
-                                    Err(e) => return Err(e),
-                                    Ok(value) => value
-                                }
+                                propagate_error!(get_type(&value, memory_managers))
                             }
                         };
 
@@ -203,10 +169,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         }
         else if matches!(section[1], Symbol::Indexer(_)) {
             let to_index = match &section[0] {
-                Symbol::Name(name) => match reference_stack.get_variable(name) {
-                    Err(e) => return Err(e),
-                    Ok(value) => value
-                },
+                Symbol::Name(name) => propagate_error!(reference_stack.get_variable(name)),
                 _ => return Err("Only a Name can be indexed".to_string())
             };
 
@@ -215,17 +178,11 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             let index = match &section[1] {
                 Symbol::Indexer(symbol) => {
                     match symbol.as_ref() {
-                        Symbol::Name(name) => match reference_stack.get_variable(name) {
-                            Err(e) => return Err(e),
-                            Ok(value) => value,
-                        },
+                        Symbol::Name(name) => propagate_error!(reference_stack.get_variable(name)),
                         Symbol::Literal(literal) => match get_type_from_literal(literal, memory_managers) {
                             Err(e) => return Err(e),
                             Ok(value) => {
-                                match value.static_assign_literal(memory_managers, literal) {
-                                    Err(e) => return Err(e),
-                                    Ok(_) => {}
-                                };
+                                propagate_error!(value.static_assign_literal(memory_managers, literal));
                                 type_holder = Some(value);
                                 type_holder.as_ref().unwrap()
                             }
@@ -243,10 +200,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 };
             }
             else {
-                let return_type = match get_type(&to_index.get_type(), memory_managers) {
-                    Err(e) => return Err(e),
-                    Ok(value) => value
-                };
+                let return_type = propagate_error!(get_type(&to_index.get_type(), memory_managers));
 
                 return match to_index.get_indexed(memory_managers, index, &return_type) {
                     Err(e) => return Err(e),
@@ -265,20 +219,11 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             let mut _lhs_holder = None;
             let lhs = match &section[1] {
                 Symbol::Name(name) => {
-                    match reference_stack.get_variable(name) {
-                        Err(e) => return Err(e),
-                        Ok(value) => value
-                    }
+                    propagate_error!(reference_stack.get_variable(name))
                 },
                 Symbol::Literal(literal) => {
-                    let object = match get_type_from_literal(&literal, memory_managers) {
-                        Err(e) => return Err(e),
-                        Ok(o) => o
-                    };
-                    match object.static_assign_literal(memory_managers, &literal) {
-                        Err(e) => return Err(e),
-                        Ok(_) => {}
-                    }
+                    let object = propagate_error!(get_type_from_literal(&literal, memory_managers));
+                    propagate_error!(object.static_assign_literal(memory_managers, &literal));
                     _lhs_holder = Some(object);
                     _lhs_holder.as_ref().unwrap()
                 },
@@ -298,28 +243,16 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             };
 
             if to_overwrite.is_none() {
-                let result_type = match lhs.get_operation_type(&operator, None) {
-                    Err(e) => return Err(e),
-                    Ok(value) => value
-                };
+                let result_type = propagate_error!(lhs.get_operation_type(&operator, None));
 
-                let mut result = match get_type(&result_type, memory_managers) {
-                    Err(e) => return Err(e),
-                    Ok(value) => value
-                };
-                match lhs.operate(memory_managers, operator, None, &mut result) {
-                    Err(e) => return Err(e),
-                    Ok(_) => {}
-                }
+                let mut result = propagate_error!(get_type(&result_type, memory_managers));
+                propagate_error!(lhs.operate(memory_managers, operator, None, &mut result));
 
                 return Ok(Some(result));
             }
             else {
-                match lhs.operate(memory_managers, operator,
-                                  None, to_overwrite.unwrap()) {
-                    Err(e) => return Err(e),
-                    Ok(_) => {}
-                }
+                propagate_error!(lhs.operate(memory_managers, operator,
+                                  None, to_overwrite.unwrap()));
 
                 return Ok(None);
             }
@@ -333,21 +266,12 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                     Ok(value) => {
                         if to_overwrite.is_none() {
                             let object =
-                                match get_type(&value.get_type(), memory_managers) {
-                                    Err(e) => return Err(e),
-                                    Ok(value) => value
-                                };
-                            match object.assign_clone(memory_managers, value) {
-                                Err(e) => return Err(e),
-                                Ok(_) => {}
-                            }
+                                propagate_error!(get_type(&value.get_type(), memory_managers));
+                            propagate_error!(object.assign_clone(memory_managers, value));
                             Ok(Some(object))
                         }
                         else {
-                            match to_overwrite.unwrap().assign_clone(memory_managers, value) {
-                                Err(e) => return Err(e),
-                                Ok(_) => { }
-                            };
+                            propagate_error!(to_overwrite.unwrap().assign_clone(memory_managers, value));
                             Ok(None)
                         }
                     }
@@ -355,21 +279,12 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             },
             Symbol::Literal(literal) => {
                 if to_overwrite.is_none() {
-                    let object = match get_type_from_literal(&literal, memory_managers) {
-                        Err(e) => return Err(e),
-                        Ok(o) => o
-                    };
-                    match object.static_assign_literal(memory_managers, &literal) {
-                        Err(e) => return Err(e),
-                        Ok(_) => { }
-                    };
+                    let object = propagate_error!(get_type_from_literal(&literal, memory_managers));
+                    propagate_error!(object.static_assign_literal(memory_managers, &literal));
                     Ok(Some(object))
                 }
                 else {
-                    match to_overwrite.unwrap().static_assign_literal(memory_managers, &literal) {
-                        Err(e) => return Err(e),
-                        Ok(_) => { }
-                    };
+                    propagate_error!(to_overwrite.unwrap().static_assign_literal(memory_managers, &literal));
                     Ok(None)
                 }
             },

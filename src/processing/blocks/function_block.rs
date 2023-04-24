@@ -7,6 +7,7 @@ use crate::processing::reference_manager::ReferenceStack;
 use crate::processing::symbols::{Literal, Symbol, try_arithmetic_block_into_parameters};
 use crate::processing::types::{get_type, Type};
 use crate::processing::types::function::FunctionType;
+use crate::propagate_error;
 
 pub struct FunctionBlock {
     jump_variable: Option<usize>,
@@ -47,14 +48,9 @@ impl BlockHandler for FunctionBlock {
 
         let parameters = match &symbol_line[2] {
             Symbol::ArithmeticBlock(_) => {
-                match try_arithmetic_block_into_parameters(&symbol_line[2]) {
-                    Err(e) => return Err(e),
-                    Ok(value) => {
-                        match value {
-                            Literal::ParameterList(list) => list,
-                            _ => panic!()
-                        }
-                    }
+                match propagate_error!(try_arithmetic_block_into_parameters(&symbol_line[2])) {
+                    Literal::ParameterList(list) => list,
+                    _ => panic!()
                 }
             },
             _ => return Err(formatting_error()),
@@ -68,10 +64,7 @@ impl BlockHandler for FunctionBlock {
             return_type = match &symbol_line[3] {
                 Symbol::Type(type_symbol) => {
                     Some(
-                        match get_type(type_symbol, memory_managers) {
-                            Err(e) => return Err(e),
-                            Ok(value) => value
-                        }
+                        propagate_error!(get_type(type_symbol, memory_managers))
                     )
                 },
                 _ => return Err(formatting_error()),
@@ -82,32 +75,20 @@ impl BlockHandler for FunctionBlock {
                 _ => return Err(formatting_error())
             };
 
-            match return_type.as_ref().unwrap().static_assign_literal(memory_managers, default_return_value) {
-                Err(e) => return Err(e),
-                Ok(_) => {}
-            };
+            propagate_error!(return_type.as_ref().unwrap().static_assign_literal(memory_managers, default_return_value));
         }
         
         //? Register and clone parameters
         let mut to_assign = Vec::new();
         
         for (type_symbol, name) in parameters {
-            let created_type = match get_type(&type_symbol, memory_managers) {
-                Err(e) => return Err(e),
-                Ok(value) => value
-            };
+            let created_type = propagate_error!(get_type(&type_symbol, memory_managers));
             to_assign.push(created_type.clone());
-            match reference_stack.register_variable(created_type, name) {
-                Err(e) => return Err(e),
-                _ => {},
-            };
+            propagate_error!(reference_stack.register_variable(created_type, name));
         }
 
         if return_type.is_some() {
-            match reference_stack.register_variable(return_type.as_ref().unwrap().clone(), "return".to_string()) {
-                Err(e) => return Err(e),
-                _ => {},
-            };
+            propagate_error!(reference_stack.register_variable(return_type.as_ref().unwrap().clone(), "return".to_string()));
         }
 
         self.jump_variable = Some(memory_managers.variable_memory.reserve(size_of::<usize>()));
@@ -122,11 +103,8 @@ impl BlockHandler for FunctionBlock {
 
 
 
-        match reference_stack.register_variable_with_offset(
-            Type::new(Box::new(function), memory_managers), name, 1) {
-            Err(e) => return Err(e),
-            _ => {}
-        };
+        propagate_error!(reference_stack.register_variable_with_offset(
+            Type::new(Box::new(function), memory_managers), name, 1));
 
         Ok(())
     }

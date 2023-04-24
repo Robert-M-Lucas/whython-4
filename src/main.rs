@@ -5,6 +5,7 @@ mod processing;
 mod errors;
 mod translator;
 mod execution;
+pub mod util;
 
 use std::env;
 use std::ffi::OsStr;
@@ -92,10 +93,10 @@ fn wrapped_main() {
         return;
     }
 
-    // translate(&memory.program_memory.memory);
+    //? translate(&memory.program_memory.memory);
 
-    // memory.variable_memory.dump_bytes("VariableMemory".to_string());
-    // memory.program_memory.dump_bytes("ProgramMemory".to_string());
+    //? memory.variable_memory.dump_bytes("VariableMemory".to_string());
+    //? memory.program_memory.dump_bytes("ProgramMemory".to_string());
 
 
     match execute(&mut memory) {
@@ -103,5 +104,5 @@ fn wrapped_main() {
         Ok(_) => {}
     };
 
-    // memory.variable_memory.dump_bytes("VariableMemory - post".to_string());
+    //? memory.variable_memory.dump_bytes("VariableMemory - post".to_string());
 }

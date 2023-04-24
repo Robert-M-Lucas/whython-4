@@ -4,6 +4,7 @@ use crate::processing::instructions::jump_instruction_3::JumpInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, TypeSymbol};
 use crate::processing::types::{Type, TypeTrait};
+use crate::propagate_error;
 
 pub struct FunctionType {
     parameters: Vec<Type>,
@@ -44,10 +45,7 @@ impl TypeTrait for FunctionType {
         if arguments.len() != self.parameters.len() { return Err("Wrong number of arguments".to_string()) }
         
         for (index, argument) in arguments.into_iter().enumerate() {
-            match self.parameters[index].assign_clone(memory_managers, argument) {
-                Err(e) => return Err(e),
-                _ => {}
-            }
+            propagate_error!(self.parameters[index].assign_clone(memory_managers, argument));
         }
 
         let static_jump_back_address =
@@ -68,10 +66,7 @@ impl TypeTrait for FunctionType {
             if self.return_type.is_none() {
                 return Err("Function does not return a value".to_string());
             }
-            match destination.unwrap().assign_clone(memory_managers, self.return_type.as_ref().unwrap()) {
-                Err(e) => return Err(e),
-                Ok(_) => {}
-            };
+            propagate_error!(destination.unwrap().assign_clone(memory_managers, self.return_type.as_ref().unwrap()));
         }
         
         Ok(())

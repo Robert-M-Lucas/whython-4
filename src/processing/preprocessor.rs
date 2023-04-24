@@ -2,6 +2,7 @@ use debugless_unwrap::DebuglessUnwrapErr;
 use crate::errors::create_line_error;
 use crate::processing::symbols::{get_symbol, STRING_DELIMITERS, Symbol};
 use crate::processing::symbols::Symbol::{ArithmeticBlock};
+use crate::propagate_error;
 
 pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     let mut symbol_line = Vec::new();
@@ -53,10 +54,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
                     _ => None
                 }
             {
-                Some(value) => match value {
-                    Err(e) => return Err(e),
-                    Ok(_) => {}
-                },
+                Some(value) => propagate_error!(value),
                 None => {}
             }
 
@@ -137,10 +135,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
 
         if c == ']' && !in_string {
             if !buffer.is_empty() {
-                match process_buffer(&mut buffer, &mut symbol_line) {
-                    Err(e) => return Err(e),
-                    Ok(_) => {}
-                };
+                propagate_error!(process_buffer(&mut buffer, &mut symbol_line));
             }
             if !in_indexer {
                 return Err("Closing indexer bracket found with no corresponding opening bracket".to_string());
@@ -159,10 +154,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
 
         if c == '[' && !in_string {
             if !buffer.is_empty() {
-                match process_buffer(&mut buffer, &mut symbol_line) {
-                    Err(e) => return Err(e),
-                    Ok(_) => {}
-                };
+                propagate_error!(process_buffer(&mut buffer, &mut symbol_line));
             }
             if in_indexer {
                 return Err("Recursive indexing not permitted".to_string());
@@ -191,6 +183,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
 
     Ok(symbol_line)
 }
+
 
 pub fn convert_to_symbols(data: String) -> Result<Vec<(usize, Vec<Symbol>)>, String> {
     let mut output = Vec::new();

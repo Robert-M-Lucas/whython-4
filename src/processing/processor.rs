@@ -4,7 +4,7 @@ use std::mem::size_of;
 use num_format::{Locale, ToFormattedString};
 use crate::memory_manager::MemoryManager;
 use crate::errors::create_line_error;
-use crate::execution::get_usize;
+use crate::util::get_usize;
 use crate::processing::blocks::BlockCoordinator;
 use crate::processing::lines::call_line::CallLine;
 use crate::processing::lines::function_line::FunctionLine;

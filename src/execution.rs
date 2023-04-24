@@ -1,4 +1,3 @@
-use std::mem::size_of;
 use std::time::Instant;
 use crate::processing::instructions::and_instruction_6::AndInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
@@ -13,14 +12,6 @@ use crate::processing::instructions::or_instruction_8::OrInstruction;
 use crate::processing::instructions::print_chars_instruction_9::PrintCharsInstruction;
 use crate::processing::instructions::print_instruction_5::PrintInstruction;
 use crate::processing::processor::MemoryManagers;
-
-pub fn get_u8(pointer: &usize, memory: &[u8]) -> u8 {
-    u8::from_le_bytes((&memory[*pointer..(*pointer + 1)]).try_into().unwrap())
-}
-
-pub fn get_usize(pointer: &usize, memory: &[u8]) -> usize {
-    usize::from_le_bytes((&memory[*pointer..(*pointer + size_of::<usize>())]).try_into().unwrap())
-}
 
 pub fn execute(memory_managers: &mut MemoryManagers) -> Result<(), String> {
     let mut pointer: usize = 0;
