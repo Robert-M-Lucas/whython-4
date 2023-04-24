@@ -30,13 +30,13 @@ impl TypeTrait for BooleanType {
                 else if *integer == 1 { value = true; }
                 else {
                     return Err(format!("{} can only be assigned {} '0' or '1'",
-                                       self.get_type().get_name(),
-                                       Literal::IntLiteral(0).get_name()))
+                                       self.get_type().to_string(),
+                                       Literal::IntLiteral(0).to_string()))
                 }
             }
             unhandled_literal => {
                 return Err(format!("{} not supported for {} assignment",
-                                        unhandled_literal.get_name(), self.get_type().get_name()))
+                                        unhandled_literal.to_string(), self.get_type().to_string()))
             }
         }
 

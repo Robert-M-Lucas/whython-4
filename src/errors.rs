@@ -10,8 +10,8 @@ pub fn create_op_not_impl_error<T>(operator: &Operator, lhs: TypeSymbol,
                                    rhs: Option<&Type>) -> Result<T, String> {
     match rhs {
         Some(rhs) => Err(format!("'{}' operator not implemented for '{}' and '{}'",
-                                 operator.get_name(), lhs.get_name(), rhs.get_type().get_name())),
+                                 operator.to_string(), lhs.to_string(), rhs.get_type().to_string())),
         None => Err(format!("'{}' operator not implemented for '{}'",
-                            operator.get_name(), lhs.get_name())),
+                            operator.to_string(), lhs.to_string())),
     }
 }

@@ -32,7 +32,7 @@ impl BlockHandler for IfBlock {
             };
 
         if condition_boolean.get_type() != TypeSymbol::Boolean {
-            return Err(format!("If expression must evaluate to {}", TypeSymbol::Boolean.get_name()));
+            return Err(format!("If expression must evaluate to {}", TypeSymbol::Boolean));
         }
 
         self.jump_instruction = Some(JumpIfNotInstruction::new_alloc(memory_managers, condition_boolean, 0));

@@ -19,13 +19,13 @@ impl TypeTrait for PointerType {
         {
             Literal::IntLiteral(integer) => {
                 value = match (*integer).try_into() {
-                    Err(_) => return Err(format!("Cannot fit {}'s value '{}' into Pointer", literal.get_name(), integer)),
+                    Err(_) => return Err(format!("Cannot fit {}'s value '{}' into Pointer", literal.to_string(), integer)),
                     Ok(value) => value
                 }
             },
             unhandled_literal => {
                 return Err(format!("{} not supported for {} assignment",
-                                   unhandled_literal.get_name(), self.get_type().get_name()))
+                                   unhandled_literal.to_string(), self.get_type().to_string()))
             }
         }
 

@@ -34,7 +34,7 @@ impl TypeTrait for CharType {
             },
             unhandled_literal => {
                 return Err(format!("{} not supported for {} assignment",
-                                        unhandled_literal.get_name(), self.get_type().get_name()))
+                                        unhandled_literal.to_string(), self.get_type().to_string()))
             }
         }
 
@@ -53,7 +53,7 @@ impl TypeTrait for CharType {
                 Ok(value) => value,
                 Err(e) => return Err(format!("Initialisation argument '{}' out of range", count))
             },
-            _ => return Err(format!("This type cannot be created with {} initialisation argument", argument_literal.get_name()))
+            _ => return Err(format!("This type cannot be created with {} initialisation argument", argument_literal.to_string()))
         };
 
         if count == 0 {
@@ -63,7 +63,7 @@ impl TypeTrait for CharType {
         let mut assigner = match assignment_literal {
             Literal::StringLiteral(string) => string.clone(),
             Literal::None => String::new(),
-            _ => return Err(format!("This type cannot be created with {} assignment argument", assignment_literal.get_name()))
+            _ => return Err(format!("This type cannot be created with {} assignment argument", assignment_literal.to_string()))
         };
 
         assigner += &*"\0".repeat(count - assigner.len());

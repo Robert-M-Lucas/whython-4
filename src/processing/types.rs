@@ -36,11 +36,11 @@ pub fn get_type_from_literal(literal: &Literal, memory_managers: &mut MemoryMana
         Literal::StringLiteral(_) => {
             Type::new(Box::new(CharType::create_empty()), memory_managers)
         },
-        _ => panic!("Cannot infer type from {}", literal.get_name())
+        _ => panic!("Cannot infer type from {}", literal.to_string())
     }
 }
 
-#[derive(PartialEq, Copy, Clone, Debug)]
+#[derive(PartialEq, Copy, Clone, Debug, strum_macros::Display)]
 pub enum TypeSymbol {
     Integer,
     Boolean,
@@ -59,18 +59,6 @@ impl SymbolHandler for TypeSymbolHandler {
             "char" => Some(Symbol::Type(TypeSymbol::Character)),
             "ptr" => Some(Symbol::Type(TypeSymbol::Pointer)),
             _ => None,
-        }
-    }
-}
-
-impl TypeSymbol {
-    pub(crate) fn get_name(&self) -> &str {
-        return match self {
-            TypeSymbol::Integer => "Integer",
-            TypeSymbol::Boolean => "Boolean",
-            TypeSymbol::Character => "Char",
-            TypeSymbol::Function => "Function",
-            TypeSymbol::Pointer => "Pointer",
         }
     }
 }
@@ -170,7 +158,7 @@ pub trait TypeTrait {
                     to_clone: &Type) -> Result<(), String> {
         if self.get_type() != to_clone.get_type() {
             return Err(format!("Mismatching types for assignment: {} -> {}",
-                               to_clone.get_type().get_name(), self.get_type().get_name()))
+                               to_clone.get_type().to_string(), self.get_type().to_string()))
         }
 
         CopyInstruction::new_alloc(memory_managers, to_clone.get_address(),
@@ -181,24 +169,24 @@ pub trait TypeTrait {
 
     fn static_assign_literal(&self, _super: &Type, _memory_managers: &mut MemoryManagers,
                              _literal: &Literal) -> Result<(), String> {
-        Err(format!("Assignment from literals not implemented for {}", self.get_type().get_name()))
+        Err(format!("Assignment from literals not implemented for {}", self.get_type().to_string()))
     }
 
     fn create_indexed(&self, _super: &Type, _memory_managers: &mut MemoryManagers,
                       _argument_literal: &Literal, _assignment_literal: &Literal) -> Result<(), String> {
-        Err(format!("{} cannot be created with initialisation argument", self.get_type().get_name()))
+        Err(format!("{} cannot be created with initialisation argument", self.get_type().to_string()))
     }
 
     fn get_type(&self) -> TypeSymbol;
 
     fn get_return_type(&self) -> Result<TypeSymbol, String> {
-        Err(format!("{} cannot be called", self.get_type().get_name()))
+        Err(format!("{} cannot be called", self.get_type().to_string()))
     }
 
     fn get_size(&self) -> usize;
     
     fn call(&self, _memory_managers: &mut MemoryManagers, _arguments: Vec<&Type>, _destination: Option<&Type>) -> Result<(), String> {
-        Err(format!("{} cannot be called", self.get_type().get_name()))
+        Err(format!("{} cannot be called", self.get_type().to_string()))
     }
 
     fn get_operation_type(&self, _lhs: &Type, operator: &Operator,

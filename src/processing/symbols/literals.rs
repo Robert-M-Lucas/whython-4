@@ -2,7 +2,7 @@ use crate::processing::types::TypeSymbol;
 use super::Symbol;
 use super::SymbolHandler;
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, strum_macros::Display)]
 pub enum Literal {
     StringLiteral(String),
     IntLiteral(i32),
@@ -64,14 +64,14 @@ impl SymbolHandler for LiteralSymbolHandler {
     }
 }
 
-impl Literal {
-    pub(crate) fn get_name(&self) -> &str {
-        return match self {
-            Literal::StringLiteral(_) => "StringLiteral",
-            Literal::IntLiteral(_) => "IntLiteral",
-            Literal::BoolLiteral(_) => "BoolLiteral",
-            Literal::ParameterList(_) => "ParameterList",
-            Literal::None => "None",
-        }
-    }
-}
+// impl Literal {
+//     pub(crate) fn get_name(&self) -> &str {
+//         return match self {
+//             Literal::StringLiteral(_) => "StringLiteral",
+//             Literal::IntLiteral(_) => "IntLiteral",
+//             Literal::BoolLiteral(_) => "BoolLiteral",
+//             Literal::ParameterList(_) => "ParameterList",
+//             Literal::None => "None",
+//         }
+//     }
+// }

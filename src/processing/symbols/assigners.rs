@@ -3,7 +3,7 @@ use super::Operator;
 use super::Symbol;
 use super::SymbolHandler;
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, strum_macros::Display)]
 pub enum Assigner {
     Setter,
     AdditionSetter,

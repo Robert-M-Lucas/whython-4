@@ -1,7 +1,7 @@
 use super::Symbol;
 use super::SymbolHandler;
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, strum_macros::Display)]
 pub enum Punctuation {
     ListSeparator
 }
@@ -17,10 +17,10 @@ impl SymbolHandler for PunctuationSymbolHandler {
     }
 }
 
-impl Punctuation {
-    pub(crate) fn get_name(&self) -> &str {
-        return match self {
-            Punctuation::ListSeparator => "ListSeparator"
-        }
-    }
-}
+// impl Punctuation {
+//     pub(crate) fn get_name(&self) -> &str {
+//         return match self {
+//             Punctuation::ListSeparator => "ListSeparator"
+//         }
+//     }
+// }

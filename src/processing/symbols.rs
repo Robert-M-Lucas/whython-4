@@ -28,7 +28,7 @@ pub use punctuation::Punctuation;
 pub use punctuation::PunctuationSymbolHandler;
 
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, strum_macros::Display)]
 pub enum Symbol {
     Assigner(Assigner),
     Literal(Literal),
