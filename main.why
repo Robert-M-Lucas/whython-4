@@ -1,6 +1,10 @@
-char[12] a = "asd"
-a[1] = a[2]
+fn printb(bool in)
+    if in
+        char[4] p = "true"
+        printc p
+    if !in
+        char[5] p = "false"
+        printc p
 
-printc a[0]
-printc a[1]
-printc a[2]
+printb(true)
+printb(false)

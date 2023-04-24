@@ -64,7 +64,7 @@ pub struct Type {
     internal_type: Box<dyn TypeTrait>,
     name: Option<String>,
     address: usize,
-    needs_indexing: bool,
+    indexed_len: Option<usize>,
 }
 
 impl Type {
@@ -76,7 +76,7 @@ impl Type {
             internal_type,
             name: None,
             address,
-            needs_indexing: false
+            indexed_len: None
         }
     }
 
@@ -88,11 +88,13 @@ impl Type {
         self.name.clone().unwrap()
     }
 
-    pub fn is_indexed(&self) -> bool { self.needs_indexing }
+    pub fn is_indexed(&self) -> bool { self.indexed_len.is_some() }
+
+    pub fn get_len(&self) -> usize { self.indexed_len.or_else(|| Some(1)).unwrap() }
 
     pub fn assign_clone(&self, memory_managers: &mut MemoryManagers,
                         to_clone: &Type) -> Result<(), String> {
-        if self.needs_indexing {
+        if self.is_indexed() {
             return Err("Tried to assign to type that needs indexing".to_string());
         }
         self.internal_type.assign_clone(self, memory_managers, to_clone)
@@ -100,22 +102,25 @@ impl Type {
 
     pub fn static_assign_literal(&self, memory_managers: &mut MemoryManagers,
                                  literal: &Literal) -> Result<(), String> {
-        if self.needs_indexing {
+        if self.is_indexed() {
             return Err("Tried to assign to type that needs indexing".to_string());
         }
         self.internal_type.static_assign_literal(self, memory_managers, literal)
     }
 
     pub fn create_indexed(&mut self, _memory_managers: &mut MemoryManagers,
-                      _argument_literal: &Literal, _assignment_literal: &Literal) -> Result<(), String> {
+                      _argument_literal: &Literal, _assignment_literal: &Literal) -> Result<usize, String> {
         let result = self.internal_type.create_indexed(self, _memory_managers, _argument_literal, _assignment_literal);
-        self.needs_indexing = true;
+        if result.is_err() {
+            return result;
+        }
+        self.indexed_len = Some(result.as_ref().unwrap().clone());
         result
     }
 
     pub fn get_indexed(&self, memory_managers: &mut MemoryManagers,
                        index_pointer: &Type, destination: &Type) -> Result<(), String> {
-        if !self.needs_indexing {
+        if !self.is_indexed() {
             return Err("Tried to index type that isn't indexed".to_string());
         }
 
@@ -124,7 +129,7 @@ impl Type {
 
     pub fn set_indexed(&self, memory_managers: &mut MemoryManagers,
                    index_pointer: &Type, source: &Type) -> Result<(), String> {
-        if !self.needs_indexing {
+        if !self.is_indexed() {
             return Err("Tried to index type that isn't indexed".to_string());
         }
 
@@ -168,7 +173,7 @@ impl Type {
             internal_type: self.internal_type.clone(),
             name: self.name.clone(),
             address: self.address,
-            needs_indexing: self.needs_indexing
+            indexed_len: self.indexed_len
         }
     }
 }
@@ -194,7 +199,7 @@ pub trait TypeTrait {
     }
 
     fn create_indexed(&self, _super: &Type, _memory_managers: &mut MemoryManagers,
-                      _argument_literal: &Literal, _assignment_literal: &Literal) -> Result<(), String> {
+                      _argument_literal: &Literal, _assignment_literal: &Literal) -> Result<usize, String> {
         Err(format!("{} cannot be created with initialisation argument", self.get_type().to_string()))
     }
 

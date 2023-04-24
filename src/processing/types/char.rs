@@ -47,7 +47,7 @@ impl TypeTrait for CharType {
     }
 
     fn create_indexed(&self, _super: &Type, memory_managers: &mut MemoryManagers,
-                      argument_literal: &Literal, assignment_literal: &Literal) -> Result<(), String> {
+                      argument_literal: &Literal, assignment_literal: &Literal) -> Result<usize, String> {
         let count: usize = match argument_literal {
             Literal::IntLiteral(count) => match (*count).try_into() {
                 Ok(value) => value,
@@ -66,7 +66,9 @@ impl TypeTrait for CharType {
             _ => return Err(format!("This type cannot be created with {} assignment argument", assignment_literal.to_string()))
         };
 
-        assigner += &*"\0".repeat(count - assigner.len());
+        if count > assigner.len() {
+            assigner += &*"\0".repeat(count - assigner.len());
+        }
 
         let mut objs = Vec::with_capacity(count - 1);
 
@@ -80,7 +82,7 @@ impl TypeTrait for CharType {
             objs[i-1].static_assign_literal(memory_managers, &Literal::StringLiteral(assigner.chars().nth(i).unwrap().to_string())).unwrap();
         }
 
-        Ok(())
+        Ok(count)
     }
 
     fn get_type(&self) -> TypeSymbol { TypeSymbol::Character }

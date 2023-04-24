@@ -21,18 +21,34 @@ impl LineHandler for PrintLine {
                         match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(), &line[1..], None, true) {
                             Err(e) => ProcessingResult::Failure(e),
                             Ok(value) => {
-                                PrintInstruction::new_alloc(memory_managers, &value.unwrap());
+                                PrintInstruction::new_alloc(memory_managers, value.as_ref().unwrap(), value.as_ref().unwrap().get_len());
                                 ProcessingResult::Success
                             }
                         }
                     },
                     Builtin::PrintChars => {
                         if line.len() == 1 { return ProcessingResult::Failure("'printc' must be followed by something to print".to_string()) }
-                        match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(), &line[1..], None, true) {
-                            Err(e) => ProcessingResult::Failure(e),
-                            Ok(value) => {
-                                PrintCharsInstruction::new_alloc(memory_managers, &value.unwrap());
-                                ProcessingResult::Success
+                        if line.len() == 2 && matches!(line[1], Symbol::Name(_)) {
+                            match &line[1] {
+                                Symbol::Name(name) => {
+                                    let obj = match block_coordinator.get_variable(name) {
+                                        Err(e) => return ProcessingResult::Failure(e),
+                                        Ok(value) => value
+                                    };
+
+                                    PrintCharsInstruction::new_alloc(memory_managers, obj, obj.get_len());
+                                    ProcessingResult::Success
+                                }
+                                _ => panic!()
+                            }
+                        }
+                        else {
+                            match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(), &line[1..], None, true) {
+                                Err(e) => ProcessingResult::Failure(e),
+                                Ok(value) => {
+                                    PrintCharsInstruction::new_alloc(memory_managers, value.as_ref().unwrap(), value.as_ref().unwrap().get_len());
+                                    ProcessingResult::Success
+                                }
                             }
                         }
                     },
