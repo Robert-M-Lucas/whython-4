@@ -2,7 +2,6 @@ use crate::processing::blocks::BlockCoordinator;
 use crate::processing::processor::{MemoryManagers, ProcessingResult};
 use crate::processing::symbols::Symbol;
 
-pub mod block_line;
 pub mod variable_initialisation_line;
 pub mod arithmetic;
 pub mod variable_assignment_line;

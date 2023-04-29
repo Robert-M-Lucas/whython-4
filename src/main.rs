@@ -84,7 +84,7 @@ fn wrapped_main() {
     //? Load compiled file
     else if extension == "cwhy" {
         memory = match MemoryManagers::load_from_compiled(input_file) {
-            Err(e) => { println!("Loading compiled file failed - {}", e); return; },
+            Err(e) => { println!("Loading precompiled file failed - {}", e); return; },
             Ok(value) => value
         };
     }

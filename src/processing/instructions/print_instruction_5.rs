@@ -13,7 +13,7 @@ pub const PRINT_INSTRUCTION_CODE: u16 = 5;
 impl PrintInstruction {
     pub fn new_alloc(memory_managers: &mut MemoryManagers, to_print: &Type, length: usize)
                      -> Self {
-        
+
         if length == 0 {
             panic!("Print length must be at least 1");
         }
@@ -23,6 +23,8 @@ impl PrintInstruction {
         instruction_memory.extend(to_print.get_address().to_le_bytes());
         instruction_memory.extend(to_print.get_size().to_le_bytes());
         instruction_memory.extend(length.to_le_bytes());
+
+        println!("{}", to_print.get_size() * length);
 
         assert_eq!(instruction_memory.len() - 2, Self::get_size());
 
@@ -52,10 +54,7 @@ impl PrintInstruction {
         *pointer += size_of::<usize>();
         let count = get_usize(pointer, &memory_managers.program_memory.memory);
         *pointer += size_of::<usize>();
-        for i in 0..(count - 1) {
-            print!("{:X?}, ", &memory_managers.variable_memory.memory[position..(position + (i * len))]);
-        }
-        println!("{:X?}", &memory_managers.variable_memory.memory[position..(position + ((count - 1) * len))]);
+        println!("{:X?}", &memory_managers.variable_memory.memory[position..(position + (count * len))]);
 
     }
 }

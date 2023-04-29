@@ -23,7 +23,19 @@ char d = "_"
 
 printc d
 
-fn to_bool(char in) bool false
-    return = ((in == "y") | (in == "t"))
+fn printb(bool in)
+    if in
+        char[4] _ = "true"
+        printc _
+    if !in
+        char[5] _ = "false"
+        printc _
 
-print(to_bool("t"))
+bool a = !true
+ptr x = 12
+print x
+print a
+print d
+print !a
+printc a
+printb(a)

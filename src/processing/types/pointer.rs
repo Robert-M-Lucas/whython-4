@@ -1,7 +1,9 @@
 use std::mem::size_of;
+use crate::errors::create_op_not_impl_error;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
+use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::processor::MemoryManagers;
-use crate::processing::symbols::{Literal, TypeSymbol};
+use crate::processing::symbols::{Literal, Operator, TypeSymbol};
 use crate::processing::types::{Type, TypeTrait};
 
 pub struct PointerType {}
@@ -40,6 +42,49 @@ impl TypeTrait for PointerType {
     fn get_type(&self) -> TypeSymbol { TypeSymbol::Pointer }
 
     fn get_size(&self) -> usize { size_of::<usize>() }
+
+    fn get_operation_type(&self, _lhs: &Type, operator: &Operator, rhs: Option<&Type>) -> Result<TypeSymbol, String> {
+        if rhs.is_none() {
+            return match operator {
+                _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+            };
+        }
+
+        match rhs.as_ref().unwrap().get_type() {
+            TypeSymbol::Pointer => {},
+            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs)
+        };
+
+        match operator {
+            Operator::Equal => {
+                Ok(TypeSymbol::Boolean)
+            },
+            _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+        }
+    }
+
+    fn operate(&self, lhs: &Type, memory_managers: &mut MemoryManagers, operator: Operator,
+               rhs: Option<&Type>, destination: &Type) -> Result<(), String> {
+
+        if rhs.is_none() {
+            return match operator {
+                _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+            };
+        }
+
+        match rhs.as_ref().unwrap().get_type() {
+            TypeSymbol::Pointer => {},
+            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs)
+        };
+
+        match operator {
+            Operator::Equal => {
+                EqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), self.get_size(), destination.get_address());
+                Ok(())
+            },
+            _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+        }
+    }
 
     fn clone(&self) -> Box<dyn TypeTrait> {
         Box::new(Self::create_empty())

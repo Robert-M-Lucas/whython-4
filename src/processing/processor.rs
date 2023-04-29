@@ -59,8 +59,9 @@ impl MemoryManagers {
 
         let name = name + format!(" - {}.cwhy", size_of::<usize>() * 8).as_str();
 
-        println!("Saving compiled data '{}' [{} bytes]",
-                 &name, to_save.len().to_formatted_string(&Locale::en));
+        println!("Saving compiled data '{}' [{} bytes - {{{}:{}}}]",
+                 &name, to_save.len().to_formatted_string(&Locale::en), self.variable_memory.get_position().to_formatted_string(&Locale::en)
+                 , self.program_memory.get_position().to_formatted_string(&Locale::en));
 
         let file = fs::OpenOptions::new().write(true)
             .create(true)
@@ -77,7 +78,7 @@ impl MemoryManagers {
     }
 
     pub fn load_from_compiled(path: String) -> Result<Self, String> {
-        println!("Loading compiled data from file '{}'", &path);
+        println!("Loading precompiled data from file '{}'", &path);
 
         let data = match fs::read(path) {
             Err(e) => return Err(e.to_string()),
