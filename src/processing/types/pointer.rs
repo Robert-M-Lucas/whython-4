@@ -4,7 +4,8 @@ use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
-use crate::processing::types::{Type, TypeTrait};
+use crate::processing::types::{get_type, Type, TypeTrait};
+use crate::propagate_error;
 
 pub struct PointerType {}
 
@@ -42,6 +43,42 @@ impl TypeTrait for PointerType {
     fn get_type(&self) -> TypeSymbol { TypeSymbol::Pointer }
 
     fn get_size(&self) -> usize { size_of::<usize>() }
+
+    fn create_indexed(&self, _super: &Type, memory_managers: &mut MemoryManagers,
+                      argument_literal: &Literal, assignment_literal: &Literal) -> Result<usize, String> {
+        let count: usize = match argument_literal {
+            Literal::IntLiteral(count) => match (*count).try_into() {
+                Ok(value) => value,
+                Err(_) => return Err(format!("Initialisation argument '{}' out of range", count))
+            },
+            _ => return Err(format!("This type cannot be created with {} initialisation argument", argument_literal.to_string()))
+        };
+
+        if count == 0 {
+            return Err("Initialisation argument cannot be 0".to_string());
+        }
+
+        let assigner = match assignment_literal {
+            Literal::IntLiteral(int) => int.clone(),
+            Literal::None => 0,
+            _ => return Err(format!("This type cannot be created with {} assignment argument", assignment_literal.to_string()))
+        };
+
+        let mut objs = Vec::with_capacity(count - 1);
+
+        for _ in 1..count {
+            let obj = get_type(&self.get_type(), memory_managers).unwrap();
+            objs.push(obj);
+        }
+
+        propagate_error!(self.static_assign_literal(_super ,memory_managers, &Literal::IntLiteral(assigner)));
+
+        for i in 1..count {
+            propagate_error!(objs[i-1].static_assign_literal(memory_managers, &Literal::IntLiteral(assigner)));
+        }
+
+        Ok(count)
+    }
 
     fn get_operation_type(&self, _lhs: &Type, operator: &Operator, rhs: Option<&Type>) -> Result<TypeSymbol, String> {
         if rhs.is_none() {

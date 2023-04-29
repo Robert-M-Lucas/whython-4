@@ -4,6 +4,7 @@ use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
 use crate::processing::types::{get_type, Type, TypeTrait};
+use crate::propagate_error;
 
 pub struct CharType {}
 
@@ -77,9 +78,9 @@ impl TypeTrait for CharType {
             objs.push(obj);
         }
 
-        self.static_assign_literal(_super ,memory_managers, &Literal::StringLiteral(assigner.chars().nth(0).unwrap().to_string())).unwrap();
+        propagate_error!(self.static_assign_literal(_super ,memory_managers, &Literal::StringLiteral(assigner.chars().nth(0).unwrap().to_string())));
         for i in 1..count {
-            objs[i-1].static_assign_literal(memory_managers, &Literal::StringLiteral(assigner.chars().nth(i).unwrap().to_string())).unwrap();
+            propagate_error!(objs[i-1].static_assign_literal(memory_managers, &Literal::StringLiteral(assigner.chars().nth(i).unwrap().to_string())));
         }
 
         Ok(count)

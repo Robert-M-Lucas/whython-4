@@ -47,7 +47,9 @@ impl MemoryManager {
         println!("Dumping memory to file '{}' [{} bytes]",
                  &name, self.memory.len().to_formatted_string(&Locale::en));
 
-        let file = fs::OpenOptions::new().write(true)
+        let file = fs::OpenOptions::new()
+            .write(true)
+            .truncate(true)
             .create(true)
             .open(name);
 

@@ -24,7 +24,7 @@ impl PrintInstruction {
         instruction_memory.extend(to_print.get_size().to_le_bytes());
         instruction_memory.extend(length.to_le_bytes());
 
-        println!("{}", to_print.get_size() * length);
+        // println!("{}", to_print.get_size() * length);
 
         assert_eq!(instruction_memory.len() - 2, Self::get_size());
 

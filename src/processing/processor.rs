@@ -63,7 +63,9 @@ impl MemoryManagers {
                  &name, to_save.len().to_formatted_string(&Locale::en), self.variable_memory.get_position().to_formatted_string(&Locale::en)
                  , self.program_memory.get_position().to_formatted_string(&Locale::en));
 
-        let file = fs::OpenOptions::new().write(true)
+        let file = fs::OpenOptions::new()
+            .write(true)
+            .truncate(true)
             .create(true)
             .open(name);
 
