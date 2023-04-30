@@ -16,3 +16,7 @@ pub fn get_usize(pointer: &usize, memory: &[u8]) -> usize {
         }
     };
 }
+
+pub fn warn(warning: &str) {
+    println!("[WARNING]: {}", warning);
+}

@@ -39,6 +39,7 @@ pub fn translate(data: &Vec<u8>) {
             9 => translate!(PrintCharsInstruction, data, i),
             10 => translate!(DynamicFromCopyInstruction, data, i),
             11 => translate!(DynamicToCopyInstruction, data, i),
+            12 => translate!(JumpInstruction, data, i),
             code => panic!("Debug not implemented for code {}", code),
         };
 

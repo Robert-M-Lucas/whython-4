@@ -8,6 +8,7 @@ use crate::processing::symbols::{Literal, Symbol, try_arithmetic_block_into_para
 use crate::processing::types::{get_type, Type};
 use crate::processing::types::function::FunctionType;
 use crate::propagate_error;
+use crate::util::warn;
 
 pub struct FunctionBlock {
     jump_variable: Option<usize>,
@@ -27,6 +28,8 @@ impl FunctionBlock {
 
 impl BlockHandler for FunctionBlock {
     fn on_entry(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack, symbol_line: &Vec<Symbol>) -> Result<(), String> {
+        warn("Functions currently don't support recursion (including indirect)");
+
         fn formatting_error() -> String {
             "Function declaration must be formatted 'fn [FUNCTION NAME] ([PARAMETER LIST]) {OPTIONAL [RETURN TYPE] [DEFAULT RETURN VALUE]}'"
                 .to_string()

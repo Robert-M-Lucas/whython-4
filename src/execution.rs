@@ -5,6 +5,7 @@ use crate::processing::instructions::dynamic_from_copy_instruction_10::DynamicFr
 use crate::processing::instructions::dynamic_to_copy_instruction_11::DynamicToCopyInstruction;
 use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::instructions::invert_instruction_1::InvertInstruction;
+use crate::processing::instructions::jump_if_instruction_12::JumpIfInstruction;
 use crate::processing::instructions::jump_if_not_instruction_2::JumpIfNotInstruction;
 use crate::processing::instructions::jump_instruction_3::JumpInstruction;
 use crate::processing::instructions::jump_variable_instruction_4::JumpVariableInstruction;
@@ -37,6 +38,7 @@ pub fn execute(memory_managers: &mut MemoryManagers) -> Result<(), String> {
             9 => PrintCharsInstruction::execute(&mut pointer, memory_managers),
             10 => DynamicFromCopyInstruction::execute(&mut pointer, memory_managers),
             11 => DynamicToCopyInstruction::execute(&mut pointer, memory_managers),
+            12 => JumpIfInstruction::execute(&mut pointer, memory_managers),
             code => return Err(format!("Unknown code! [{}]", code))
         };
 

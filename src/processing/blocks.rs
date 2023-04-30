@@ -1,5 +1,6 @@
 pub mod if_block;
 pub mod function_block;
+pub mod while_block;
 
 use crate::processing::processor::MemoryManagers;
 use crate::processing::reference_manager::ReferenceStack;

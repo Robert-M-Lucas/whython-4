@@ -11,6 +11,7 @@ pub mod print_line;
 pub mod call_line;
 pub mod variable_initialisation_with_argument_line;
 pub mod indexed_variable_assignment_line;
+pub mod while_line;
 
 pub trait LineHandler {
     fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,
