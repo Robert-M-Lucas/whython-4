@@ -99,10 +99,10 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         }
     }
     else if section.len() == 2 {
-        if matches!(section[1], Symbol::ArithmeticBlock(_)) {
+        if matches!(section[0], Symbol::Name(_)) && matches!(section[1], Symbol::ArithmeticBlock(_)) {
             let name = match &section[0] {
                 Symbol::Name(name) => name.clone(),
-                _ => return Err("Only a function can be called".to_string())
+                _ => panic!()
             };
 
             let function = propagate_error!(reference_stack.get_variable(&name));

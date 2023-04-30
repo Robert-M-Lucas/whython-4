@@ -8,7 +8,7 @@ use crate::processing::reference_manager::ReferenceStack;
 use crate::processing::symbols::{Symbol};
 use crate::processing::types::{TypeSymbol};
 use crate::propagate_error;
-use crate::util::warn;
+
 
 pub struct WhileBlock {
     jump_end_instructions: Option<JumpIfNotInstruction>,
@@ -28,7 +28,7 @@ impl WhileBlock {
 
 impl BlockHandler for WhileBlock {
     fn on_entry(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack, symbol_line: &Vec<Symbol>) -> Result<(), String> {
-        warn("While block still under development!");
+        // warn("While block still under development!");
 
         self.start_position = Some(memory_managers.program_memory.get_position());
 

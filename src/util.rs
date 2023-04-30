@@ -17,6 +17,34 @@ pub fn get_usize(pointer: &usize, memory: &[u8]) -> usize {
     };
 }
 
+#[macro_export] macro_rules! col_println {
+    ($color: ident, $($arg:tt)*) => {
+        {
+            use colored::Colorize;
+            println!("{}", format!($($arg)*).$color())
+        }
+    };
+    (($($col_args:tt),*), $($arg:tt)*) => {
+        {
+            use colored::Colorize;
+            println!("{}", format!($($arg)*)$(.$col_args())*)
+        }
+    };
+}
+
+#[macro_export] macro_rules! col_print {
+    ($color: ident, $($arg:tt)*) => {
+       {
+           use colored::Colorize;
+           print!("{}", format!($($arg)*).$color())
+       }
+    };
+}
+
 pub fn warn(warning: &str) {
-    println!("[WARNING]: {}", warning);
+    col_println!((yellow, bold), "[WARNING]: {}", warning);
+}
+
+pub fn info(info: &str) {
+    col_println!((blue, bold), "[INFO]: {}", info);
 }

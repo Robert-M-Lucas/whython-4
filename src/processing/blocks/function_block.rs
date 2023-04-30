@@ -28,7 +28,7 @@ impl FunctionBlock {
 
 impl BlockHandler for FunctionBlock {
     fn on_entry(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack, symbol_line: &Vec<Symbol>) -> Result<(), String> {
-        warn("Functions currently don't support recursion (including indirect)");
+        warn("Functions do not currently support recursion (including indirect)");
 
         fn formatting_error() -> String {
             "Function declaration must be formatted 'fn [FUNCTION NAME] ([PARAMETER LIST]) {OPTIONAL [RETURN TYPE] [DEFAULT RETURN VALUE]}'"

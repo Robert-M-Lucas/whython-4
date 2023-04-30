@@ -20,6 +20,7 @@ use crate::execution::execute;
 use crate::processing::processor::MemoryManagers;
 #[allow(unused_imports)]
 use crate::translator::translate;
+use crate::util::info;
 
 fn pause() {
     let mut stdout = stdout();
@@ -35,7 +36,7 @@ fn main() {
 
 fn wrapped_main() {
     let args: Vec<String> = env::args().collect();
-    println!("Platform pointer (usize) length: {} [{}-bit]", size_of::<usize>(), size_of::<usize>() * 8);
+    info(format!("Platform pointer (usize) length: {} [{}-bit]", size_of::<usize>(), size_of::<usize>() * 8).as_str());
     let input_file;
     if args.len() >= 2 { input_file = args[1].clone(); }
     else { input_file = "main.why".to_string() }
@@ -43,7 +44,7 @@ fn wrapped_main() {
     let mut memory;
 
     let extension = match Path::new(&input_file).extension().and_then(OsStr::to_str) {
-        None => { println!("Invalid input file '{}'", input_file); return; },
+        None => { col_println!((red, bold), "Invalid input file '{}'", input_file); return; },
         Some(value) => value
     };
 
@@ -51,45 +52,47 @@ fn wrapped_main() {
     if extension == "why" {
         let input = match fs::read_to_string(&input_file) {
             Err(e) => {
-                println!("Error reading file '{}' - {}", input_file, e.to_string());
+                col_println!((red, bold), "Error reading file '{}' - {}", input_file, e.to_string());
                 return;
             }
             Ok(value) => value,
         };
 
+        println!("Starting compilation (pre)");
         let start = Instant::now();
         let r = match convert_to_symbols(input) {
             Err(e) => {
-                println!("Compilation (pre) failed [{:?}]:\n\t{}", start.elapsed(), e);
+                col_println!((red, bold), "Compilation (pre) failed [{:?}]:\n\t{}", start.elapsed(), e);
                 return;
             },
             Ok(value) => value
         };
 
-        println!("Compilation (pre) completed [{:?}]", start.elapsed());
+        col_println!((green, bold), "Compilation (pre) completed [{:?}]", start.elapsed());
 
+        println!("Starting compilation (post)");
         let start = Instant::now();
         memory = match process_symbols(r) {
             Err(e) => {
-                println!("Compilation (post) failed [{:?}]:\n\t{}", start.elapsed(), e);
+                col_println!((red, bold), "Compilation (post) failed [{:?}]:\n\t{}", start.elapsed(), e);
                 return;
             },
             Ok(value) => value
         };
 
-        println!("Compilation (post) completed [{:?}]", start.elapsed());
+        col_println!((green, bold), "Compilation (post) completed [{:?}]", start.elapsed());
 
         memory.save_to_compiled("Compiled".to_string());
     }
     //? Load compiled file
     else if extension == "cwhy" {
         memory = match MemoryManagers::load_from_compiled(input_file) {
-            Err(e) => { println!("Loading precompiled file failed - {}", e); return; },
+            Err(e) => { col_println!((red, bold), "Loading precompiled file failed - {}", e); return; },
             Ok(value) => value
         };
     }
     else {
-        println!("Unrecognised extension '{}'", extension);
+        col_println!((red, bold), "Unrecognised extension '{}'", extension);
         return;
     }
 
