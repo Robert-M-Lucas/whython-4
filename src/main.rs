@@ -96,14 +96,14 @@ fn wrapped_main() {
         return;
     }
 
-    //? translate(&memory.program_memory.memory);
+    // translate(&memory.program_memory.memory);
 
     //? memory.variable_memory.dump_bytes("VariableMemory".to_string());
     //? memory.program_memory.dump_bytes("ProgramMemory".to_string());
 
 
     match execute(&mut memory) {
-        Err(e) => println!("Execution failed: {}", e),
+        Err(e) => col_println!((red, bold), "Execution failed:\n\t{}", e),
         Ok(_) => {}
     };
 

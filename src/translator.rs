@@ -1,3 +1,4 @@
+use crate::processing::instructions::add_instruction_13::AddInstruction;
 use crate::processing::instructions::and_instruction_6::AndInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::dynamic_from_copy_instruction_10::DynamicFromCopyInstruction;
@@ -40,6 +41,7 @@ pub fn translate(data: &Vec<u8>) {
             10 => translate!(DynamicFromCopyInstruction, data, i),
             11 => translate!(DynamicToCopyInstruction, data, i),
             12 => translate!(JumpInstruction, data, i),
+            13 => translate!(AddInstruction, data, i),
             code => panic!("Debug not implemented for code {}", code),
         };
 

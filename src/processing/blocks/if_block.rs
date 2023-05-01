@@ -66,6 +66,8 @@ impl BlockHandler for IfBlock {
                 self.jump_end_instructions.push(JumpInstruction::new_alloc(memory_managers, 0));
                 self.jump_next_instruction.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());
                 propagate_error!(self.on_entry(memory_managers, reference_stack, symbol_line));
+                reference_stack.remove_handler();
+                reference_stack.add_handler();
                 Ok(false)
             },
             Block::Else => {
@@ -73,6 +75,8 @@ impl BlockHandler for IfBlock {
                 self.jump_end_instructions.push(JumpInstruction::new_alloc(memory_managers, 0));
                 self.jump_next_instruction.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());
                 self.jump_next_instruction = None;
+                reference_stack.remove_handler();
+                reference_stack.add_handler();
                 Ok(false)
             }
             _ => return exit_with_cleanup(self, memory_managers, reference_stack),

@@ -1,0 +1,103 @@
+char[9] board = "---------"
+
+bool turn = false
+bool draw = false
+
+bool exit = false
+
+ptr turn_count = 0
+
+ptr sample_in = 0
+
+fn print_board()
+    ptr k = 0
+    while ! (k == 9)
+        printc board[k]
+        printc " "
+        k += 1
+        printc board[k]
+        printc " "
+        k += 1
+        printc board[k]
+        k += 1
+        printc "\n"
+
+while !exit
+    print_board()
+
+    char turn_char = "-"
+
+    if turn
+        turn_char = "O"
+        char[9] text = "Turn: O\n\n"
+        printc text
+    else
+        turn_char = "X"
+        char[9] text = "Turn: X\n\n"
+        printc text
+
+    ptr selection = sample_in # TODO: Get input
+    sample_in += 1
+
+    char cur_value = board[selection]
+    if cur_value == "-"
+        board[selection] = turn_char
+
+        fn test(char _turn_char, char one, char two, char three) bool false
+            return = (one == _turn_char) & ((one == two) & (two == three))
+
+        ptr i = 0
+        while (!(i == 9)) & (!exit)
+            char one = board[i]
+            i += 1
+            char two = board[i]
+            i += 1
+            char three = board[i]
+            i += 1
+            exit = test(turn_char, one, two, three)
+
+        if ! exit
+            ptr j = 0
+            while (!(j == 3)) & (!exit)
+                char one = board[j]
+                ptr x = j + 3
+                char two = board[x]
+                ptr y = j + 6
+                char three = board[y]
+                j += 1
+                exit = test(turn_char, one, two, three)
+
+        if ! exit
+            char one = board[0]
+            char two = board[4]
+            char three = board[8]
+            exit = test(turn_char, one, two, three)
+
+        if ! exit
+            char one = board[2]
+            char two = board[4]
+            char three = board[6]
+            exit = test(turn_char, one, two, three)
+
+        if ! exit
+            turn = !turn
+
+        turn_count +=
+        if (!exit) & (turn_count == 9)
+            exit = true
+            draw = true
+    else
+        char[20] text = "Selection not empty\n"
+        printc text
+
+print_board()
+
+if draw
+    char[5] text = "Draw!"
+    printc text
+elif turn
+    char[7] text = "O Wins!"
+    printc text
+else
+    char[7] text = "X Wins!"
+    printc text

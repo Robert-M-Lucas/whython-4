@@ -52,7 +52,7 @@ impl PrintCharsInstruction {
         *pointer += size_of::<usize>();
         let count = get_usize(pointer, &memory_managers.program_memory.memory);
         *pointer += size_of::<usize>();
-        println!("{}", String::from_utf8_lossy(&memory_managers.variable_memory.memory[position..position+(len * count)]));
+        print!("{}", String::from_utf8_lossy(&memory_managers.variable_memory.memory[position..position+(len * count)]));
     }
 }
 

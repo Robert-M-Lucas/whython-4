@@ -15,18 +15,28 @@ pub struct LiteralSymbolHandler {}
 
 pub const STRING_DELIMITERS: [char; 2] = ['\'', '"'];
 
-const ESCAPE_CODES: [(char, char); 1] = [('n', '\n')];
+const ESCAPE_CODES: [(char, char); 2] = [('n', '\n'), ('\\', '\\')];
 
 fn evaluate_string_escapes(input: String) -> String {
     let mut output = String::new();
+    let mut next = false;
     'char_loop: for c in input.chars() {
-        for code in ESCAPE_CODES {
-            if c == code.0 {
-                output.push(code.1);
-                continue 'char_loop;
+        if next {
+            next = false;
+            for code in ESCAPE_CODES {
+                if c == code.0 {
+                    output.push(code.1);
+                    continue 'char_loop;
+                }
             }
         }
-        output.push(c);
+
+        if c == '\\' && !next {
+            next = true;
+        }
+        else {
+            output.push(c);
+        }
     }
     output
 }

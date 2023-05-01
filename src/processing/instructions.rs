@@ -11,6 +11,7 @@ pub mod print_chars_instruction_9;
 pub mod dynamic_from_copy_instruction_10;
 pub mod dynamic_to_copy_instruction_11;
 pub mod jump_if_instruction_12;
+pub mod add_instruction_13;
 
 pub const INSTRUCTION_CODE_LENGTH: usize = 2;
 

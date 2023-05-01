@@ -1,5 +1,6 @@
 use std::time::Instant;
 use crate::col_println;
+use crate::processing::instructions::add_instruction_13::AddInstruction;
 use crate::processing::instructions::and_instruction_6::AndInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::dynamic_from_copy_instruction_10::DynamicFromCopyInstruction;
@@ -40,12 +41,13 @@ pub fn execute(memory_managers: &mut MemoryManagers) -> Result<(), String> {
             10 => DynamicFromCopyInstruction::execute(&mut pointer, memory_managers),
             11 => DynamicToCopyInstruction::execute(&mut pointer, memory_managers),
             12 => JumpIfInstruction::execute(&mut pointer, memory_managers),
+            13 => AddInstruction::execute(&mut pointer, memory_managers),
             code => return Err(format!("Unknown code! [{}]", code))
         };
 
     }
 
-    col_println!((green, bold), "Execution completed [{:?}]", start_time.elapsed());
+    col_println!((green, bold), "\nExecution completed [{:?}]", start_time.elapsed());
 
     Ok(())
 }

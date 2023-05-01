@@ -1,5 +1,6 @@
 use std::mem::size_of;
 use crate::errors::create_op_not_impl_error;
+use crate::processing::instructions::add_instruction_13::AddInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::processor::MemoryManagers;
@@ -44,8 +45,7 @@ impl TypeTrait for PointerType {
 
     fn get_size(&self) -> usize { size_of::<usize>() }
 
-    fn create_indexed(&self, _super: &Type, memory_managers: &mut MemoryManagers,
-                      argument_literal: &Literal, assignment_literal: &Literal) -> Result<usize, String> {
+    fn create_indexed(&self, _super: &Type, memory_managers: &mut MemoryManagers, argument_literal: &Literal, assignment_literal: &Literal) -> Result<usize, String> {
         let count: usize = match argument_literal {
             Literal::IntLiteral(count) => match (*count).try_into() {
                 Ok(value) => value,
@@ -96,6 +96,9 @@ impl TypeTrait for PointerType {
             Operator::Equal => {
                 Ok(TypeSymbol::Boolean)
             },
+            Operator::Add => {
+                Ok(TypeSymbol::Pointer)
+            }
             _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
         }
     }
@@ -109,17 +112,23 @@ impl TypeTrait for PointerType {
             };
         }
 
-        match rhs.as_ref().unwrap().get_type() {
+        let rhs = rhs.unwrap();
+
+        match rhs.get_type() {
             TypeSymbol::Pointer => {},
-            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs)
+            _ => return create_op_not_impl_error(&operator, self.get_type(), Some(rhs))
         };
 
         match operator {
             Operator::Equal => {
-                EqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), self.get_size(), destination.get_address());
+                EqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.get_address(), self.get_size(), destination.get_address());
                 Ok(())
             },
-            _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+            Operator::Add => {
+                AddInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.get_address(), self.get_size(), destination.get_address());
+                Ok(())
+            }
+            _ => create_op_not_impl_error(&operator, self.get_type(), Some(rhs))
         }
     }
 
