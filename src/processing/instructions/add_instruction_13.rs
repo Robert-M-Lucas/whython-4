@@ -7,12 +7,12 @@ pub struct AddInstruction {
     address: usize
 }
 
-pub const INVERT_INSTRUCTION_CODE: u16 = 13;
+pub const ADD_INSTRUCTION_CODE: u16 = 13;
 
 impl AddInstruction {
     pub fn new_alloc(memory_managers: &mut MemoryManagers, lhs: usize, rhs: usize, len: usize, dest: usize) -> Self {
         let mut instruction_memory = vec![];
-        instruction_memory.extend(INVERT_INSTRUCTION_CODE.to_le_bytes());
+        instruction_memory.extend(ADD_INSTRUCTION_CODE.to_le_bytes());
         instruction_memory.extend(lhs.to_le_bytes());
         instruction_memory.extend(rhs.to_le_bytes());
         instruction_memory.extend(len.to_le_bytes());
@@ -25,7 +25,7 @@ impl AddInstruction {
         Self { address }
     }
 
-    pub fn get_code() -> u16 { INVERT_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 { ADD_INSTRUCTION_CODE }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 4

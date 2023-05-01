@@ -3,13 +3,10 @@ char[9] board = "---------"
 bool turn = false
 bool draw = false
 
-bool exit = false
-
 ptr turn_count = 0
 
-ptr sample_in = 0
-
 fn print_board()
+    printc "\n"
     ptr k = 0
     while k != 9
         printc board[k]
@@ -22,82 +19,108 @@ fn print_board()
         k += 1
         printc "\n"
 
-while ! exit
+fn char_to_ptr(char c) ptr 9
+    if c == '0'
+        return = 0
+    elif c == '1'
+        return = 1
+    elif c == '2'
+        return = 2
+    elif c == '3'
+        return = 3
+    elif c == '4'
+        return = 4
+    elif c == '5'
+        return = 5
+    elif c == '6'
+        return = 6
+    elif c == '7'
+        return = 7
+    elif c == '8'
+        return = 8
+
+
+while true
     print_board()
 
     char turn_char = "-"
 
     if turn
         turn_char = "O"
-        char[9] text = "Turn: O\n\n"
-        printc text
+        printc "Turn: O\n"
     else
         turn_char = "X"
-        char[9] text = "Turn: X\n\n"
-        printc text
+        printc "Turn: X\n"
 
-    ptr selection = sample_in # TODO: Get input
-    sample_in += 1
+    char selection_char = "-"
+    input selection_char
+
+    ptr selection = char_to_ptr(selection_char)
+
+    if selection == 9
+        printc "Invalid selection\n"
+        continue
 
     char cur_value = board[selection]
-    if cur_value == "-"
-        board[selection] = turn_char
+    if cur_value != "-"
+        printc "Selection not empty\n"
+        continue
 
-        fn test(char _turn_char, char one, char two, char three) bool false
-            return = (one == _turn_char) & ((one == two) & (two == three))
+    board[selection] = turn_char
 
-        ptr i = 0
-        while (i != 9) & (!exit)
-            char one = board[i]
-            i += 1
-            char two = board[i]
-            i += 1
-            char three = board[i]
-            i += 1
-            exit = test(turn_char, one, two, three)
+    fn test(char _turn_char, char one, char two, char three) bool false
+        return = (one == _turn_char) & ((one == two) & (two == three))
 
-        if ! exit
-            ptr j = 0
-            while (j != 3) & (!exit)
-                char one = board[j]
-                ptr x = j + 3
-                char two = board[x]
-                ptr y = j + 6
-                char three = board[y]
-                j += 1
-                exit = test(turn_char, one, two, three)
+    char one = "-"
+    char two = "-"
+    char three = "-"
 
-        if ! exit
-            char one = board[0]
-            char two = board[4]
-            char three = board[8]
-            exit = test(turn_char, one, two, three)
+    ptr i = 0
+    while i != 9
+        one = board[i]
+        i += 1
+        two = board[i]
+        i += 1
+        three = board[i]
+        i += 1
+        if test(turn_char, one, two, three)
+            break
 
-        if ! exit
-            char one = board[2]
-            char two = board[4]
-            char three = board[6]
-            exit = test(turn_char, one, two, three)
+    ptr j = 0
+    while j != 3
+        one = board[j]
+        ptr x = j + 3
+        two = board[x]
+        ptr y = j + 6
+        three = board[y]
+        j += 1
+        if test(turn_char, one, two, three)
+            break
 
-        if ! exit
-            turn = !turn
+    one = board[0]
+    two = board[4]
+    three = board[8]
+    if test(turn_char, one, two, three)
+        break
 
-        turn_count += 1
-        if (! exit) & (turn_count == 9)
-            exit = true
-            draw = true
-    else
-        char[20] text = "Selection not empty\n"
-        printc text
+    one = board[2]
+    two = board[4]
+    three = board[6]
+    if test(turn_char, one, two, three)
+        break
+
+    turn = ! turn
+
+    turn_count += 1
+    if turn_count == 9
+        draw = true
+        break
 
 print_board()
 
 if draw
-    char[5] text = "Draw!"
-    printc text
+    printc "Draw!"
 elif turn
-    char[7] text = "O Wins!"
-    printc text
+    printc "O Wins!"
 else
-    char[7] text = "X Wins!"
-    printc text
+    printc "X Wins!"

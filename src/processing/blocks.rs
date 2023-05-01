@@ -25,6 +25,10 @@ pub trait BlockHandler {
     fn on_break(&mut self, _memory_managers: &mut MemoryManagers) -> Result<bool, String> {
         Ok(false)
     }
+
+    fn on_continue(&mut self, _memory_managers: &mut MemoryManagers) -> Result<bool, String> {
+        Ok(false)
+    }
 }
 
 pub struct BlockCoordinator {
@@ -61,6 +65,21 @@ impl BlockCoordinator {
         Ok(())
     }
 
+    pub fn continue_block_handler(&mut self, memory_managers: &mut MemoryManagers) -> Result<(), String> {
+        let mut success = false;
+        for h in self.stack.iter_mut().rev() {
+            if propagate_error!(h.on_continue(memory_managers)) {
+                success = true;
+                break;
+            }
+        }
+
+        if !success {
+            return Err("None of the scopes 'continue' is in support continuing".to_string());
+        }
+        Ok(())
+    }
+
     pub fn exit_block_handler(&mut self, memory_managers: &mut MemoryManagers,
                               symbol_line: &Vec<Symbol>)  -> Result<bool, String> {
 
@@ -73,13 +92,12 @@ impl BlockCoordinator {
 
 
         if result.is_ok() {
-            if result.unwrap() == false {
+            return if result.unwrap() == false {
                 self.stack.push(handler);
-                return Ok(false);
-            }
-            else {
+                Ok(false)
+            } else {
                 self.reference_stack.remove_handler();
-                return Ok(true);
+                Ok(true)
             }
         }
         result
@@ -97,53 +115,6 @@ impl BlockCoordinator {
 
         result
     }
-
-    /*pub fn on_exit(&mut self, memory_managers: &mut MemoryManagers,
-                   symbol_line: &Vec<Symbol>)  -> Result<bool, String> {
-
-        if self.stack.len() == 0 { panic!("Called on_exit when not BlockHandler exists on stack!") }
-
-        let mut handler = self.stack.pop().unwrap();
-
-        let result =
-            handler.on_exit(memory_managers, self.get_reference_stack_mut(), symbol_line);
-
-
-        if result.is_ok() {
-            if result.unwrap() == false {
-                self.stack.push(handler);
-                return Ok(false);
-            }
-            else {
-                self.reference_stack.remove_handler();
-                return Ok(true);
-            }
-        }
-        result
-    }*/
-
-/*    pub fn start_block_removal(&mut self, memory_managers: &mut MemoryManagers,
-                               symbol_line: &Vec<Symbol>) -> Result<(), String> {
-        if self.stack.len() == 0 { panic!("Called block removal when there is no BlockHandler on stack!") }
-        let mut handler = self.stack.pop().unwrap();
-        let result =
-            handler.on_forced_exit(memory_managers, self.get_reference_stack_mut());
-        self.reference_stack.start_handler_remove();
-        result
-    }
-
-    pub fn cancel_block_removal(&mut self) {
-        self.stack.push(self.stack_removed.unwrap());
-        self.stack_removed = None;
-        self.reference_stack.cancel_handler_remove();
-    }
-
-    pub fn complete_block_removal(&mut self) -> Result<(), String> {
-        let r = self.stack_removed.unwrap().on_forced_exit()
-        self.stack_removed = None;
-        self.reference_stack.complete_handler_removal();
-
-    }*/
 
     pub fn get_indentation(&self) -> usize { self.stack.len() }
 

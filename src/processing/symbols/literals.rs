@@ -5,7 +5,7 @@ use super::SymbolHandler;
 #[derive(PartialEq, Clone, strum_macros::Display)]
 pub enum Literal {
     StringLiteral(String),
-    IntLiteral(i32),
+    IntLiteral(i64),
     BoolLiteral(bool),
     ParameterList(Vec<(TypeSymbol, String)>),
     None,
@@ -66,7 +66,7 @@ impl SymbolHandler for LiteralSymbolHandler {
         )
         .or_else(
             // Integer
-            || match string.parse::<i32>() {
+            || match string.parse::<i64>() {
                 Ok(ok) => Some(Symbol::Literal(Literal::IntLiteral(ok))),
                 Err(_) => None,
             },

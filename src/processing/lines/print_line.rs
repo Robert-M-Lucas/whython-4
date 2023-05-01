@@ -4,7 +4,8 @@ use crate::processing::instructions::print_instruction_5::PrintInstruction;
 use crate::processing::lines::arithmetic::handle_arithmetic_section;
 use crate::processing::lines::LineHandler;
 use crate::processing::processor::{MemoryManagers, ProcessingResult};
-use crate::processing::symbols::{Builtin, Symbol};
+use crate::processing::symbols::{Builtin, Literal, Symbol, TypeSymbol};
+use crate::processing::types::get_type;
 
 pub struct PrintLine {}
 
@@ -28,6 +29,24 @@ impl LineHandler for PrintLine {
                     },
                     Builtin::PrintChars => {
                         if line.len() == 1 { return ProcessingResult::Failure("'printc' must be followed by something to print".to_string()) }
+                        if line.len() == 2 && matches!(line[1], Symbol::Literal(_)) {
+                            match &line[1] {
+                                Symbol::Literal(literal) => {
+                                    match literal {
+                                        Literal::StringLiteral(string) => {
+                                            let mut t = get_type(&TypeSymbol::Character, memory_managers).unwrap();
+                                            t.create_indexed(memory_managers, &Literal::IntLiteral(string.len() as i64), literal)
+                                                .unwrap();
+
+                                            PrintCharsInstruction::new_alloc(memory_managers, &t, t.get_len());
+                                            return ProcessingResult::Success
+                                        },
+                                        _ => {}
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
                         if line.len() == 2 && matches!(line[1], Symbol::Name(_)) {
                             match &line[1] {
                                 Symbol::Name(name) => {

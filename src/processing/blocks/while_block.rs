@@ -13,6 +13,7 @@ use crate::propagate_error;
 pub struct WhileBlock {
     jump_end_instruction: Option<JumpIfNotInstruction>,
     jump_end_instructions: Vec<JumpInstruction>,
+    jump_start_instructions: Vec<JumpInstruction>,
     start_position: Option<usize>
 }
 
@@ -22,6 +23,7 @@ impl WhileBlock {
             Self {
                 jump_end_instruction: None,
                 jump_end_instructions: Vec::new(),
+                jump_start_instructions: Vec::new(),
                 start_position: None
             }
         )
@@ -57,6 +59,11 @@ impl BlockHandler for WhileBlock {
         Ok(true)
     }
 
+    fn on_continue(&mut self, memory_managers: &mut MemoryManagers) -> Result<bool, String> {
+        self.jump_start_instructions.push(JumpInstruction::new_alloc(memory_managers, 0));
+        Ok(true)
+    }
+
     fn on_exit(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack, _symbol_line: &Vec<Symbol>) -> Result<bool, String> {
         propagate_error!(self.on_forced_exit(memory_managers, reference_stack));
         Ok(true)
@@ -67,6 +74,9 @@ impl BlockHandler for WhileBlock {
         self.jump_end_instruction.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());
         for i in self.jump_end_instructions.iter_mut() {
             i.set_destination(memory_managers, memory_managers.program_memory.get_position());
+        }
+        for i in self.jump_start_instructions.iter_mut() {
+            i.set_destination(memory_managers, self.start_position.unwrap());
         }
         Ok(())
     }
