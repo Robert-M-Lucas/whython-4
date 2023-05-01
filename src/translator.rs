@@ -8,6 +8,7 @@ use crate::processing::instructions::invert_instruction_1::InvertInstruction;
 use crate::processing::instructions::jump_if_not_instruction_2::JumpIfNotInstruction;
 use crate::processing::instructions::jump_instruction_3::JumpInstruction;
 use crate::processing::instructions::jump_variable_instruction_4::JumpVariableInstruction;
+use crate::processing::instructions::not_equal_instruction_14::NotEqualInstruction;
 use crate::processing::instructions::or_instruction_8::OrInstruction;
 use crate::processing::instructions::print_chars_instruction_9::PrintCharsInstruction;
 use crate::processing::instructions::print_instruction_5::PrintInstruction;
@@ -42,6 +43,7 @@ pub fn translate(data: &Vec<u8>) {
             11 => translate!(DynamicToCopyInstruction, data, i),
             12 => translate!(JumpInstruction, data, i),
             13 => translate!(AddInstruction, data, i),
+            14 => translate!(NotEqualInstruction, data, i),
             code => panic!("Debug not implemented for code {}", code),
         };
 

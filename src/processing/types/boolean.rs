@@ -3,6 +3,7 @@ use crate::processing::instructions::and_instruction_6::AndInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::equal_instruction_7::EqualInstruction;
 use crate::processing::instructions::invert_instruction_1::InvertInstruction;
+use crate::processing::instructions::not_equal_instruction_14::NotEqualInstruction;
 use crate::processing::instructions::or_instruction_8::OrInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
@@ -75,13 +76,7 @@ impl TypeTrait for BooleanType {
         };
 
         match operator {
-            Operator::And => {
-                Ok(self.get_type())
-            },
-            Operator::Equal => {
-                Ok(self.get_type())
-            },
-            Operator::Or => {
+            Operator::And | Operator::Or | Operator::Equal | Operator::NotEqual => {
                 Ok(self.get_type())
             },
             _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
@@ -115,6 +110,10 @@ impl TypeTrait for BooleanType {
             },
             Operator::Equal => {
                 EqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), self.get_size(), destination.get_address());
+                Ok(())
+            },
+            Operator::NotEqual => {
+                NotEqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), self.get_size(), destination.get_address());
                 Ok(())
             },
             Operator::Or => {

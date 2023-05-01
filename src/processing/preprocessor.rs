@@ -58,25 +58,25 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
                 None => {}
             }
 
-            //? If buffer is empty, process character alone
-            match
-                match c {
-                    '!' => {
-                        if buffer.len() != 0 { None }
-                        else {
-                            buffer.push(c);
-                            Some(process_buffer(&mut buffer, &mut symbol_line))
-                        }
-                    },
-                    _ => None
-                }
-            {
-                Some(value) => match value {
-                    Err(e) => return Err(e),
-                    Ok(_) => continue
-                },
-                None => {}
-            }
+            // //? If buffer is empty, process character alone
+            // match
+            //     match c {
+            //         '!' => {
+            //             if buffer.len() != 0 { None }
+            //             else {
+            //                 buffer.push(c);
+            //                 Some(process_buffer(&mut buffer, &mut symbol_line))
+            //             }
+            //         },
+            //         _ => None
+            //     }
+            // {
+            //     Some(value) => match value {
+            //         Err(e) => return Err(e),
+            //         Ok(_) => continue
+            //     },
+            //     None => {}
+            // }
 
             //? Process character alone
             match

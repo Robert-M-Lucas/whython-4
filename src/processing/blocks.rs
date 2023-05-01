@@ -21,6 +21,10 @@ pub trait BlockHandler {
 
     fn on_forced_exit(&mut self, memory_managers: &mut MemoryManagers,
                       block_coordinator: &mut ReferenceStack) -> Result<(), String>;
+
+    fn on_break(&mut self, _memory_managers: &mut MemoryManagers) -> Result<bool, String> {
+        Ok(false)
+    }
 }
 
 pub struct BlockCoordinator {
@@ -40,6 +44,21 @@ impl BlockCoordinator {
         let r = handler.on_entry(memory_managers, self.get_reference_stack_mut(), symbol_line);
         self.stack.push(handler);
         r
+    }
+
+    pub fn break_block_handler(&mut self, memory_managers: &mut MemoryManagers) -> Result<(), String> {
+        let mut success = false;
+        for h in self.stack.iter_mut().rev() {
+            if propagate_error!(h.on_break(memory_managers)) {
+                success = true;
+                break;
+            }
+        }
+
+        if !success {
+            return Err("None of the scopes 'break' is in support breaking".to_string());
+        }
+        Ok(())
     }
 
     pub fn exit_block_handler(&mut self, memory_managers: &mut MemoryManagers,

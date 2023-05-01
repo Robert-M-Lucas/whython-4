@@ -4,17 +4,17 @@ use crate::processing::processor::MemoryManagers;
 use crate::processing::types::boolean::{BOOLEAN_FALSE, BOOLEAN_TRUE};
 use super::Instruction;
 
-pub struct EqualInstruction {
+pub struct NotEqualInstruction {
     address: usize
 }
 
-pub const EQUAL_INSTRUCTION_CODE: u16 = 7;
+pub const NOT_EQUAL_INSTRUCTION_CODE: u16 = 14;
 
-/// Applies and to LHS and RHS
-impl EqualInstruction {
+/// Applies not equal to LHS and RHS
+impl NotEqualInstruction {
     pub fn new_alloc(memory_managers: &mut MemoryManagers, lhs: usize, rhs: usize, len: usize, dest: usize) -> Self {
         let mut instruction_memory = vec![];
-        instruction_memory.extend(EQUAL_INSTRUCTION_CODE.to_le_bytes());
+        instruction_memory.extend(NOT_EQUAL_INSTRUCTION_CODE.to_le_bytes());
         instruction_memory.extend(lhs.to_le_bytes());
         instruction_memory.extend(rhs.to_le_bytes());
         instruction_memory.extend(len.to_le_bytes());
@@ -27,14 +27,14 @@ impl EqualInstruction {
         Self { address }
     }
 
-    pub fn get_code() -> u16 { EQUAL_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 { NOT_EQUAL_INSTRUCTION_CODE }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 4 // LHS, RHS, len, dest
     }
 
     pub fn get_debug(data: &[u8]) -> String {
-        format!("EQUAL [{}], [{}] (len:{}) dest [{}]",
+        format!("NOT EQUAL [{}], [{}] (len:{}) dest [{}]",
                 get_usize(&0, data),
                 get_usize(&size_of::<usize>(), data),
                 get_usize(&(size_of::<usize>() * 2), data),
@@ -52,17 +52,18 @@ impl EqualInstruction {
         let dest = get_usize(pointer, &memory_managers.program_memory.memory);
         *pointer += size_of::<usize>();
 
+
         for i in 0..len {
             if memory_managers.variable_memory.memory[lhs + i] != memory_managers.variable_memory.memory[rhs + i] {
-                memory_managers.variable_memory.memory[dest] = BOOLEAN_FALSE;
+                memory_managers.variable_memory.memory[dest] = BOOLEAN_TRUE;
                 return;
             }
         }
-        memory_managers.variable_memory.memory[dest] = BOOLEAN_TRUE;
+        memory_managers.variable_memory.memory[dest] = BOOLEAN_FALSE;
     }
 }
 
-impl Instruction for EqualInstruction {
+impl Instruction for NotEqualInstruction {
     fn get_address(&self) -> usize {
         self.address
     }

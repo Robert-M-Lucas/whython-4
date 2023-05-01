@@ -4,6 +4,7 @@ mod builtins;
 mod literals;
 mod operators;
 mod punctuation;
+mod keywords;
 
 pub use assigners::Assigner;
 use assigners::AssignerSymbolHandler;
@@ -27,6 +28,9 @@ use builtins::BuiltinSymbolHandler;
 pub use punctuation::Punctuation;
 pub use punctuation::PunctuationSymbolHandler;
 
+pub use keywords::Keyword;
+pub use keywords::KeywordSymbolHandler;
+
 
 #[derive(PartialEq, Clone, strum_macros::Display)]
 pub enum Symbol {
@@ -40,7 +44,8 @@ pub enum Symbol {
     Block(Block),
     Builtin(Builtin),
     Punctuation(Punctuation),
-    Name(String)
+    Name(String),
+    Keyword(Keyword),
 }
 
 
@@ -114,6 +119,7 @@ impl SymbolHandler for AllSymbolHandler {
             .or_else(|| BuiltinSymbolHandler::get_symbol(string))
             .or_else(|| LiteralSymbolHandler::get_symbol(string))
             .or_else(|| PunctuationSymbolHandler::get_symbol(string))
+            .or_else(|| KeywordSymbolHandler::get_symbol(string))
             .or_else(
                 || {
                     for c in string.chars() {

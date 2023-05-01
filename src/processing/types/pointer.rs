@@ -3,6 +3,7 @@ use crate::errors::create_op_not_impl_error;
 use crate::processing::instructions::add_instruction_13::AddInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
 use crate::processing::instructions::equal_instruction_7::EqualInstruction;
+use crate::processing::instructions::not_equal_instruction_14::NotEqualInstruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
 use crate::processing::types::{get_type, Type, TypeTrait};
@@ -93,7 +94,7 @@ impl TypeTrait for PointerType {
         };
 
         match operator {
-            Operator::Equal => {
+            Operator::Equal | Operator::NotEqual => {
                 Ok(TypeSymbol::Boolean)
             },
             Operator::Add => {
@@ -122,6 +123,10 @@ impl TypeTrait for PointerType {
         match operator {
             Operator::Equal => {
                 EqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.get_address(), self.get_size(), destination.get_address());
+                Ok(())
+            },
+            Operator::NotEqual => {
+                NotEqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.get_address(), self.get_size(), destination.get_address());
                 Ok(())
             },
             Operator::Add => {

@@ -11,7 +11,8 @@ use crate::propagate_error;
 
 
 pub struct WhileBlock {
-    jump_end_instructions: Option<JumpIfNotInstruction>,
+    jump_end_instruction: Option<JumpIfNotInstruction>,
+    jump_end_instructions: Vec<JumpInstruction>,
     start_position: Option<usize>
 }
 
@@ -19,7 +20,8 @@ impl WhileBlock {
     pub fn new() -> Box<dyn BlockHandler> {
         Box::new(
             Self {
-                jump_end_instructions: None,
+                jump_end_instruction: None,
+                jump_end_instructions: Vec::new(),
                 start_position: None
             }
         )
@@ -45,9 +47,14 @@ impl BlockHandler for WhileBlock {
             return Err(format!("If expression must evaluate to {}", TypeSymbol::Boolean));
         }
 
-        self.jump_end_instructions = Some(JumpIfNotInstruction::new_alloc(memory_managers, condition_boolean, 0));
+        self.jump_end_instruction = Some(JumpIfNotInstruction::new_alloc(memory_managers, condition_boolean, 0));
 
         Ok(())
+    }
+
+    fn on_break(&mut self, memory_managers: &mut MemoryManagers) -> Result<bool, String> {
+        self.jump_end_instructions.push(JumpInstruction::new_alloc(memory_managers, 0));
+        Ok(true)
     }
 
     fn on_exit(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack, _symbol_line: &Vec<Symbol>) -> Result<bool, String> {
@@ -57,7 +64,10 @@ impl BlockHandler for WhileBlock {
 
     fn on_forced_exit(&mut self, memory_managers: &mut MemoryManagers, _reference_stack: &mut ReferenceStack) -> Result<(), String> {
         JumpInstruction::new_alloc(memory_managers, self.start_position.unwrap());
-        self.jump_end_instructions.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());
+        self.jump_end_instruction.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());
+        for i in self.jump_end_instructions.iter_mut() {
+            i.set_destination(memory_managers, memory_managers.program_memory.get_position());
+        }
         Ok(())
     }
 }

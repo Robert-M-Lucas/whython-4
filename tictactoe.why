@@ -11,7 +11,7 @@ ptr sample_in = 0
 
 fn print_board()
     ptr k = 0
-    while ! (k == 9)
+    while k != 9
         printc board[k]
         printc " "
         k += 1
@@ -22,7 +22,7 @@ fn print_board()
         k += 1
         printc "\n"
 
-while !exit
+while ! exit
     print_board()
 
     char turn_char = "-"
@@ -47,7 +47,7 @@ while !exit
             return = (one == _turn_char) & ((one == two) & (two == three))
 
         ptr i = 0
-        while (!(i == 9)) & (!exit)
+        while (i != 9) & (!exit)
             char one = board[i]
             i += 1
             char two = board[i]
@@ -58,7 +58,7 @@ while !exit
 
         if ! exit
             ptr j = 0
-            while (!(j == 3)) & (!exit)
+            while (j != 3) & (!exit)
                 char one = board[j]
                 ptr x = j + 3
                 char two = board[x]
@@ -82,8 +82,8 @@ while !exit
         if ! exit
             turn = !turn
 
-        turn_count +=
-        if (!exit) & (turn_count == 9)
+        turn_count += 1
+        if (! exit) & (turn_count == 9)
             exit = true
             draw = true
     else

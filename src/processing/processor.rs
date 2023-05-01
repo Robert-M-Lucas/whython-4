@@ -16,6 +16,7 @@ use crate::processing::lines::variable_assignment_line::VariableAssignmentLine;
 use crate::processing::lines::variable_initialisation_line::VariableInitialisationLine;
 use crate::processing::lines::variable_initialisation_with_argument_line::VariableInitialisationWithArgumentLine;
 use crate::processing::lines::while_line::WhileLine;
+use crate::processing::lines::break_line::BreakLine;
 use crate::processing::symbols::Symbol;
 
 #[derive(PartialEq)]
@@ -157,6 +158,7 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
                 .or_else( || process_line!(WhileLine, symbol_line, memory_managers, block_coordinator)))
                 .or_else( || process_line!(FunctionLine, symbol_line, memory_managers, block_coordinator))
                 .or_else( || process_line!(PrintLine, symbol_line, memory_managers, block_coordinator))
+                .or_else( || process_line!(BreakLine, symbol_line, memory_managers, block_coordinator))
             ;
 
 
