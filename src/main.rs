@@ -10,9 +10,9 @@ pub mod util;
 use std::env;
 use std::ffi::OsStr;
 use std::fs;
-use std::io::{Read, stdin, stdout, Write};
 use std::mem::size_of;
 use std::path::Path;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 use processing::preprocessor::convert_to_symbols;
 use processing::processor::process_symbols;
@@ -22,12 +22,18 @@ use crate::processing::processor::MemoryManagers;
 use crate::translator::translate;
 use crate::util::info;
 
+static CTRLC: AtomicBool = AtomicBool::new(false);
+
 fn main() {
-    wrapped_main();
+    ctrlc::set_handler(|| {
+        CTRLC.store(true, Ordering::Relaxed);
+    }).expect("Error setting Ctrl-C handler");
+
+    wrapped_main(&CTRLC);
     util::pause();
 }
 
-fn wrapped_main() {
+fn wrapped_main(exit: &AtomicBool) {
     let args: Vec<String> = env::args().collect();
     info(format!("Platform pointer (usize) length: {} [{}-bit]", size_of::<usize>(), size_of::<usize>() * 8).as_str());
     let input_file;
@@ -95,7 +101,7 @@ fn wrapped_main() {
     //? memory.program_memory.dump_bytes("ProgramMemory".to_string());
 
 
-    match execute(&mut memory) {
+    match execute(&mut memory, exit) {
         Err(e) => col_println!((red, bold), "Execution failed:\n\t{}", e),
         Ok(_) => {}
     };
