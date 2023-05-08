@@ -15,7 +15,12 @@ pub struct LiteralSymbolHandler {}
 
 pub const STRING_DELIMITERS: [char; 2] = ['\'', '"'];
 
-const ESCAPE_CODES: [(char, char); 2] = [('n', '\n'), ('\\', '\\')];
+const ESCAPE_CODES: [(char, char); 3] = 
+    [
+        ('n', '\n'), 
+        ('\\', '\\'),
+        ('0', '\0')
+    ];
 
 fn evaluate_string_escapes(input: String) -> String {
     let mut output = String::new();

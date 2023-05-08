@@ -58,12 +58,12 @@ while true
     ptr selection = char_to_ptr(selection_char)
 
     if selection == 9
-        printc "Invalid selection\n"
+        printc "Invalid selection!\n"
         continue
 
     char cur_value = board[selection]
     if cur_value != "-"
-        printc "Selection not empty\n"
+        printc "Selection not empty!\n"
         continue
 
     board[selection] = turn_char

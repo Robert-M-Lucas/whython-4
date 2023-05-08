@@ -12,7 +12,6 @@ use crate::processing::symbols::{Literal, Operator, Symbol, SymbolHandler};
 use crate::processing::types::boolean::BooleanType;
 use crate::processing::types::char::CharType;
 use crate::processing::types::pointer::PointerType;
-use crate::util::info;
 
 macro_rules! create_type {
     ($internal_type: ident, $memory_managers: expr) => { Type::new(Box::new($internal_type::create_empty()), $memory_managers) };
@@ -216,7 +215,7 @@ pub trait TypeTrait {
             return Err(format!("Cannot move value from indexed {} into {}", self.get_type(), destination.get_type()))
         }
 
-        info(format!("{}", index_pointer.get_address()).as_str());
+        // info(format!("{}", index_pointer.get_address()).as_str());
 
         DynamicFromCopyInstruction::new_alloc(memory_managers, _super.get_address(),
                                               self.get_size(), index_pointer.get_address(),
