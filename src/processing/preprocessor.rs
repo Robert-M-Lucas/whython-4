@@ -1,9 +1,10 @@
 use debugless_unwrap::DebuglessUnwrapErr;
 use crate::errors::create_line_error;
-use crate::processing::symbols::{get_symbol, STRING_DELIMITERS, Symbol};
+use crate::processing::symbols::{get_all_symbol, STRING_DELIMITERS, Symbol};
 use crate::processing::symbols::Symbol::{ArithmeticBlock};
 use crate::propagate_error;
 
+/// Takes a line of code and returns an array of symbols
 pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     let mut symbol_line = Vec::new();
 
@@ -18,7 +19,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
             return Ok(())
         }
 
-        let symbol = get_symbol(&buffer);
+        let symbol = get_all_symbol(&buffer);
         if symbol.is_none() {
             return Err(format!("Symbol '{}' not found", buffer));
         }
@@ -183,7 +184,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
 
     //? Push remaining data
     if !buffer.is_empty() {
-        let symbol = get_symbol(&buffer);
+        let symbol = get_all_symbol(&buffer);
         if symbol.is_none() { return Err(format!("Symbol '{}' not found", buffer)); }
         symbol_line.push(symbol.unwrap());
     }
@@ -191,7 +192,9 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     Ok(symbol_line)
 }
 
-
+/// Takes code as an input
+///
+/// Returns `Vec<indentation, symbol line>`
 pub fn convert_to_symbols(data: String) -> Result<Vec<(usize, Vec<Symbol>)>, String> {
     let mut output = Vec::new();
 

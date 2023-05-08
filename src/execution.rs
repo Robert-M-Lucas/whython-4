@@ -18,6 +18,7 @@ use crate::processing::instructions::print_chars_instruction_9::PrintCharsInstru
 use crate::processing::instructions::print_instruction_5::PrintInstruction;
 use crate::processing::processor::MemoryManagers;
 
+/// Executes the compiled program
 pub fn execute(memory_managers: &mut MemoryManagers) -> Result<(), String> {
     let mut pointer: usize = 0;
     let program_length = memory_managers.program_memory.memory.len();

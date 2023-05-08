@@ -22,6 +22,7 @@ const ESCAPE_CODES: [(char, char); 3] =
         ('0', '\0')
     ];
 
+/// Takes an input string and replaces escape codes with their corresponding values
 fn format_escape_codes(input: String) -> String {
     let mut output = String::new();
     let mut next = false;

@@ -28,6 +28,7 @@ pub enum ProcessingResult {
 }
 
 impl ProcessingResult {
+    /// Calls `f` if state is `Unmatched` returns `self` otherwise
     pub fn or_else<F: FnOnce() -> ProcessingResult>(self, f: F) -> ProcessingResult
     {
         return match self {
@@ -54,6 +55,11 @@ pub struct MemoryManagers {
 }
 
 impl MemoryManagers {
+    /// Saves memory data to an encoded file that can be loaded by `load_from_compiled`. 
+    /// # Save file format
+    /// * Size of variable memory (`usize`)
+    /// * Variable memory
+    /// * Program memory
     pub fn save_to_compiled(&self, name: String) {
         let mut to_save = Vec::new();
         to_save.append(&mut Vec::from(self.variable_memory.get_position().to_le_bytes()));
@@ -82,6 +88,11 @@ impl MemoryManagers {
         if r.is_err() { println!("Failed to write to file - {}", r.unwrap_err().to_string()) }
     }
 
+    /// Loads memory data from an encoded file that can be created by `save_from_compiled`. 
+    /// # Save file format
+    /// * Size of variable memory (`usize`)
+    /// * Variable memory
+    /// * Program memory
     pub fn load_from_compiled(path: String) -> Result<Self, String> {
         println!("Loading precompiled data from file '{}'", &path);
 
@@ -112,6 +123,7 @@ macro_rules! process_line {
     };
 }
 
+/// Takes symbol lines as an input and outputs compiled memory
 pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManagers, String> {
     let mut memory_managers =  MemoryManagers {
         program_memory: MemoryManager::new(),

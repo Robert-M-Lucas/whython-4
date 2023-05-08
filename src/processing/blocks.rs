@@ -14,7 +14,9 @@ pub trait BlockHandler {
                 block_coordinator: &mut ReferenceStack,
                 symbol_line: &Vec<Symbol>) -> Result<(), String>;
 
-    /// Try to exit block (returns Ok(true) if block exit is successful)
+    /// Try to exit block
+    ///
+    /// Returns `Ok(true)` if block exit is successful
     fn on_exit(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack,
                _symbol_line: &Vec<Symbol>) -> Result<bool, String> {
         propagate_error!(self.on_forced_exit(memory_managers, reference_stack));
@@ -46,6 +48,10 @@ impl BlockCoordinator {
         Self { stack: Vec::new(), reference_stack: ReferenceStack::new() }
     }
 
+    /// Add a block handler
+    ///
+    /// # Arguments
+    /// * `symbol_line` - Line that created this block
     pub fn add_block_handler(&mut self, mut handler: Box<dyn BlockHandler>, memory_managers: &mut MemoryManagers,
                              symbol_line: &Vec<Symbol>) -> Result<(), String> {
 
@@ -55,6 +61,7 @@ impl BlockCoordinator {
         r
     }
 
+    /// Break from block e.g. while
     pub fn break_block_handler(&mut self, memory_managers: &mut MemoryManagers) -> Result<(), String> {
         let mut success = false;
         for h in self.stack.iter_mut().rev() {
@@ -70,6 +77,7 @@ impl BlockCoordinator {
         Ok(())
     }
 
+    /// Continue block e.g. while
     pub fn continue_block_handler(&mut self, memory_managers: &mut MemoryManagers) -> Result<(), String> {
         let mut success = false;
         for h in self.stack.iter_mut().rev() {
@@ -85,6 +93,9 @@ impl BlockCoordinator {
         Ok(())
     }
 
+    /// Try to exit block
+    ///
+    /// Returns `Ok(true)` if block exit is successful
     pub fn exit_block_handler(&mut self, memory_managers: &mut MemoryManagers,
                               symbol_line: &Vec<Symbol>)  -> Result<bool, String> {
 
@@ -108,6 +119,7 @@ impl BlockCoordinator {
         result
     }
 
+    /// Force exit
     pub fn force_exit_block_handler(&mut self, memory_managers: &mut MemoryManagers
         )  -> Result<(), String> {
 
@@ -121,25 +133,32 @@ impl BlockCoordinator {
         result
     }
 
+    /// Returns the current indentation level
     pub fn get_indentation(&self) -> usize { self.stack.len() }
 
+    /// Returns a reference to the reference stack
     pub fn get_reference_stack(&self) -> &ReferenceStack {
         &self.reference_stack
     }
 
+    /// Returns a mutable reference to the reference stack
     pub fn get_reference_stack_mut(&mut self) -> &mut ReferenceStack {
         &mut self.reference_stack
     }
 
+    /// Registers a variable
     pub fn register_variable(&mut self, variable: Type, name: String) -> Result<(), String> {
         self.reference_stack.register_variable(variable, name)
     }
 
+    /// Searches for a variable going up the reference stack
     pub fn get_variable(&self, name: &String) -> Result<&Type, String> {
         self.reference_stack.get_variable(name)
     }
 
+    /// Adds a reference handler (adds a variable scope)
     pub fn add_reference_handler(&mut self) { self.reference_stack.add_handler() }
 
+    /// Removes a reference handler (removes a variable scope)
     pub fn remove_reference_handler(&mut self) { self.reference_stack.remove_handler() }
 }

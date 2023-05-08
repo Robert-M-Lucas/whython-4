@@ -50,13 +50,16 @@ pub enum Symbol {
 
 
 pub trait SymbolHandler {
+    /// Converts a string to a symbol. Returns `None` if no symbol matches the string
     fn get_symbol(string: &String) -> Option<Symbol>;
 }
 
-pub fn get_symbol(string: &String) -> Option<Symbol> {
+/// Converts a string to a symbol. Returns `None` if no symbol matches the string
+pub fn get_all_symbol(string: &String) -> Option<Symbol> {
     AllSymbolHandler::get_symbol(string)
 }
 
+/// Converts an arithmetic block into a `Literal::ParameterList(parameters)`
 pub fn try_arithmetic_block_into_parameters(arithmetic_block: &Symbol) -> Result<Literal, String> {
     fn formatting_error() -> String {
         "Parameters must be formatted ([Type] [Name] , [Type] [Name] , [...])".to_string()

@@ -18,5 +18,6 @@ pub mod input_instruction_15;
 pub const INSTRUCTION_CODE_LENGTH: usize = 2;
 
 pub trait Instruction {
+    /// Returns the address of the instruction in program memory
     fn get_address(&self) -> usize;
 }

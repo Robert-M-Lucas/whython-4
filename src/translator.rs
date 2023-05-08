@@ -21,6 +21,7 @@ macro_rules! translate {
     };
 }
 
+/// Prints the instructions and their data in the given memory
 pub fn translate(data: &Vec<u8>) {
     println!("<------------------------------>");
     let mut i: usize = 0;

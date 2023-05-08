@@ -4,7 +4,17 @@ use crate::processing::symbols::{Punctuation, Symbol};
 use crate::processing::types::{get_type, get_type_from_literal, Type};
 use crate::propagate_error;
 
-/// Returns Ok(Some(Type))/Err if to_overwrite is None. If to_overwrite is Some, returns Ok(None)/Err
+/// Takes an evaluable expression
+///
+/// # Arguments
+///
+/// * `section` - Expression to evaluate
+/// * `to_overwrite` - Type to write result to
+/// * `must_evaluate` - Whether the expression must evaluate to a type
+///
+/// # Returns
+/// * Returns `Ok(Some(Type))` if to_overwrite is `None`.
+/// * Returns `Ok(None)` if to_overwrite is `Some`,
 pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                                  reference_stack: &ReferenceStack,
                                  section: &[Symbol], to_overwrite: Option<&Type>,
@@ -94,7 +104,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
 
         // Return result
         if to_overwrite.is_none() {
-            let result_type = propagate_error!(lhs.get_operation_type(&operator, Some(rhs)));
+            let result_type = propagate_error!(lhs.get_operation_return_type(&operator, Some(rhs)));
 
             let mut result = propagate_error!(get_type(&result_type, memory_managers));
             propagate_error!(lhs.operate(memory_managers, operator, Some(rhs), &mut result));
@@ -266,7 +276,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
 
             // Return
             if to_overwrite.is_none() {
-                let result_type = propagate_error!(lhs.get_operation_type(&operator, None));
+                let result_type = propagate_error!(lhs.get_operation_return_type(&operator, None));
 
                 let mut result = propagate_error!(get_type(&result_type, memory_managers));
                 propagate_error!(lhs.operate(memory_managers, operator, None, &mut result));

@@ -7,32 +7,39 @@ pub struct MemoryManager {
 }
 
 impl MemoryManager {
+    /// Creates an empty memory manager
     pub fn new() -> Self {
         Self { memory: Vec::new() }
     }
 
+    /// Creates memory manager from vector of bytes
     pub fn from_vec(memory: Vec<u8>) -> Self { Self { memory } }
 
+    /// Gets the position after the last piece of memory written
     pub fn get_position(&self) -> usize { self.memory.len() }
 
+    /// Adds a byte to the memory
     pub fn append_byte(&mut self, data: u8) -> usize {
         let position = self.get_position();
         self.memory.push(data);
         position
     }
 
+    /// Adds an array of bytes to the end
     pub fn append(&mut self, data: &[u8]) -> usize {
         let position = self.get_position();
         self.memory.extend(data);
         position
     }
 
+    /// Overwrites a region of memory
     pub fn overwrite(&mut self, position: usize, data: &[u8]) {
         for (i, b) in data.into_iter().enumerate() {
             self.memory[position + i] = *b;
         }
     }
 
+    /// Reserves a section of memory. Returns the position of this memory
     pub fn reserve(&mut self, amount: usize) -> usize {
         let position = self.get_position();
         self.memory.reserve(amount);
@@ -42,6 +49,7 @@ impl MemoryManager {
         position
     }
 
+    /// Saves the bytes in a '`name.b`' file
     pub fn dump_bytes(&self, name: String) {
         let name = name + ".b";
         println!("Dumping memory to file '{}' [{} bytes]",

@@ -22,16 +22,9 @@ use crate::processing::processor::MemoryManagers;
 use crate::translator::translate;
 use crate::util::info;
 
-fn pause() {
-    let mut stdout = stdout();
-    stdout.write(b"Press enter to exit...").unwrap();
-    stdout.flush().unwrap();
-    stdin().read(&mut [0]).unwrap();
-}
-
 fn main() {
     wrapped_main();
-    pause();
+    util::pause();
 }
 
 fn wrapped_main() {
