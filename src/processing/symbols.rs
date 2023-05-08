@@ -58,6 +58,10 @@ pub fn get_symbol(string: &String) -> Option<Symbol> {
 }
 
 pub fn try_arithmetic_block_into_parameters(arithmetic_block: &Symbol) -> Result<Literal, String> {
+    fn formatting_error() -> String {
+        "Parameters must be formatted ([Type] [Name] , [Type] [Name] , [...])".to_string()
+    }
+
     let list = match arithmetic_block {
         Symbol::ArithmeticBlock(list) => list,
         _ => panic!("Must be arithmetic block")
@@ -72,29 +76,33 @@ pub fn try_arithmetic_block_into_parameters(arithmetic_block: &Symbol) -> Result
     let mut i: usize = 0;
 
     while i < list.len() {
+        // Type without name
         if list.len() - i == 1 {
-            return Err("Parameters must be formatted ([Type] [Name] , [Type] [Name] , [...])".to_string());
+            return Err(formatting_error());
         }
 
+        // No type
         let type_symbol = match list[i] {
             Symbol::Type(type_symbol) => type_symbol,
-            _ => return Err("Parameters must be formatted ([Type] [Name] , [Type] [Name] , [...])".to_string())
+            _ => return Err(formatting_error())
         };
 
+        // No name
         let name = match &list[i + 1] {
             Symbol::Name(name) => name.clone(),
-            _ => return Err("Parameters must be formatted ([Type] [Name] , [Type] [Name] , [...])".to_string())
+            _ => return Err(formatting_error())
         };
 
+        // Check for list separator
         if i + 2 < list.len() {
             match list[i + 2] {
                 Symbol::Punctuation(punctuation) => {
                     #[allow(unreachable_patterns)] match punctuation {
                         Punctuation::ListSeparator => (),
-                        _ => return Err("Parameters must be formatted ([Type] [Name] , [Type] [Name] , [...])".to_string())
+                        _ => return Err(formatting_error())
                     }
                 }
-                _ => return Err("Parameters must be formatted ([Type] [Name] , [Type] [Name] , [...])".to_string()),
+                _ => return Err(formatting_error()),
             }
         }
 

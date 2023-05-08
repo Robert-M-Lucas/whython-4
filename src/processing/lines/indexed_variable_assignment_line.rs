@@ -12,11 +12,13 @@ impl LineHandler for IndexedVariableAssignmentLine {
                     block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
         if line.len() < 4 { return ProcessingResult::Unmatched; }
 
+        // Get variable
         let name = match &line[0] {
             Symbol::Name(name) => name,
             _ => return ProcessingResult::Unmatched,
         };
 
+        // Get index
         #[allow(unused_assignments)]
         let mut type_holder = None;
         let index = match &line[1] {
@@ -43,21 +45,24 @@ impl LineHandler for IndexedVariableAssignmentLine {
             _ => return ProcessingResult::Unmatched
         };
 
+        // Get value to be assigned
         let object = match block_coordinator.get_variable(name) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(object) => object,
         };
 
+        // Get assigner
         let assigner = match &line[2] {
             Symbol::Assigner(assigner) => assigner,
             _ => return ProcessingResult::Failure("Name and indexer must be followed by assigner".to_string())
         };
 
+        // Get assignment value
         let mut rhs = Vec::new();
         line[3..].clone_into(&mut rhs);
 
-        let to_evaluate = assigner.get_equivalent(line[0].clone(), rhs);
-
+        let to_evaluate = assigner.get_expanded_equivalent(line[0].clone(), rhs);
+        
         let result = match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
                                         &to_evaluate, None,
                                         true) {
@@ -65,6 +70,7 @@ impl LineHandler for IndexedVariableAssignmentLine {
             Ok(value) => { value.unwrap() },
         };
 
+        // Write to object
         match object.set_indexed(memory_managers, index, &result) {
             Err(e) => return ProcessingResult::Failure(e),
             Ok(_) => {}

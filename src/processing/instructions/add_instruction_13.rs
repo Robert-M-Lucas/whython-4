@@ -60,7 +60,7 @@ impl AddInstruction {
             if !overflow {
                 result = a.wrapping_add(b);
             }
-            else { result = a.wrapping_add(b).wrapping_add(1); }
+            else { result = a.wrapping_add(b).wrapping_add(1); } // Carry
 
             overflow =  result < a || result < b;
 

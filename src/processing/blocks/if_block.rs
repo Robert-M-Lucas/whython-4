@@ -26,6 +26,8 @@ impl IfBlock {
 
 impl BlockHandler for IfBlock {
     fn on_entry(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack, symbol_line: &Vec<Symbol>) -> Result<(), String> {
+        //? Extract condition boolean
+
         let condition_boolean =
             match handle_arithmetic_section(memory_managers, reference_stack, &symbol_line[1..], None, true) {
                 Err(e) => return Err(e),
@@ -39,6 +41,7 @@ impl BlockHandler for IfBlock {
             return Err(format!("If expression must evaluate to {}", TypeSymbol::Boolean));
         }
 
+        //? Insert instruction to skip this section if boolean is false
         self.jump_next_instruction = Some(JumpIfNotInstruction::new_alloc(memory_managers, condition_boolean, 0));
 
         Ok(())
@@ -50,10 +53,12 @@ impl BlockHandler for IfBlock {
             return Ok(true);
         }
 
+        //? No elif or else
         if symbol_line.len() == 0 {
             return exit_with_cleanup(self, memory_managers, reference_stack);
         }
 
+        // Filter out non-blocks
         let block_type = match &symbol_line[0] {
             Symbol::Block(block) => block,
             _ => {
@@ -61,20 +66,36 @@ impl BlockHandler for IfBlock {
             }
         };
 
+        //? Handle elif or else
         match block_type {
             Block::Elif => {
+                if self.jump_next_instruction.is_none() {
+                    return Err("'elif' cannot follow an 'else' block as it will never be reached".to_string());
+                }
+
+                // Add instruction to skip to end if previous if/elif condition was met and executed
                 self.jump_end_instructions.push(JumpInstruction::new_alloc(memory_managers, 0));
+                // Set jump next instruction to jump to this section (check this block if previous was false)
                 self.jump_next_instruction.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());
+                // Reuse if handling
                 propagate_error!(self.on_entry(memory_managers, reference_stack, symbol_line));
+                // Create new scope
                 reference_stack.remove_handler();
                 reference_stack.add_handler();
                 Ok(false)
             },
             Block::Else => {
                 if symbol_line.len() > 1 { return Err("Else cannot be followed by any other symbol".to_string()); }
+                if self.jump_next_instruction.is_none() {
+                    return Err("'else' cannot follow an 'else' block as it will never be reached".to_string());
+                }
+                // Add instruction to skip to end if previous if/elif condition was met and executed
                 self.jump_end_instructions.push(JumpInstruction::new_alloc(memory_managers, 0));
+                // Set jump next instruction to jump to this section (run this block if previous was false)
                 self.jump_next_instruction.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());
+                // Else block cannot be skipped
                 self.jump_next_instruction = None;
+                // Create new scope
                 reference_stack.remove_handler();
                 reference_stack.add_handler();
                 Ok(false)

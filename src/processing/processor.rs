@@ -123,15 +123,18 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
     let line_count = symbols.len();
 
     'line_iterator: for (line_index, line) in symbols.into_iter().enumerate() {
+        //? Skip empty lines
         if line.1.len() == 0 { continue; }
 
         let indentation = line.0;
         let symbol_line = line.1;
 
+        //? Error if indentation is skipped
         if indentation > block_coordinator.get_indentation() {
             return create_line_error("Indentation to high".to_string(), line_index)
         }
 
+        //? Exit blocks until block indentation matches code indentation
         while block_coordinator.get_indentation() >= 1
             && indentation <= block_coordinator.get_indentation() - 1 {
 
@@ -146,9 +149,8 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
                 if result.unwrap() == false { continue 'line_iterator; }
             }
         }
-        // START
 
-
+        //? Process line
         let r =
             process_line!(VariableInitialisationWithArgumentLine, symbol_line, memory_managers, block_coordinator)
                 .or_else( || process_line!(VariableInitialisationLine, symbol_line, memory_managers, block_coordinator))
@@ -163,8 +165,7 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
                 .or_else( || process_line!(BreakContinueLine, symbol_line, memory_managers, block_coordinator))
             ;
 
-
-        // END
+        //? Handle unmatched / failed line
         if r.is_failure() {
             return create_line_error(r.get_error(), line_index);
         }
@@ -174,8 +175,7 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
         }
     }
 
-    //TODO: Don't duplicate code
-
+    //? Exit remaining blocks
     while block_coordinator.get_indentation() >= 1 {
         let result = block_coordinator.force_exit_block_handler(&mut memory_managers);
         if result.is_err() { return create_line_error(result.unwrap_err(), line_count); }

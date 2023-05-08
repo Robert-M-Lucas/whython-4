@@ -13,7 +13,7 @@ pub enum Assigner {
 }
 
 impl Assigner {
-    pub fn get_equivalent(&self, lhs: Symbol, rhs: Vec<Symbol>) -> Vec<Symbol> {
+    pub fn get_expanded_equivalent(&self, lhs: Symbol, rhs: Vec<Symbol>) -> Vec<Symbol> {
         let equivalent = match self {
             Assigner::Setter => {
                 return vec![ArithmeticBlock(rhs)];

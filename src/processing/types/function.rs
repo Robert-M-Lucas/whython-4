@@ -43,11 +43,13 @@ impl TypeTrait for FunctionType {
 
     fn call(&self, memory_managers: &mut MemoryManagers, arguments: Vec<&Type>, destination: Option<&Type>) -> Result<(), String> {
         if arguments.len() != self.parameters.len() { return Err("Wrong number of arguments".to_string()) }
-        
+
+        // Copy arguments over
         for (index, argument) in arguments.into_iter().enumerate() {
             propagate_error!(self.parameters[index].assign_clone(memory_managers, argument));
         }
 
+        // Set jump back address
         let static_jump_back_address =
             memory_managers.variable_memory.append(
                 &(memory_managers.program_memory.get_position() + CopyInstruction::get_size() + 2
@@ -55,13 +57,15 @@ impl TypeTrait for FunctionType {
                     .to_le_bytes()
             );
 
+        // Copy return value out of function
         CopyInstruction::new_alloc(memory_managers, static_jump_back_address,
                                    self.jump_variable_address,
                                    size_of::<usize>());
 
+        // Create instruction to jump to function
         JumpInstruction::new_alloc(memory_managers, self.start_address);
 
-
+        // Return value
         if destination.is_some() {
             if self.return_type.is_none() {
                 return Err("Function does not return a value".to_string());

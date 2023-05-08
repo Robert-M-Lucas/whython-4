@@ -9,23 +9,28 @@ use crate::processing::types::Type;
 use crate::propagate_error;
 
 pub trait BlockHandler {
+    /// Enter block
     fn on_entry(&mut self, memory_managers: &mut MemoryManagers,
                 block_coordinator: &mut ReferenceStack,
                 symbol_line: &Vec<Symbol>) -> Result<(), String>;
 
+    /// Try to exit block (returns Ok(true) if block exit is successful)
     fn on_exit(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack,
                _symbol_line: &Vec<Symbol>) -> Result<bool, String> {
         propagate_error!(self.on_forced_exit(memory_managers, reference_stack));
         Ok(true)
     }
 
+    /// Force exit
     fn on_forced_exit(&mut self, memory_managers: &mut MemoryManagers,
                       block_coordinator: &mut ReferenceStack) -> Result<(), String>;
 
+    /// Break from block e.g. while
     fn on_break(&mut self, _memory_managers: &mut MemoryManagers) -> Result<bool, String> {
         Ok(false)
     }
 
+    /// Continue block e.g. while
     fn on_continue(&mut self, _memory_managers: &mut MemoryManagers) -> Result<bool, String> {
         Ok(false)
     }

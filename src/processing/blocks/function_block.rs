@@ -36,10 +36,9 @@ impl BlockHandler for FunctionBlock {
         }
 
         //? Insert skip instruction
-
         self.skip_instruction = Some(JumpInstruction::new_alloc(memory_managers, 0));
 
-        //? Extract name and parameters
+        //? Extract name, parameters and return type
         if symbol_line.len() != 3 && symbol_line.len() != 5 {
             return Err(formatting_error());
         }
@@ -104,8 +103,6 @@ impl BlockHandler for FunctionBlock {
                                         self.jump_variable.unwrap()
             );
 
-
-
         propagate_error!(reference_stack.register_variable_with_offset(
             Type::new(Box::new(function), memory_managers), name, 1));
 
@@ -113,6 +110,7 @@ impl BlockHandler for FunctionBlock {
     }
 
     fn on_forced_exit(&mut self, memory_managers: &mut MemoryManagers, _reference_stack: &mut ReferenceStack) -> Result<(), String> {
+        //? Insert instruction to jump back to calling location
         JumpVariableInstruction::new_alloc(memory_managers, self.jump_variable.unwrap());
 
         self.skip_instruction.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());

@@ -21,7 +21,7 @@ impl BooleanType {
 impl TypeTrait for BooleanType {
     fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers,
                              literal: &Literal) -> Result<(), String> {
-
+        // Get literal value
         let value: bool;
         match literal
         {
@@ -41,6 +41,7 @@ impl TypeTrait for BooleanType {
             }
         }
 
+        // Allocate from constant
         let constant_address;
         if value {
             constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_TRUE); // Reserve for constant
@@ -60,7 +61,6 @@ impl TypeTrait for BooleanType {
     fn get_size(&self) -> usize { 1 }
 
     fn get_operation_type(&self, _lhs: &Type, operator: &Operator, rhs: Option<&Type>) -> Result<TypeSymbol, String> {
-
         if rhs.is_none() {
             return match operator {
                 Operator::Not => {

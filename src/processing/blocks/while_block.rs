@@ -32,10 +32,10 @@ impl WhileBlock {
 
 impl BlockHandler for WhileBlock {
     fn on_entry(&mut self, memory_managers: &mut MemoryManagers, reference_stack: &mut ReferenceStack, symbol_line: &Vec<Symbol>) -> Result<(), String> {
-        // warn("While block still under development!");
-
+        // Save position before boolean evaluation
         self.start_position = Some(memory_managers.program_memory.get_position());
 
+        //? Extract boolean
         let condition_boolean =
             match handle_arithmetic_section(memory_managers, reference_stack, &symbol_line[1..], None, true) {
                 Err(e) => return Err(e),
@@ -49,17 +49,20 @@ impl BlockHandler for WhileBlock {
             return Err(format!("If expression must evaluate to {}", TypeSymbol::Boolean));
         }
 
+        //? Create instruction to leave while if condition is false
         self.jump_end_instruction = Some(JumpIfNotInstruction::new_alloc(memory_managers, condition_boolean, 0));
 
         Ok(())
     }
 
     fn on_break(&mut self, memory_managers: &mut MemoryManagers) -> Result<bool, String> {
+        // Go to end of while
         self.jump_end_instructions.push(JumpInstruction::new_alloc(memory_managers, 0));
         Ok(true)
     }
 
     fn on_continue(&mut self, memory_managers: &mut MemoryManagers) -> Result<bool, String> {
+        // Go to start of while
         self.jump_start_instructions.push(JumpInstruction::new_alloc(memory_managers, 0));
         Ok(true)
     }
@@ -70,7 +73,10 @@ impl BlockHandler for WhileBlock {
     }
 
     fn on_forced_exit(&mut self, memory_managers: &mut MemoryManagers, _reference_stack: &mut ReferenceStack) -> Result<(), String> {
+        //? Insert looping instruction
         JumpInstruction::new_alloc(memory_managers, self.start_position.unwrap());
+
+        //? Set all instructions to jump to correct locations
         self.jump_end_instruction.as_mut().unwrap().set_destination(memory_managers, memory_managers.program_memory.get_position());
         for i in self.jump_end_instructions.iter_mut() {
             i.set_destination(memory_managers, memory_managers.program_memory.get_position());

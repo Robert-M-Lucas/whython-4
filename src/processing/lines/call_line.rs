@@ -6,6 +6,7 @@ use crate::processing::symbols::{Symbol};
 
 pub struct CallLine {}
 
+/// Standalone function calling
 impl LineHandler for CallLine {
     fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,
                     block_coordinator: &mut BlockCoordinator) -> ProcessingResult {

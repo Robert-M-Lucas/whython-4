@@ -29,6 +29,7 @@ impl LineHandler for PrintLine {
                     },
                     Builtin::PrintChars => {
                         if line.len() == 1 { return ProcessingResult::Failure("'printc' must be followed by something to print".to_string()) }
+                        //? Special case for string literals to print correctly
                         if line.len() == 2 && matches!(line[1], Symbol::Literal(_)) {
                             match &line[1] {
                                 Symbol::Literal(literal) => {

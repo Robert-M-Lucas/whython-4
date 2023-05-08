@@ -12,7 +12,12 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                                  -> Result<Option<Type>, String> {
 
     fn get_formatting_error() -> String {
-        "Operations must be formatted [LHS] [Operator] [RHS] or [Operator] [Operand] or [Value] or [Name][Index]"
+        "Operations must be formatted:\n\
+            \t[LHS] [Operator] [RHS] or\n\
+            \t[Operator] [LHS] or\n\
+            \t[Value] or\n\
+            \t[Name][Index] or\n\
+            \t[Function Name][Arguments]"
             .to_string()
     }
 
@@ -20,7 +25,9 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
         return Err(get_formatting_error());
     }
 
+    //? Three operators - [LHS] [Operator] [RHS]
     if section.len() == 3 {
+        // Get operator
         let operator = match section[1] {
             Symbol::Operator(op) => op,
             _ => return
@@ -28,6 +35,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 .to_string())
         };
 
+        // Get lhs
         let mut _lhs_holder = None;
         let lhs = match &section[0] {
             Symbol::Name(name) => {
@@ -54,6 +62,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 .to_string())
         };
 
+        // Get rhs
         let mut _rhs_holder = None;
         let rhs = match &section[2] {
             Symbol::Name(name) => {
@@ -83,6 +92,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 .to_string())
         };
 
+        // Return result
         if to_overwrite.is_none() {
             let result_type = propagate_error!(lhs.get_operation_type(&operator, Some(rhs)));
 
@@ -98,8 +108,11 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             return Ok(None);
         }
     }
+    //? Two symbols - function calling, indexing or prefix operators
     else if section.len() == 2 {
+        //? Function call
         if matches!(section[0], Symbol::Name(_)) && matches!(section[1], Symbol::ArithmeticBlock(_)) {
+            // Get function
             let name = match &section[0] {
                 Symbol::Name(name) => name.clone(),
                 _ => panic!()
@@ -107,6 +120,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
 
             let function = propagate_error!(reference_stack.get_variable(&name));
 
+            // Get arguments
             let arguments = match &section[1] {
                 Symbol::ArithmeticBlock(symbols) => symbols,
                 _ => panic!()
@@ -146,6 +160,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 },
                 None => {
                     return if must_evaluate {
+                        // Call function with created destination
                         let return_type = match function.get_return_type() {
                             Err(e) => return Err(e),
                             Ok(value) => {
@@ -159,6 +174,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                         }
                     }
                     else {
+                        // Call function without handling return
                         match function.call(memory_managers, argument_list.iter().collect(), None) {
                             Err(e) => Err(e),
                             Ok(_) => Ok(None)
@@ -167,12 +183,15 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 }
             }
         }
+        //? Indexing
         else if matches!(section[1], Symbol::Indexer(_)) {
+            // Get variable
             let to_index = match &section[0] {
                 Symbol::Name(name) => propagate_error!(reference_stack.get_variable(name)),
                 _ => return Err("Only a Name can be indexed".to_string())
             };
 
+            // Index
             #[allow(unused_assignments)]
             let mut type_holder = None;
             let index = match &section[1] {
@@ -208,7 +227,9 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                 };
             }
         }
+        //? Prefix operator e.g. '!a'
         else {
+            // Get operator
             let operator = match section[0] {
                 Symbol::Operator(op) => op,
                 _ => return
@@ -216,6 +237,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                         .to_string())
             };
 
+            // Get operand
             let mut _lhs_holder = None;
             let lhs = match &section[1] {
                 Symbol::Name(name) => {
@@ -242,6 +264,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                     .to_string())
             };
 
+            // Return
             if to_overwrite.is_none() {
                 let result_type = propagate_error!(lhs.get_operation_type(&operator, None));
 
@@ -258,8 +281,10 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
             }
         }
     }
+    //? One symbol
     else {
         return match &section[0] {
+            // Get type out of name
             Symbol::Name(name) => {
                 match reference_stack.get_variable(name) {
                     Err(e) => return Err(e),
@@ -277,6 +302,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                     }
                 }
             },
+            // Get type out of literal
             Symbol::Literal(literal) => {
                 if to_overwrite.is_none() {
                     let object = propagate_error!(get_type_from_literal(&literal, memory_managers));
@@ -288,6 +314,7 @@ pub fn handle_arithmetic_section(memory_managers: &mut MemoryManagers,
                     Ok(None)
                 }
             },
+            // Recurse into arithmetic block
             Symbol::ArithmeticBlock(symbols) => {
                 handle_arithmetic_section(memory_managers, reference_stack,
                                           symbols, to_overwrite,

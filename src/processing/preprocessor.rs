@@ -28,6 +28,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     }
 
     for c in line.chars() {
+        //? Comments
         if c == '#' && !in_string {
             break;
         }
@@ -98,6 +99,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
             }
         }
 
+        //? End bracket section
         if c == ')' && !in_string {
             bracket_depth -= 1;
 
@@ -121,10 +123,12 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
             continue;
         }
 
+        //? End string
         if STRING_DELIMITERS.contains(&c) {
             in_string = !in_string;
         }
 
+        //? Start bracket
         if c == '(' && !in_string {
             if bracket_depth != 0 {
                 buffer.push(c);
@@ -133,6 +137,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
             continue;
         }
 
+        //? End indexer
         if c == ']' && !in_string {
             if !buffer.is_empty() {
                 propagate_error!(process_buffer(&mut buffer, &mut symbol_line));
@@ -152,6 +157,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
             continue;
         }
 
+        //? Start indexer
         if c == '[' && !in_string {
             if !buffer.is_empty() {
                 propagate_error!(process_buffer(&mut buffer, &mut symbol_line));
@@ -175,6 +181,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
         return Err("Unclosed brackets".to_string())
     }
 
+    //? Push remaining data
     if !buffer.is_empty() {
         let symbol = get_symbol(&buffer);
         if symbol.is_none() { return Err(format!("Symbol '{}' not found", buffer)); }
@@ -190,6 +197,7 @@ pub fn convert_to_symbols(data: String) -> Result<Vec<(usize, Vec<Symbol>)>, Str
 
 
     for (line_index, line) in  data.lines().enumerate() {
+        //? Count indentation
         let mut indentation_count: usize = 0;
         let mut indentation_char_count: usize = 0;
         for c in line.chars() {
@@ -202,6 +210,8 @@ pub fn convert_to_symbols(data: String) -> Result<Vec<(usize, Vec<Symbol>)>, Str
             return create_line_error("Indentation must be a multiple of 4 spaces or single tabs"
                                          .to_string(), line_index + 1);
         }
+
+        //? Get symbols
         let symbols = match get_symbols_from_line(&line[indentation_char_count..]) {
             Err(e) => return create_line_error(e, line_index),
             Ok(symbols) => symbols

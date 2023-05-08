@@ -22,7 +22,7 @@ const ESCAPE_CODES: [(char, char); 3] =
         ('0', '\0')
     ];
 
-fn evaluate_string_escapes(input: String) -> String {
+fn format_escape_codes(input: String) -> String {
     let mut output = String::new();
     let mut next = false;
     'char_loop: for c in input.chars() {
@@ -63,7 +63,7 @@ impl SymbolHandler for LiteralSymbolHandler {
                     && string.chars().last().unwrap() == string.chars().nth(0).unwrap()
                 {
                     return Some(Symbol::Literal(Literal::StringLiteral(
-                        evaluate_string_escapes(string[1..string.len() - 1].to_string()),
+                        format_escape_codes(string[1..string.len() - 1].to_string()),
                     )));
                 }
                 None

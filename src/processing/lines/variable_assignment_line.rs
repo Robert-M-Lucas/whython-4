@@ -29,7 +29,7 @@ impl LineHandler for VariableAssignmentLine {
         let mut rhs = Vec::new();
         line[2..].clone_into(&mut rhs);
 
-        let to_evaluate = assigner.get_equivalent(line[0].clone(), rhs);
+        let to_evaluate = assigner.get_expanded_equivalent(line[0].clone(), rhs);
 
         match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
                                         &to_evaluate, Some(object),

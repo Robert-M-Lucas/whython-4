@@ -16,7 +16,7 @@ impl CharType {
 impl TypeTrait for CharType {
     fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers,
                              literal: &Literal) -> Result<(), String> {
-
+        // Get literal value
         let value: u8;
         match literal
         {
@@ -40,6 +40,7 @@ impl TypeTrait for CharType {
             }
         }
 
+        // Assign from constant
         let constant_address = memory_managers.variable_memory.append_byte(value);
 
         CopyInstruction::new_alloc(memory_managers, constant_address,
@@ -68,10 +69,12 @@ impl TypeTrait for CharType {
             _ => return Err(format!("This type cannot be created with {} assignment argument", assignment_literal.to_string()))
         };
 
+        // Fill remaining space in string with null characters
         if count > assigner.len() {
             assigner += &*"\0".repeat(count - assigner.len());
         }
 
+        // Create every item in array
         let mut objs = Vec::with_capacity(count - 1);
 
         for _ in 1..count {

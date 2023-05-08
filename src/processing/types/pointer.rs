@@ -65,6 +65,7 @@ impl TypeTrait for PointerType {
             _ => return Err(format!("This type cannot be created with {} assignment argument", assignment_literal.to_string()))
         };
 
+        // Assign to all objects in array
         let mut objs = Vec::with_capacity(count - 1);
 
         for _ in 1..count {

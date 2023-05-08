@@ -19,6 +19,7 @@ impl ReferenceStack {
     }
 
     pub fn get_variable(&self, name: &String) -> Result<&Type, String> {
+        //? Go up the stack and search for a variable
         let mut i = self.stack.len() - 1;
         let mut reference_manager = &self.stack[i];
         loop {
