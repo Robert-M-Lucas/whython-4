@@ -19,8 +19,11 @@ impl LineHandler for WhileLine {
 
         match line[0] {
             Symbol::Block(Block::While) => {
-                match block_coordinator.add_block_handler(WhileBlock::new(), memory_managers, line)
-                {
+                match block_coordinator.add_block_handler(
+                    WhileBlock::new_block(),
+                    memory_managers,
+                    line,
+                ) {
                     Err(e) => ProcessingResult::Failure(e),
                     Ok(_) => ProcessingResult::Success,
                 }

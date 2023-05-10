@@ -35,10 +35,9 @@ impl LineHandler for IndexedVariableAssignmentLine {
                 Symbol::Literal(literal) => match get_type_from_literal(literal, memory_managers) {
                     Err(e) => return ProcessingResult::Failure(e),
                     Ok(value) => {
-                        match value.static_assign_literal(memory_managers, literal) {
-                            Err(e) => return ProcessingResult::Failure(e),
-                            Ok(_) => {}
-                        };
+                        if let Err(e) = value.static_assign_literal(memory_managers, literal) {
+                            return ProcessingResult::Failure(e);
+                        }
                         type_holder = Some(value);
                         type_holder.as_ref().unwrap()
                     }
@@ -82,10 +81,9 @@ impl LineHandler for IndexedVariableAssignmentLine {
         };
 
         // Write to object
-        match object.set_indexed(memory_managers, index, &result) {
-            Err(e) => return ProcessingResult::Failure(e),
-            Ok(_) => {}
-        };
+        if let Err(e) = object.set_indexed(memory_managers, index, &result) {
+            return ProcessingResult::Failure(e);
+        }
 
         ProcessingResult::Success
     }

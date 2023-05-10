@@ -15,7 +15,7 @@ pub struct FunctionBlock {
 }
 
 impl FunctionBlock {
-    pub fn new() -> Box<dyn BlockHandler> {
+    pub fn new_block() -> Box<dyn BlockHandler> {
         Box::new(Self {
             jump_variable: None,
             skip_instruction: None,

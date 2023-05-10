@@ -115,8 +115,8 @@ pub fn handle_arithmetic_section(
         if to_overwrite.is_none() {
             let result_type = lhs.get_operation_return_type(&operator, Some(rhs))?;
 
-            let mut result = get_type(&result_type, memory_managers)?;
-            lhs.operate(memory_managers, operator, Some(rhs), &mut result)?;
+            let result = get_type(&result_type, memory_managers)?;
+            lhs.operate(memory_managers, operator, Some(rhs), &result)?;
 
             Ok(Some(result))
         } else {
@@ -165,15 +165,7 @@ pub fn handle_arithmetic_section(
                 if i < arguments.len() {
                     #[allow(unreachable_patterns)]
                     match arguments[i] {
-                        Symbol::Punctuation(punctuation) => {
-                            match punctuation {
-                                Punctuation::ListSeparator => {}
-                                _ => return Err(
-                                    "Arguments must be formatted ([ARGUMENT] , [ARGUMENT] , [...]"
-                                        .to_string(),
-                                ),
-                            }
-                        }
+                        Symbol::Punctuation(Punctuation::ListSeparator) => {}
                         _ => {
                             return Err(
                                 "Arguments must be formatted ([ARGUMENT] , [ARGUMENT] , [...]"
@@ -251,8 +243,8 @@ pub fn handle_arithmetic_section(
                 _ => panic!(),
             };
 
-            if to_overwrite.is_some() {
-                return match to_index.get_indexed(memory_managers, index, to_overwrite.unwrap()) {
+            if let Some(o) = to_overwrite {
+                return match to_index.get_indexed(memory_managers, index, o) {
                     Err(e) => return Err(e),
                     Ok(_) => Ok(None),
                 };
@@ -310,8 +302,8 @@ pub fn handle_arithmetic_section(
             if to_overwrite.is_none() {
                 let result_type = lhs.get_operation_return_type(&operator, None)?;
 
-                let mut result = get_type(&result_type, memory_managers)?;
-                lhs.operate(memory_managers, operator, None, &mut result)?;
+                let result = get_type(&result_type, memory_managers)?;
+                lhs.operate(memory_managers, operator, None, &result)?;
 
                 return Ok(Some(result));
             } else {

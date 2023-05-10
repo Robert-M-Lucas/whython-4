@@ -2,6 +2,7 @@ use num_format::{Locale, ToFormattedString};
 use std::fs;
 use std::io::Write;
 
+#[derive(Default)]
 pub struct MemoryManager {
     pub memory: Vec<u8>,
 }

@@ -65,12 +65,11 @@ impl AddInstruction {
             let a = memory_managers.variable_memory.memory[lhs + i];
             let b = memory_managers.variable_memory.memory[rhs + i];
 
-            let result;
-            if !overflow {
-                result = a.wrapping_add(b);
+            let result = if !overflow {
+                a.wrapping_add(b)
             } else {
-                result = a.wrapping_add(b).wrapping_add(1);
-            } // Carry
+                a.wrapping_add(b).wrapping_add(1)
+            }; // Carry
 
             overflow = result < a || result < b;
 

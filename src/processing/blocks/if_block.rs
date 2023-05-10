@@ -13,7 +13,7 @@ pub struct IfBlock {
 }
 
 impl IfBlock {
-    pub fn new() -> Box<dyn BlockHandler> {
+    pub fn new_block() -> Box<dyn BlockHandler> {
         Box::new(Self {
             jump_next_instruction: None,
             jump_end_instructions: Vec::new(),
@@ -171,12 +171,11 @@ impl BlockHandler for IfBlock {
          */
 
         // Set jump to next
-        match self.jump_next_instruction.as_mut() {
-            Some(instruction) => instruction.set_destination(
+        if let Some(instruction) = self.jump_next_instruction.as_mut() {
+            instruction.set_destination(
                 memory_managers,
                 memory_managers.program_memory.get_position(),
-            ),
-            None => {}
+            )
         }
 
         // Set all jump to end

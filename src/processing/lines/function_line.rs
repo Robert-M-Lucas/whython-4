@@ -17,19 +17,16 @@ impl LineHandler for FunctionLine {
         }
 
         match line[0] {
-            Symbol::Block(block) => match block {
-                Block::Function => {
-                    match block_coordinator.add_block_handler(
-                        FunctionBlock::new(),
-                        memory_managers,
-                        line,
-                    ) {
-                        Err(e) => ProcessingResult::Failure(e),
-                        Ok(_) => ProcessingResult::Success,
-                    }
+            Symbol::Block(Block::Function) => {
+                match block_coordinator.add_block_handler(
+                    FunctionBlock::new_block(),
+                    memory_managers,
+                    line,
+                ) {
+                    Err(e) => ProcessingResult::Failure(e),
+                    Ok(_) => ProcessingResult::Success,
                 }
-                _ => ProcessingResult::Unmatched,
-            },
+            }
             _ => ProcessingResult::Unmatched,
         }
     }

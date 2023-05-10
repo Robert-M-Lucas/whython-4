@@ -17,16 +17,16 @@ impl LineHandler for IfLine {
         }
 
         match line[0] {
-            Symbol::Block(block) => match block {
-                Block::If => {
-                    match block_coordinator.add_block_handler(IfBlock::new(), memory_managers, line)
-                    {
-                        Err(e) => ProcessingResult::Failure(e),
-                        Ok(_) => ProcessingResult::Success,
-                    }
+            Symbol::Block(Block::If) => {
+                match block_coordinator.add_block_handler(
+                    IfBlock::new_block(),
+                    memory_managers,
+                    line,
+                ) {
+                    Err(e) => ProcessingResult::Failure(e),
+                    Ok(_) => ProcessingResult::Success,
                 }
-                _ => ProcessingResult::Unmatched,
-            },
+            }
             _ => ProcessingResult::Unmatched,
         }
     }

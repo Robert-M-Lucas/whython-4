@@ -16,7 +16,7 @@ pub struct WhileBlock {
 }
 
 impl WhileBlock {
-    pub fn new() -> Box<dyn BlockHandler> {
+    pub fn new_block() -> Box<dyn BlockHandler> {
         Box::new(Self {
             jump_end_instruction: None,
             jump_end_instructions: Vec::new(),

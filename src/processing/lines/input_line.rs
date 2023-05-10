@@ -17,10 +17,7 @@ impl LineHandler for InputLine {
         }
 
         match line[0] {
-            Symbol::Builtin(builtin) => match builtin {
-                Builtin::Input => {}
-                _ => return ProcessingResult::Unmatched,
-            },
+            Symbol::Builtin(Builtin::Input) => {}
             _ => return ProcessingResult::Unmatched,
         };
 

@@ -54,29 +54,24 @@ impl LineHandler for PrintLine {
                         }
                         //? Special case for string literals to print correctly
                         if line.len() == 2 && matches!(line[1], Symbol::Literal(_)) {
-                            match &line[1] {
-                                Symbol::Literal(literal) => match literal {
-                                    Literal::String(string) => {
-                                        let mut t =
-                                            get_type(&TypeSymbol::Character, memory_managers)
-                                                .unwrap();
-                                        t.create_indexed(
-                                            memory_managers,
-                                            &Literal::Int(string.len() as i64),
-                                            literal,
-                                        )
-                                        .unwrap();
+                            if let Symbol::Literal(literal) = &line[1] {
+                                if let Literal::String(string) = literal {
+                                    let mut t =
+                                        get_type(&TypeSymbol::Character, memory_managers).unwrap();
+                                    t.create_indexed(
+                                        memory_managers,
+                                        &Literal::Int(string.len() as i64),
+                                        literal,
+                                    )
+                                    .unwrap();
 
-                                        PrintCharsInstruction::new_alloc(
-                                            memory_managers,
-                                            &t,
-                                            t.get_len(),
-                                        );
-                                        return ProcessingResult::Success;
-                                    }
-                                    _ => {}
-                                },
-                                _ => {}
+                                    PrintCharsInstruction::new_alloc(
+                                        memory_managers,
+                                        &t,
+                                        t.get_len(),
+                                    );
+                                    return ProcessingResult::Success;
+                                }
                             }
                         }
                         if line.len() == 2 && matches!(line[1], Symbol::Name(_)) {

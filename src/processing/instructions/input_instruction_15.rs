@@ -47,10 +47,7 @@ impl InputInstruction {
         *pointer += size_of::<usize>();
 
         let mut input = String::new();
-        stdin()
-            .read_line(&mut input)
-            .ok()
-            .expect("Terminal read error");
+        stdin().read_line(&mut input).expect("Terminal read error");
 
         for i in 0..len {
             if i < input.len() {

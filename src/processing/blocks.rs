@@ -47,6 +47,7 @@ pub trait BlockHandler {
     }
 }
 
+#[derive(Default)]
 pub struct BlockCoordinator {
     stack: Vec<Box<dyn BlockHandler>>,
     reference_stack: ReferenceStack,
@@ -130,8 +131,8 @@ impl BlockCoordinator {
 
         let result = handler.on_exit(memory_managers, self.get_reference_stack_mut(), symbol_line);
 
-        if result.is_ok() {
-            return if !result.unwrap() {
+        if let Ok(r) = result {
+            return if !r {
                 self.stack.push(handler);
                 Ok(false)
             } else {
