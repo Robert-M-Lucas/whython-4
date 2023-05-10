@@ -1,8 +1,7 @@
-use debugless_unwrap::DebuglessUnwrapErr;
 use crate::errors::create_line_error;
-use crate::processing::symbols::{get_all_symbol, STRING_DELIMITERS, Symbol};
-use crate::processing::symbols::Symbol::{ArithmeticBlock};
-use crate::propagate_error;
+use crate::processing::symbols::Symbol::ArithmeticBlock;
+use crate::processing::symbols::{get_all_symbol, Symbol, STRING_DELIMITERS};
+use debugless_unwrap::DebuglessUnwrapErr;
 
 /// Takes a line of code and returns an array of symbols
 pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
@@ -16,7 +15,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
 
     fn process_buffer(buffer: &mut String, symbol_line: &mut Vec<Symbol>) -> Result<(), String> {
         if buffer.is_empty() {
-            return Ok(())
+            return Ok(());
         }
 
         let symbol = get_all_symbol(&buffer);
@@ -36,27 +35,23 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
 
         if bracket_depth == 0 && !in_string {
             //? Process buffer and ignore c
-            match
-                match c {
-                    ' ' => Some(process_buffer(&mut buffer, &mut symbol_line)),
-                    _ => None
-                }
-            {
+            match match c {
+                ' ' => Some(process_buffer(&mut buffer, &mut symbol_line)),
+                _ => None,
+            } {
                 Some(value) => match value {
                     Err(e) => return Err(e),
-                    Ok(_) => continue
+                    Ok(_) => continue,
                 },
                 None => {}
             }
 
             //? Process buffer and then treat c normally
-            match
-                match c {
-                    '(' => Some(process_buffer(&mut buffer, &mut symbol_line)),
-                    _ => None
-                }
-            {
-                Some(value) => propagate_error!(value),
+            match match c {
+                '(' => Some(process_buffer(&mut buffer, &mut symbol_line)),
+                _ => None,
+            } {
+                Some(value) => value?,
                 None => {}
             }
 
@@ -81,20 +76,20 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
             // }
 
             //? Process character alone
-            match
-                match c {
-                    ',' => {
-                        let r = process_buffer(&mut buffer, &mut symbol_line);
-                        if r.is_err() { return Err(r.debugless_unwrap_err()); }
-                        buffer.push(c);
-                        Some(process_buffer(&mut buffer, &mut symbol_line))
-                    },
-                    _ => None
+            match match c {
+                ',' => {
+                    let r = process_buffer(&mut buffer, &mut symbol_line);
+                    if r.is_err() {
+                        return Err(r.debugless_unwrap_err());
+                    }
+                    buffer.push(c);
+                    Some(process_buffer(&mut buffer, &mut symbol_line))
                 }
-            {
+                _ => None,
+            } {
                 Some(value) => match value {
                     Err(e) => return Err(e),
-                    Ok(_) => continue
+                    Ok(_) => continue,
                 },
                 None => {}
             }
@@ -105,19 +100,16 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
             bracket_depth -= 1;
 
             if bracket_depth == 0 {
-                symbol_line.push(
-                    match get_symbols_from_line(buffer.as_str()) {
-                        Ok(symbols) => ArithmeticBlock(symbols),
-                        Err(e) => return Err(e)
-                    }
-                );
+                symbol_line.push(match get_symbols_from_line(buffer.as_str()) {
+                    Ok(symbols) => ArithmeticBlock(symbols),
+                    Err(e) => return Err(e),
+                });
                 buffer.clear();
-
-            }
-            else if bracket_depth < 0 {
-                return Err("Closing bracket found with no corresponding opening bracket".to_string())
-            }
-            else {
+            } else if bracket_depth < 0 {
+                return Err(
+                    "Closing bracket found with no corresponding opening bracket".to_string(),
+                );
+            } else {
                 buffer.push(c);
             }
 
@@ -141,10 +133,13 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
         //? End indexer
         if c == ']' && !in_string {
             if !buffer.is_empty() {
-                propagate_error!(process_buffer(&mut buffer, &mut symbol_line));
+                process_buffer(&mut buffer, &mut symbol_line)?;
             }
             if !in_indexer {
-                return Err("Closing indexer bracket found with no corresponding opening bracket".to_string());
+                return Err(
+                    "Closing indexer bracket found with no corresponding opening bracket"
+                        .to_string(),
+                );
             }
             if symbol_line.len() - indexing_start > 1 {
                 return Err("Indexers may only contain one symbol".to_string());
@@ -161,7 +156,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
         //? Start indexer
         if c == '[' && !in_string {
             if !buffer.is_empty() {
-                propagate_error!(process_buffer(&mut buffer, &mut symbol_line));
+                process_buffer(&mut buffer, &mut symbol_line)?;
             }
             if in_indexer {
                 return Err("Recursive indexing not permitted".to_string());
@@ -175,17 +170,19 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     }
 
     if in_string {
-        return Err("Unclosed string".to_string())
+        return Err("Unclosed string".to_string());
     }
 
     if bracket_depth != 0 {
-        return Err("Unclosed brackets".to_string())
+        return Err("Unclosed brackets".to_string());
     }
 
     //? Push remaining data
     if !buffer.is_empty() {
         let symbol = get_all_symbol(&buffer);
-        if symbol.is_none() { return Err(format!("Symbol '{}' not found", buffer)); }
+        if symbol.is_none() {
+            return Err(format!("Symbol '{}' not found", buffer));
+        }
         symbol_line.push(symbol.unwrap());
     }
 
@@ -198,26 +195,31 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
 pub fn convert_to_symbols(data: String) -> Result<Vec<(usize, Vec<Symbol>)>, String> {
     let mut output = Vec::new();
 
-
-    for (line_index, line) in  data.lines().enumerate() {
+    for (line_index, line) in data.lines().enumerate() {
         //? Count indentation
         let mut indentation_count: usize = 0;
         let mut indentation_char_count: usize = 0;
         for c in line.chars() {
-            if c == ' ' { indentation_count += 1 }
-            else if c == '\t' { indentation_count += 4 }
-            else { break }
+            if c == ' ' {
+                indentation_count += 1
+            } else if c == '\t' {
+                indentation_count += 4
+            } else {
+                break;
+            }
             indentation_char_count += 1;
         }
         if indentation_count % 4 != 0 {
-            return create_line_error("Indentation must be a multiple of 4 spaces or single tabs"
-                                         .to_string(), line_index + 1);
+            return create_line_error(
+                "Indentation must be a multiple of 4 spaces or single tabs".to_string(),
+                line_index + 1,
+            );
         }
 
         //? Get symbols
         let symbols = match get_symbols_from_line(&line[indentation_char_count..]) {
             Err(e) => return create_line_error(e, line_index),
-            Ok(symbols) => symbols
+            Ok(symbols) => symbols,
         };
         output.push((indentation_count / 4, symbols));
     }

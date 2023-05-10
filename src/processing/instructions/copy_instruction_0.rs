@@ -1,18 +1,21 @@
-use std::mem::size_of;
-use crate::util::get_usize;
-use crate::processing::processor::MemoryManagers;
 use super::Instruction;
+use crate::processing::processor::MemoryManagers;
+use crate::util::get_usize;
+use std::mem::size_of;
 
 pub struct CopyInstruction {
-    address: usize
+    address: usize,
 }
 
 pub const COPY_INSTRUCTION_CODE: u16 = 0;
 
 impl CopyInstruction {
-    pub fn new_alloc(memory_managers: &mut MemoryManagers, from: usize, to: usize, length: usize)
-        -> Self {
-
+    pub fn new_alloc(
+        memory_managers: &mut MemoryManagers,
+        from: usize,
+        to: usize,
+        length: usize,
+    ) -> Self {
         let mut instruction_memory = vec![];
         instruction_memory.extend(COPY_INSTRUCTION_CODE.to_le_bytes());
         instruction_memory.extend(from.to_le_bytes());
@@ -26,17 +29,20 @@ impl CopyInstruction {
         Self { address }
     }
 
-    pub fn get_code() -> u16 { COPY_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 {
+        COPY_INSTRUCTION_CODE
+    }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 3 // From, To,  Length
     }
 
     pub(crate) fn get_debug(data: &[u8]) -> String {
-        format!("COPY [{}] (len:{}) dest [{}]",
-                get_usize(&0, data),
-                get_usize(&(size_of::<usize>() * 2), data),
-                get_usize(&size_of::<usize>(), data),
+        format!(
+            "COPY [{}] (len:{}) dest [{}]",
+            get_usize(&0, data),
+            get_usize(&(size_of::<usize>() * 2), data),
+            get_usize(&size_of::<usize>(), data),
         )
     }
 

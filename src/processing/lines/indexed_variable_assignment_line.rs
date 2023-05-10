@@ -8,9 +8,14 @@ use crate::processing::types::get_type_from_literal;
 pub struct IndexedVariableAssignmentLine {}
 
 impl LineHandler for IndexedVariableAssignmentLine {
-    fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,
-                    block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
-        if line.len() < 4 { return ProcessingResult::Unmatched; }
+    fn process_line(
+        line: &Vec<Symbol>,
+        memory_managers: &mut MemoryManagers,
+        block_coordinator: &mut BlockCoordinator,
+    ) -> ProcessingResult {
+        if line.len() < 4 {
+            return ProcessingResult::Unmatched;
+        }
 
         // Get variable
         let name = match &line[0] {
@@ -22,27 +27,25 @@ impl LineHandler for IndexedVariableAssignmentLine {
         #[allow(unused_assignments)]
         let mut type_holder = None;
         let index = match &line[1] {
-            Symbol::Indexer(symbol) => {
-                match symbol.as_ref() {
-                    Symbol::Name(name) => match block_coordinator.get_variable(name) {
-                        Err(e) => return ProcessingResult::Failure(e),
-                        Ok(value) => value,
-                    },
-                    Symbol::Literal(literal) => match get_type_from_literal(literal, memory_managers) {
-                        Err(e) => return ProcessingResult::Failure(e),
-                        Ok(value) => {
-                            match value.static_assign_literal(memory_managers, literal) {
-                                Err(e) => return ProcessingResult::Failure(e),
-                                Ok(_) => {}
-                            };
-                            type_holder = Some(value);
-                            type_holder.as_ref().unwrap()
-                        }
-                    },
-                    _ => return ProcessingResult::Unmatched
-                }
+            Symbol::Indexer(symbol) => match symbol.as_ref() {
+                Symbol::Name(name) => match block_coordinator.get_variable(name) {
+                    Err(e) => return ProcessingResult::Failure(e),
+                    Ok(value) => value,
+                },
+                Symbol::Literal(literal) => match get_type_from_literal(literal, memory_managers) {
+                    Err(e) => return ProcessingResult::Failure(e),
+                    Ok(value) => {
+                        match value.static_assign_literal(memory_managers, literal) {
+                            Err(e) => return ProcessingResult::Failure(e),
+                            Ok(_) => {}
+                        };
+                        type_holder = Some(value);
+                        type_holder.as_ref().unwrap()
+                    }
+                },
+                _ => return ProcessingResult::Unmatched,
             },
-            _ => return ProcessingResult::Unmatched
+            _ => return ProcessingResult::Unmatched,
         };
 
         // Get value to be assigned
@@ -54,7 +57,11 @@ impl LineHandler for IndexedVariableAssignmentLine {
         // Get assigner
         let assigner = match &line[2] {
             Symbol::Assigner(assigner) => assigner,
-            _ => return ProcessingResult::Failure("Name and indexer must be followed by assigner".to_string())
+            _ => {
+                return ProcessingResult::Failure(
+                    "Name and indexer must be followed by assigner".to_string(),
+                )
+            }
         };
 
         // Get assignment value
@@ -62,12 +69,16 @@ impl LineHandler for IndexedVariableAssignmentLine {
         line[3..].clone_into(&mut rhs);
 
         let to_evaluate = assigner.get_expanded_equivalent(line[0].clone(), rhs);
-        
-        let result = match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
-                                        &to_evaluate, None,
-                                        true) {
+
+        let result = match handle_arithmetic_section(
+            memory_managers,
+            block_coordinator.get_reference_stack(),
+            &to_evaluate,
+            None,
+            true,
+        ) {
             Err(e) => return ProcessingResult::Failure(e),
-            Ok(value) => { value.unwrap() },
+            Ok(value) => value.unwrap(),
         };
 
         // Write to object

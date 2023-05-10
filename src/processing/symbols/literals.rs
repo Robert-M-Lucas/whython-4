@@ -1,12 +1,12 @@
-use crate::processing::types::TypeSymbol;
 use super::Symbol;
 use super::SymbolHandler;
+use crate::processing::types::TypeSymbol;
 
 #[derive(PartialEq, Clone, strum_macros::Display)]
 pub enum Literal {
-    StringLiteral(String),
-    IntLiteral(i64),
-    BoolLiteral(bool),
+    String(String),
+    Int(i64),
+    Bool(bool),
     ParameterList(Vec<(TypeSymbol, String)>),
     None,
 }
@@ -15,12 +15,7 @@ pub struct LiteralSymbolHandler {}
 
 pub const STRING_DELIMITERS: [char; 2] = ['\'', '"'];
 
-const ESCAPE_CODES: [(char, char); 3] = 
-    [
-        ('n', '\n'), 
-        ('\\', '\\'),
-        ('0', '\0')
-    ];
+const ESCAPE_CODES: [(char, char); 3] = [('n', '\n'), ('\\', '\\'), ('0', '\0')];
 
 /// Takes an input string and replaces escape codes with their corresponding values
 fn format_escape_codes(input: String) -> String {
@@ -39,8 +34,7 @@ fn format_escape_codes(input: String) -> String {
 
         if c == '\\' && !next {
             next = true;
-        }
-        else {
+        } else {
             output.push(c);
         }
     }
@@ -48,11 +42,11 @@ fn format_escape_codes(input: String) -> String {
 }
 
 impl SymbolHandler for LiteralSymbolHandler {
-    fn get_symbol(string: &String) -> Option<Symbol> {
-        (match string.as_str() {
+    fn get_symbol(string: &str) -> Option<Symbol> {
+        (match string {
             // Boolean
-            "true" => Some(Symbol::Literal(Literal::BoolLiteral(true))),
-            "false" => Some(Symbol::Literal(Literal::BoolLiteral(false))),
+            "true" => Some(Symbol::Literal(Literal::Bool(true))),
+            "false" => Some(Symbol::Literal(Literal::Bool(false))),
             "none" => Some(Symbol::Literal(Literal::None)),
             _ => None,
         })
@@ -63,7 +57,7 @@ impl SymbolHandler for LiteralSymbolHandler {
                     && STRING_DELIMITERS.contains(&string.chars().nth(0).unwrap())
                     && string.chars().last().unwrap() == string.chars().nth(0).unwrap()
                 {
-                    return Some(Symbol::Literal(Literal::StringLiteral(
+                    return Some(Symbol::Literal(Literal::String(
                         format_escape_codes(string[1..string.len() - 1].to_string()),
                     )));
                 }
@@ -73,7 +67,7 @@ impl SymbolHandler for LiteralSymbolHandler {
         .or_else(
             // Integer
             || match string.parse::<i64>() {
-                Ok(ok) => Some(Symbol::Literal(Literal::IntLiteral(ok))),
+                Ok(ok) => Some(Symbol::Literal(Literal::Int(ok))),
                 Err(_) => None,
             },
         )

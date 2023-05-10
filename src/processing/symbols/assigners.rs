@@ -1,7 +1,7 @@
-use crate::processing::symbols::Symbol::ArithmeticBlock;
 use super::Operator;
 use super::Symbol;
 use super::SymbolHandler;
+use crate::processing::symbols::Symbol::ArithmeticBlock;
 
 #[derive(PartialEq, Copy, Clone, strum_macros::Display)]
 pub enum Assigner {
@@ -17,11 +17,11 @@ impl Assigner {
         let equivalent = match self {
             Assigner::Setter => {
                 return vec![ArithmeticBlock(rhs)];
-            },
+            }
             Assigner::AdditionSetter => Operator::Add,
             Assigner::SubtractionSetter => Operator::Subtract,
             Assigner::ProductSetter => Operator::Product,
-            Assigner::DivisionSetter => Operator::Divide
+            Assigner::DivisionSetter => Operator::Divide,
         };
 
         vec![lhs, Symbol::Operator(equivalent), ArithmeticBlock(rhs)]
@@ -31,8 +31,8 @@ impl Assigner {
 pub struct AssignerSymbolHandler {}
 
 impl SymbolHandler for AssignerSymbolHandler {
-    fn get_symbol(string: &String) -> Option<Symbol> {
-        match string.as_str() {
+    fn get_symbol(string: &str) -> Option<Symbol> {
+        match string {
             "=" => Some(Symbol::Assigner(Assigner::Setter)),
             "+=" => Some(Symbol::Assigner(Assigner::AdditionSetter)),
             "-=" => Some(Symbol::Assigner(Assigner::SubtractionSetter)),

@@ -3,16 +3,16 @@ use super::SymbolHandler;
 
 #[derive(PartialEq, Copy, Clone, strum_macros::Display)]
 pub enum Punctuation {
-    ListSeparator
+    ListSeparator,
 }
 
 pub struct PunctuationSymbolHandler {}
 
 impl SymbolHandler for PunctuationSymbolHandler {
-    fn get_symbol(string: &String) -> Option<Symbol> {
-        match string.as_str() {
+    fn get_symbol(string: &str) -> Option<Symbol> {
+        match string {
             "," => Some(Symbol::Punctuation(Punctuation::ListSeparator)),
-            _ => None
+            _ => None,
         }
     }
 }

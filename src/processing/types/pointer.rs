@@ -1,4 +1,3 @@
-use std::mem::size_of;
 use crate::errors::create_op_not_impl_error;
 use crate::processing::instructions::add_instruction_13::AddInstruction;
 use crate::processing::instructions::copy_instruction_0::CopyInstruction;
@@ -7,52 +6,77 @@ use crate::processing::instructions::not_equal_instruction_14::NotEqualInstructi
 use crate::processing::processor::MemoryManagers;
 use crate::processing::symbols::{Literal, Operator, TypeSymbol};
 use crate::processing::types::{get_type, Type, TypeTrait};
-use crate::propagate_error;
+use std::mem::size_of;
 
 pub struct PointerType {}
 
 impl PointerType {
-    pub(crate) fn create_empty() -> Self { Self {} }
+    pub(crate) fn create_empty() -> Self {
+        Self {}
+    }
 }
 
 impl TypeTrait for PointerType {
-    fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers,
-                             literal: &Literal) -> Result<(), String> {
+    fn static_assign_literal(
+        &self,
+        _super: &Type,
+        memory_managers: &mut MemoryManagers,
+        literal: &Literal,
+    ) -> Result<(), String> {
         let value: usize;
 
-        match literal
-        {
-            Literal::IntLiteral(integer) => {
+        match literal {
+            Literal::Int(integer) => {
                 value = match (*integer).try_into() {
-                    Err(_) => return Err(format!("Cannot fit {}'s value '{}' into Pointer", literal.to_string(), integer)),
-                    Ok(value) => value
+                    Err(_) => {
+                        return Err(format!(
+                            "Cannot fit {}'s value '{}' into Pointer",
+                            literal,
+                            integer
+                        ))
+                    }
+                    Ok(value) => value,
                 }
-            },
+            }
             unhandled_literal => {
-                return Err(format!("{} not supported for {} assignment",
-                                   unhandled_literal.to_string(), self.get_type().to_string()))
+                return Err(format!(
+                    "{} not supported for {} assignment",
+                    unhandled_literal,
+                    self.get_type()
+                ))
             }
         }
 
         let constant_address = memory_managers.variable_memory.append(&value.to_le_bytes());
 
-        CopyInstruction::new_alloc(memory_managers, constant_address,
-                                   _super.get_address(), self.get_size());
+        CopyInstruction::new_alloc(
+            memory_managers,
+            constant_address,
+            _super.get_address(),
+            self.get_size(),
+        );
 
         Ok(())
     }
 
-    fn get_type(&self) -> TypeSymbol { TypeSymbol::Pointer }
-
-    fn get_size(&self) -> usize { size_of::<usize>() }
-
-    fn create_indexed(&self, _super: &Type, memory_managers: &mut MemoryManagers, argument_literal: &Literal, assignment_literal: &Literal) -> Result<usize, String> {
+    fn create_indexed(
+        &self,
+        _super: &Type,
+        memory_managers: &mut MemoryManagers,
+        argument_literal: &Literal,
+        assignment_literal: &Literal,
+    ) -> Result<usize, String> {
         let count: usize = match argument_literal {
-            Literal::IntLiteral(count) => match (*count).try_into() {
+            Literal::Int(count) => match (*count).try_into() {
                 Ok(value) => value,
-                Err(_) => return Err(format!("Initialisation argument '{}' out of range", count))
+                Err(_) => return Err(format!("Initialisation argument '{}' out of range", count)),
             },
-            _ => return Err(format!("This type cannot be created with {} initialisation argument", argument_literal.to_string()))
+            _ => {
+                return Err(format!(
+                    "This type cannot be created with {} initialisation argument",
+                    argument_literal
+                ))
+            }
         };
 
         if count == 0 {
@@ -60,9 +84,14 @@ impl TypeTrait for PointerType {
         }
 
         let assigner = match assignment_literal {
-            Literal::IntLiteral(int) => int.clone(),
+            Literal::Int(int) => *int,
             Literal::None => 0,
-            _ => return Err(format!("This type cannot be created with {} assignment argument", assignment_literal.to_string()))
+            _ => {
+                return Err(format!(
+                    "This type cannot be created with {} assignment argument",
+                    assignment_literal
+                ))
+            }
         };
 
         // Assign to all objects in array
@@ -73,68 +102,96 @@ impl TypeTrait for PointerType {
             objs.push(obj);
         }
 
-        propagate_error!(self.static_assign_literal(_super ,memory_managers, &Literal::IntLiteral(assigner)));
+        self.static_assign_literal(_super, memory_managers, &Literal::Int(assigner))?;
 
         for i in 1..count {
-            propagate_error!(objs[i-1].static_assign_literal(memory_managers, &Literal::IntLiteral(assigner)));
+            objs[i - 1].static_assign_literal(memory_managers, &Literal::Int(assigner))?;
         }
 
         Ok(count)
     }
 
-    fn get_operation_type(&self, _lhs: &Type, operator: &Operator, rhs: Option<&Type>) -> Result<TypeSymbol, String> {
+    fn get_type(&self) -> TypeSymbol {
+        TypeSymbol::Pointer
+    }
+
+    fn get_size(&self) -> usize {
+        size_of::<usize>()
+    }
+
+    fn get_operation_type(
+        &self,
+        _lhs: &Type,
+        operator: &Operator,
+        rhs: Option<&Type>,
+    ) -> Result<TypeSymbol, String> {
         if rhs.is_none() {
-            return match operator {
-                _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
-            };
+            return create_op_not_impl_error(operator, self.get_type(), rhs);
         }
 
         match rhs.as_ref().unwrap().get_type() {
-            TypeSymbol::Pointer => {},
-            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs)
+            TypeSymbol::Pointer => {}
+            _ => return create_op_not_impl_error(operator, self.get_type(), rhs),
         };
 
         match operator {
-            Operator::Equal | Operator::NotEqual => {
-                Ok(TypeSymbol::Boolean)
-            },
-            Operator::Add => {
-                Ok(TypeSymbol::Pointer)
-            }
-            _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+            Operator::Equal | Operator::NotEqual => Ok(TypeSymbol::Boolean),
+            Operator::Add => Ok(TypeSymbol::Pointer),
+            _ => create_op_not_impl_error(operator, self.get_type(), rhs),
         }
     }
 
-    fn operate(&self, lhs: &Type, memory_managers: &mut MemoryManagers, operator: Operator,
-               rhs: Option<&Type>, destination: &Type) -> Result<(), String> {
-
+    fn operate(
+        &self,
+        lhs: &Type,
+        memory_managers: &mut MemoryManagers,
+        operator: Operator,
+        rhs: Option<&Type>,
+        destination: &Type,
+    ) -> Result<(), String> {
         if rhs.is_none() {
-            return match operator {
-                _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
-            };
+            return create_op_not_impl_error(&operator, self.get_type(), rhs);
         }
 
         let rhs = rhs.unwrap();
 
         match rhs.get_type() {
-            TypeSymbol::Pointer => {},
-            _ => return create_op_not_impl_error(&operator, self.get_type(), Some(rhs))
+            TypeSymbol::Pointer => {}
+            _ => return create_op_not_impl_error(&operator, self.get_type(), Some(rhs)),
         };
 
         match operator {
             Operator::Equal => {
-                EqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.get_address(), self.get_size(), destination.get_address());
-                Ok(())
-            },
-            Operator::NotEqual => {
-                NotEqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.get_address(), self.get_size(), destination.get_address());
-                Ok(())
-            },
-            Operator::Add => {
-                AddInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.get_address(), self.get_size(), destination.get_address());
+                EqualInstruction::new_alloc(
+                    memory_managers,
+                    lhs.get_address(),
+                    rhs.get_address(),
+                    self.get_size(),
+                    destination.get_address(),
+                );
                 Ok(())
             }
-            _ => create_op_not_impl_error(&operator, self.get_type(), Some(rhs))
+            Operator::NotEqual => {
+                NotEqualInstruction::new_alloc(
+                    memory_managers,
+                    lhs.get_address(),
+                    rhs.get_address(),
+                    self.get_size(),
+                    destination.get_address(),
+                );
+                Ok(())
+            }
+            Operator::Add => {
+                AddInstruction::new_alloc(
+                    memory_managers,
+                    lhs.get_address(),
+                    rhs.get_address(),
+                    self.get_size(),
+                    destination.get_address(),
+                );
+                Ok(())
+            }
+            _ => create_op_not_impl_error(&operator, self.get_type(), Some(rhs)),
         }
     }
 

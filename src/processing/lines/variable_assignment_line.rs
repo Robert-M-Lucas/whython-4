@@ -7,9 +7,14 @@ use crate::processing::symbols::Symbol;
 pub struct VariableAssignmentLine {}
 
 impl LineHandler for VariableAssignmentLine {
-    fn process_line(line: &Vec<Symbol>, memory_managers: &mut MemoryManagers,
-                    block_coordinator: &mut BlockCoordinator) -> ProcessingResult {
-        if line.len() < 3 { return ProcessingResult::Unmatched; }
+    fn process_line(
+        line: &Vec<Symbol>,
+        memory_managers: &mut MemoryManagers,
+        block_coordinator: &mut BlockCoordinator,
+    ) -> ProcessingResult {
+        if line.len() < 3 {
+            return ProcessingResult::Unmatched;
+        }
 
         let name = match &line[0] {
             Symbol::Name(name) => name,
@@ -23,7 +28,7 @@ impl LineHandler for VariableAssignmentLine {
 
         let assigner = match &line[1] {
             Symbol::Assigner(assigner) => assigner,
-            _ => return ProcessingResult::Failure("Name must be followed by assigner".to_string())
+            _ => return ProcessingResult::Failure("Name must be followed by assigner".to_string()),
         };
 
         let mut rhs = Vec::new();
@@ -31,11 +36,15 @@ impl LineHandler for VariableAssignmentLine {
 
         let to_evaluate = assigner.get_expanded_equivalent(line[0].clone(), rhs);
 
-        match handle_arithmetic_section(memory_managers, block_coordinator.get_reference_stack(),
-                                        &to_evaluate, Some(object),
-                                        true) {
+        match handle_arithmetic_section(
+            memory_managers,
+            block_coordinator.get_reference_stack(),
+            &to_evaluate,
+            Some(object),
+            true,
+        ) {
             Err(e) => return ProcessingResult::Failure(e),
-            Ok(_) => { },
+            Ok(_) => {}
         };
 
         ProcessingResult::Success

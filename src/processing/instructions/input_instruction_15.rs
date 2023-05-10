@@ -1,11 +1,11 @@
+use super::Instruction;
+use crate::processing::processor::MemoryManagers;
+use crate::util::get_usize;
 use std::io::stdin;
 use std::mem::size_of;
-use crate::util::get_usize;
-use crate::processing::processor::MemoryManagers;
-use super::Instruction;
 
 pub struct InputInstruction {
-    address: usize
+    address: usize,
 }
 
 pub const INPUT_INSTRUCTION_CODE: u16 = 15;
@@ -24,16 +24,19 @@ impl InputInstruction {
         Self { address }
     }
 
-    pub fn get_code() -> u16 { INPUT_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 {
+        INPUT_INSTRUCTION_CODE
+    }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 2
     }
 
     pub fn get_debug(data: &[u8]) -> String {
-        format!("INPUT (len: {}) dest [{}]",
-                get_usize(&0, data),
-                get_usize(&size_of::<usize>(), data),
+        format!(
+            "INPUT (len: {}) dest [{}]",
+            get_usize(&0, data),
+            get_usize(&size_of::<usize>(), data),
         )
     }
 
@@ -44,13 +47,16 @@ impl InputInstruction {
         *pointer += size_of::<usize>();
 
         let mut input = String::new();
-        stdin().read_line(&mut input).ok().expect("Terminal read error");
+        stdin()
+            .read_line(&mut input)
+            .ok()
+            .expect("Terminal read error");
 
         for i in 0..len {
             if i < input.len() {
-                memory_managers.variable_memory.memory[dest + i] = input.chars().nth(i).unwrap() as u8;
-            }
-            else {
+                memory_managers.variable_memory.memory[dest + i] =
+                    input.chars().nth(i).unwrap() as u8;
+            } else {
                 memory_managers.variable_memory.memory[dest + i] = 0;
             }
         }

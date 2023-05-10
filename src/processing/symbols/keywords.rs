@@ -10,8 +10,8 @@ pub enum Keyword {
 pub struct KeywordSymbolHandler {}
 
 impl SymbolHandler for KeywordSymbolHandler {
-    fn get_symbol(string: &String) -> Option<Symbol> {
-        match string.as_str() {
+    fn get_symbol(string: &str) -> Option<Symbol> {
+        match string {
             "break" => Some(Symbol::Keyword(Keyword::Break)),
             "continue" => Some(Symbol::Keyword(Keyword::Continue)),
             _ => None,

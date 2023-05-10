@@ -1,9 +1,9 @@
+use num_format::{Locale, ToFormattedString};
 use std::fs;
 use std::io::Write;
-use num_format::{Locale, ToFormattedString};
 
 pub struct MemoryManager {
-    pub memory: Vec<u8>
+    pub memory: Vec<u8>,
 }
 
 impl MemoryManager {
@@ -13,10 +13,14 @@ impl MemoryManager {
     }
 
     /// Creates memory manager from vector of bytes
-    pub fn from_vec(memory: Vec<u8>) -> Self { Self { memory } }
+    pub fn from_vec(memory: Vec<u8>) -> Self {
+        Self { memory }
+    }
 
     /// Gets the position after the last piece of memory written
-    pub fn get_position(&self) -> usize { self.memory.len() }
+    pub fn get_position(&self) -> usize {
+        self.memory.len()
+    }
 
     /// Adds a byte to the memory
     pub fn append_byte(&mut self, data: u8) -> usize {
@@ -52,8 +56,11 @@ impl MemoryManager {
     /// Saves the bytes in a '`name.b`' file
     pub fn dump_bytes(&self, name: String) {
         let name = name + ".b";
-        println!("Dumping memory to file '{}' [{} bytes]",
-                 &name, self.memory.len().to_formatted_string(&Locale::en));
+        println!(
+            "Dumping memory to file '{}' [{} bytes]",
+            &name,
+            self.memory.len().to_formatted_string(&Locale::en)
+        );
 
         let file = fs::OpenOptions::new()
             .write(true)
@@ -68,6 +75,8 @@ impl MemoryManager {
 
         let mut file = file.unwrap();
         let r = file.write_all(&self.memory);
-        if r.is_err() { println!("Failed to write to file - {}", r.unwrap_err().to_string()) }
+        if r.is_err() {
+            println!("Failed to write to file - {}", r.unwrap_err().to_string())
+        }
     }
 }

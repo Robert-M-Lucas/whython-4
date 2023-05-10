@@ -1,11 +1,11 @@
-use std::mem::size_of;
-use crate::util::get_usize;
+use super::Instruction;
 use crate::processing::processor::MemoryManagers;
 use crate::processing::types::boolean::{BOOLEAN_FALSE, BOOLEAN_TRUE};
-use super::Instruction;
+use crate::util::get_usize;
+use std::mem::size_of;
 
 pub struct InvertInstruction {
-    address: usize
+    address: usize,
 }
 
 pub const INVERT_INSTRUCTION_CODE: u16 = 1;
@@ -25,16 +25,19 @@ impl InvertInstruction {
         Self { address }
     }
 
-    pub fn get_code() -> u16 { INVERT_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 {
+        INVERT_INSTRUCTION_CODE
+    }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 2 // To flip, dest
     }
 
     pub fn get_debug(data: &[u8]) -> String {
-        format!("INVERT [{}] dest [{}]",
-                get_usize(&0, data),
-                get_usize(&size_of::<usize>(), data),
+        format!(
+            "INVERT [{}] dest [{}]",
+            get_usize(&0, data),
+            get_usize(&size_of::<usize>(), data),
         )
     }
 
@@ -46,8 +49,7 @@ impl InvertInstruction {
 
         if memory_managers.variable_memory.memory[variable] == BOOLEAN_TRUE {
             memory_managers.variable_memory.memory[dest] = BOOLEAN_FALSE;
-        }
-        else {
+        } else {
             memory_managers.variable_memory.memory[dest] = BOOLEAN_TRUE;
         }
     }

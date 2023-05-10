@@ -1,10 +1,10 @@
 mod assigners;
 mod blocks;
 mod builtins;
+mod keywords;
 mod literals;
 mod operators;
 mod punctuation;
-mod keywords;
 
 pub use assigners::Assigner;
 use assigners::AssignerSymbolHandler;
@@ -31,7 +31,6 @@ pub use punctuation::PunctuationSymbolHandler;
 pub use keywords::Keyword;
 pub use keywords::KeywordSymbolHandler;
 
-
 #[derive(PartialEq, Clone, strum_macros::Display)]
 pub enum Symbol {
     Assigner(Assigner),
@@ -48,14 +47,13 @@ pub enum Symbol {
     Keyword(Keyword),
 }
 
-
 pub trait SymbolHandler {
     /// Converts a string to a symbol. Returns `None` if no symbol matches the string
-    fn get_symbol(string: &String) -> Option<Symbol>;
+    fn get_symbol(string: &str) -> Option<Symbol>;
 }
 
 /// Converts a string to a symbol. Returns `None` if no symbol matches the string
-pub fn get_all_symbol(string: &String) -> Option<Symbol> {
+pub fn get_all_symbol(string: &str) -> Option<Symbol> {
     AllSymbolHandler::get_symbol(string)
 }
 
@@ -67,7 +65,7 @@ pub fn try_arithmetic_block_into_parameters(arithmetic_block: &Symbol) -> Result
 
     let list = match arithmetic_block {
         Symbol::ArithmeticBlock(list) => list,
-        _ => panic!("Must be arithmetic block")
+        _ => panic!("Must be arithmetic block"),
     };
 
     if list.len() == 0 {
@@ -87,22 +85,24 @@ pub fn try_arithmetic_block_into_parameters(arithmetic_block: &Symbol) -> Result
         // No type
         let type_symbol = match list[i] {
             Symbol::Type(type_symbol) => type_symbol,
-            _ => return Err(formatting_error())
+            _ => return Err(formatting_error()),
         };
 
         // No name
         let name = match &list[i + 1] {
             Symbol::Name(name) => name.clone(),
-            _ => return Err(formatting_error())
+            _ => return Err(formatting_error()),
         };
 
         // Check for list separator
         if i + 2 < list.len() {
             match list[i + 2] {
-                Symbol::Punctuation(punctuation) => {
-                    #[allow(unreachable_patterns)] match punctuation {
+                Symbol::Punctuation(punctuation) =>
+                {
+                    #[allow(unreachable_patterns)]
+                    match punctuation {
                         Punctuation::ListSeparator => (),
-                        _ => return Err(formatting_error())
+                        _ => return Err(formatting_error()),
                     }
                 }
                 _ => return Err(formatting_error()),
@@ -122,7 +122,7 @@ const ALLOWED_CHARS_IN_NAME: &str = "abcdefghijklmnopqrstuvwxyz_";
 struct AllSymbolHandler {}
 
 impl SymbolHandler for AllSymbolHandler {
-    fn get_symbol(string: &String) -> Option<Symbol> {
+    fn get_symbol(string: &str) -> Option<Symbol> {
         AssignerSymbolHandler::get_symbol(string)
             .or_else(|| OperatorSymbolHandler::get_symbol(string))
             .or_else(|| TypeSymbolHandler::get_symbol(string))
@@ -131,14 +131,14 @@ impl SymbolHandler for AllSymbolHandler {
             .or_else(|| LiteralSymbolHandler::get_symbol(string))
             .or_else(|| PunctuationSymbolHandler::get_symbol(string))
             .or_else(|| KeywordSymbolHandler::get_symbol(string))
-            .or_else(
-                || {
-                    for c in string.chars() {
-                        if !ALLOWED_CHARS_IN_NAME.contains(c) { return None; }
+            .or_else(|| {
+                for c in string.chars() {
+                    if !ALLOWED_CHARS_IN_NAME.contains(c) {
+                        return None;
                     }
-
-                    return Some(Symbol::Name(string.clone()));
                 }
-            )
+
+                return Some(Symbol::Name(String::from(string)));
+            })
     }
 }

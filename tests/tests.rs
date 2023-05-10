@@ -1,22 +1,27 @@
 #[cfg(test)]
 mod tests {
+    use ignore_result::Ignore;
     use std::path::PathBuf;
     use std::sync::atomic::AtomicBool;
-    use ignore_result::Ignore;
     use walkdir::WalkDir;
-    use whython_4::memory_manager::MemoryManager;
-    use whython_4::translator::translate;
     use whython_4::execution::execute;
+    use whython_4::memory_manager::MemoryManager;
     use whython_4::processing::processor::MemoryManagers;
+    use whython_4::translator::translate;
 
     #[test]
     fn test_instruction_implementation() {
         let mut d = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         d.push("src/processing/instructions");
-        let count = WalkDir::new(d).into_iter()
+        let count = WalkDir::new(d)
+            .into_iter()
             .filter(|f| {
-                if f.is_err() { return false; }
-                if f.as_ref().unwrap().file_type().is_dir() { return false; }
+                if f.is_err() {
+                    return false;
+                }
+                if f.as_ref().unwrap().file_type().is_dir() {
+                    return false;
+                }
                 true
             })
             .count() as u16;
@@ -38,7 +43,9 @@ mod tests {
 
         for i in 0..count {
             // ! Skip input instruction test
-            if i == 15 { continue }
+            if i == 15 {
+                continue;
+            }
 
             let encoded_code = i.to_le_bytes();
             for (j, b) in encoded_code.iter().enumerate() {
@@ -50,8 +57,9 @@ mod tests {
                     variable_memory: MemoryManager::from_vec(Vec::from(dummy_data)),
                     program_memory: MemoryManager::from_vec(Vec::from(dummy_data)),
                 },
-                &atomic_bool
-            ).ignore();
+                &atomic_bool,
+            )
+            .ignore();
         }
     }
 }

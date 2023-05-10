@@ -1,16 +1,22 @@
-use std::mem::size_of;
-use crate::util::get_usize;
-use crate::processing::processor::MemoryManagers;
 use super::Instruction;
+use crate::processing::processor::MemoryManagers;
+use crate::util::get_usize;
+use std::mem::size_of;
 
 pub struct AddInstruction {
-    address: usize
+    address: usize,
 }
 
 pub const ADD_INSTRUCTION_CODE: u16 = 13;
 
 impl AddInstruction {
-    pub fn new_alloc(memory_managers: &mut MemoryManagers, lhs: usize, rhs: usize, len: usize, dest: usize) -> Self {
+    pub fn new_alloc(
+        memory_managers: &mut MemoryManagers,
+        lhs: usize,
+        rhs: usize,
+        len: usize,
+        dest: usize,
+    ) -> Self {
         let mut instruction_memory = vec![];
         instruction_memory.extend(ADD_INSTRUCTION_CODE.to_le_bytes());
         instruction_memory.extend(lhs.to_le_bytes());
@@ -25,18 +31,21 @@ impl AddInstruction {
         Self { address }
     }
 
-    pub fn get_code() -> u16 { ADD_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 {
+        ADD_INSTRUCTION_CODE
+    }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 4
     }
 
     pub fn get_debug(data: &[u8]) -> String {
-        format!("ADD [{} to {}] (len: {}) dest [{}]",
-                get_usize(&0, data),
-                get_usize(&size_of::<usize>(), data),
-                get_usize(&(size_of::<usize>() * 2), data),
-                get_usize(&(size_of::<usize>() * 3), data),
+        format!(
+            "ADD [{} to {}] (len: {}) dest [{}]",
+            get_usize(&0, data),
+            get_usize(&size_of::<usize>(), data),
+            get_usize(&(size_of::<usize>() * 2), data),
+            get_usize(&(size_of::<usize>() * 3), data),
         )
     }
 
@@ -59,10 +68,11 @@ impl AddInstruction {
             let result;
             if !overflow {
                 result = a.wrapping_add(b);
-            }
-            else { result = a.wrapping_add(b).wrapping_add(1); } // Carry
+            } else {
+                result = a.wrapping_add(b).wrapping_add(1);
+            } // Carry
 
-            overflow =  result < a || result < b;
+            overflow = result < a || result < b;
 
             memory_managers.variable_memory.memory[dest + i] = result;
         }

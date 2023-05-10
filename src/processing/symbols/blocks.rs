@@ -14,8 +14,8 @@ pub enum Block {
 pub struct BlockSymbolHandler {}
 
 impl SymbolHandler for BlockSymbolHandler {
-    fn get_symbol(string: &String) -> Option<Symbol> {
-        match string.as_str() {
+    fn get_symbol(string: &str) -> Option<Symbol> {
+        match string {
             "while" => Some(Symbol::Block(Block::While)),
             "loop" => Some(Symbol::Block(Block::Loop)),
             "if" => Some(Symbol::Block(Block::If)),

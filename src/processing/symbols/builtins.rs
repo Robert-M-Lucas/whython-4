@@ -11,8 +11,8 @@ pub enum Builtin {
 pub struct BuiltinSymbolHandler {}
 
 impl SymbolHandler for BuiltinSymbolHandler {
-    fn get_symbol(string: &String) -> Option<Symbol> {
-        match string.as_str() {
+    fn get_symbol(string: &str) -> Option<Symbol> {
+        match string {
             "print" => Some(Symbol::Builtin(Builtin::Print)),
             "printc" => Some(Symbol::Builtin(Builtin::PrintChars)),
             "input" => Some(Symbol::Builtin(Builtin::Input)),

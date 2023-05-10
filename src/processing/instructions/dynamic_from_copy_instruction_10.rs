@@ -1,10 +1,10 @@
-use std::mem::size_of;
-use crate::util::get_usize;
-use crate::processing::processor::MemoryManagers;
 use super::Instruction;
+use crate::processing::processor::MemoryManagers;
+use crate::util::get_usize;
+use std::mem::size_of;
 
 pub struct DynamicFromCopyInstruction {
-    address: usize
+    address: usize,
 }
 
 pub const DYNAMIC_FROM_COPY_INSTRUCTION_CODE: u16 = 10;
@@ -16,10 +16,8 @@ impl DynamicFromCopyInstruction {
         indexing_size: usize,
         from_pointer_location: usize,
         direct_to: usize,
-        length: usize
-    )
-                     -> Self {
-
+        length: usize,
+    ) -> Self {
         let mut instruction_memory = vec![];
         instruction_memory.extend(DYNAMIC_FROM_COPY_INSTRUCTION_CODE.to_le_bytes());
         instruction_memory.extend(from_location.to_le_bytes());
@@ -35,19 +33,22 @@ impl DynamicFromCopyInstruction {
         Self { address }
     }
 
-    pub fn get_code() -> u16 { DYNAMIC_FROM_COPY_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 {
+        DYNAMIC_FROM_COPY_INSTRUCTION_CODE
+    }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 5
     }
 
     pub(crate) fn get_debug(data: &[u8]) -> String {
-        format!("DYNAMIC COPY [{}:{}:{}] (len:{}) dest [{}]",
-                get_usize(&0, data),
-                get_usize(&size_of::<usize>(), data),
-                get_usize(&(size_of::<usize>() * 2), data),
-                get_usize(&(size_of::<usize>() * 4), data),
-                get_usize(&(size_of::<usize>() * 3), data),
+        format!(
+            "DYNAMIC COPY [{}:{}:{}] (len:{}) dest [{}]",
+            get_usize(&0, data),
+            get_usize(&size_of::<usize>(), data),
+            get_usize(&(size_of::<usize>() * 2), data),
+            get_usize(&(size_of::<usize>() * 4), data),
+            get_usize(&(size_of::<usize>() * 3), data),
         )
     }
 
@@ -66,8 +67,9 @@ impl DynamicFromCopyInstruction {
         let actual_from = get_usize(&from_pointer, &memory_managers.variable_memory.memory);
 
         for i in 0..length {
-            memory_managers.variable_memory.memory[direct_to + i] =
-                memory_managers.variable_memory.memory[from_location + (actual_from * indexing_size) + i];
+            memory_managers.variable_memory.memory[direct_to + i] = memory_managers
+                .variable_memory
+                .memory[from_location + (actual_from * indexing_size) + i];
         }
     }
 }

@@ -21,20 +21,20 @@ pub enum Operator {
 pub struct OperatorSymbolHandler {}
 
 impl SymbolHandler for OperatorSymbolHandler {
-    fn get_symbol(string: &String) -> Option<Symbol> {
-        match string.as_str() {
-            "+"  => Some(Symbol::Operator(Operator::Add)),
-            "-"  => Some(Symbol::Operator(Operator::Subtract)),
-            "*"  => Some(Symbol::Operator(Operator::Product)),
-            "/"  => Some(Symbol::Operator(Operator::Divide)),
-            ">"  => Some(Symbol::Operator(Operator::Greater)),
-            "<"  => Some(Symbol::Operator(Operator::Less)),
+    fn get_symbol(string: &str) -> Option<Symbol> {
+        match string {
+            "+" => Some(Symbol::Operator(Operator::Add)),
+            "-" => Some(Symbol::Operator(Operator::Subtract)),
+            "*" => Some(Symbol::Operator(Operator::Product)),
+            "/" => Some(Symbol::Operator(Operator::Divide)),
+            ">" => Some(Symbol::Operator(Operator::Greater)),
+            "<" => Some(Symbol::Operator(Operator::Less)),
             ">=" => Some(Symbol::Operator(Operator::GreaterEqual)),
             "<=" => Some(Symbol::Operator(Operator::LessEqual)),
             "==" => Some(Symbol::Operator(Operator::Equal)),
             "!=" => Some(Symbol::Operator(Operator::NotEqual)),
-            "|"  => Some(Symbol::Operator(Operator::Or)),
-            "&"  => Some(Symbol::Operator(Operator::And)),
+            "|" => Some(Symbol::Operator(Operator::Or)),
+            "&" => Some(Symbol::Operator(Operator::And)),
             "!" => Some(Symbol::Operator(Operator::Not)),
             _ => None,
         }

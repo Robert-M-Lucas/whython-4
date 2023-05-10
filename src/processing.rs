@@ -1,10 +1,10 @@
-pub mod symbols;
+pub mod blocks;
+pub mod instructions;
 pub mod lines;
 pub mod preprocessor;
 pub mod processor;
-pub mod blocks;
-pub mod types;
-pub mod instructions;
 pub mod reference_manager;
+pub mod symbols;
+pub mod types;
 
 pub use reference_manager::ReferenceManager;

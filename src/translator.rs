@@ -16,8 +16,10 @@ use crate::processing::instructions::print_instruction_5::PrintInstruction;
 
 macro_rules! translate {
     ($instruction: ident, $data: expr, $i: expr) => {
-        ($instruction::get_debug(&$data[$i..$i+$instruction::get_size()]),
-                 $instruction::get_size())
+        (
+            $instruction::get_debug(&$data[$i..$i + $instruction::get_size()]),
+            $instruction::get_size(),
+        )
     };
 }
 
@@ -28,19 +30,19 @@ pub fn translate(data: &[u8], translate_one: bool) {
     while i < data.len() {
         print!("[{:0>5}] | ", i);
 
-        let code = &data[i..i+2];
+        let code = &data[i..i + 2];
         i += 2;
         let (output, size) = match u16::from_le_bytes(code.try_into().unwrap()) {
-            00 => translate!(CopyInstruction, data, i),
-            01 => translate!(InvertInstruction, data, i),
-            02 => translate!(JumpIfNotInstruction, data, i),
-            03 => translate!(JumpInstruction, data, i),
-            04 => translate!(JumpVariableInstruction, data, i),
-            05 => translate!(PrintInstruction, data, i),
-            06 => translate!(AndInstruction, data, i),
-            07 => translate!(EqualInstruction, data, i),
-            08 => translate!(OrInstruction, data, i),
-            09 => translate!(PrintCharsInstruction, data, i),
+            0 => translate!(CopyInstruction, data, i),
+            1 => translate!(InvertInstruction, data, i),
+            2 => translate!(JumpIfNotInstruction, data, i),
+            3 => translate!(JumpInstruction, data, i),
+            4 => translate!(JumpVariableInstruction, data, i),
+            5 => translate!(PrintInstruction, data, i),
+            6 => translate!(AndInstruction, data, i),
+            7 => translate!(EqualInstruction, data, i),
+            8 => translate!(OrInstruction, data, i),
+            9 => translate!(PrintCharsInstruction, data, i),
             10 => translate!(DynamicFromCopyInstruction, data, i),
             11 => translate!(DynamicToCopyInstruction, data, i),
             12 => translate!(JumpInstruction, data, i),

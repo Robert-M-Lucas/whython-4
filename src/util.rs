@@ -1,5 +1,5 @@
+use std::io::{stdin, stdout, Read, Write};
 use std::mem::size_of;
-use std::io::{Read, stdin, stdout, Write};
 
 /// Gets a `u8` from `memory` at the pointer
 pub fn get_u8(pointer: &usize, memory: &[u8]) -> u8 {
@@ -8,18 +8,22 @@ pub fn get_u8(pointer: &usize, memory: &[u8]) -> u8 {
 
 /// Gets a `usize` from `memory` at the pointer
 pub fn get_usize(pointer: &usize, memory: &[u8]) -> usize {
-    usize::from_le_bytes((&memory[*pointer..(*pointer + size_of::<usize>())]).try_into().unwrap())
+    usize::from_le_bytes(
+        (&memory[*pointer..(*pointer + size_of::<usize>())])
+            .try_into()
+            .unwrap(),
+    )
 }
 
-/// Evaluates to the `Ok` value or returns `Err(e)`
-#[macro_export] macro_rules! propagate_error {
-    ($result: expr) => {
-        match $result {
-            Err(e) => return Err(e),
-            Ok(value) => value
-        }
-    };
-}
+// /// Evaluates to the `Ok` value or returns `Err(e)`
+// #[macro_export] macro_rules! propagate_error {
+//     ($result: expr) => {
+//         match $result {
+//             Err(e) => return Err(e),
+//             Ok(value) => value
+//         }
+//     };
+// }
 
 /// Prints formatted text
 ///
@@ -33,7 +37,8 @@ pub fn get_usize(pointer: &usize, memory: &[u8]) -> usize {
 ///
 /// col_println!((red, bold), "Sample Text: [{}, {}]", "Text one", "text two");
 /// ```
-#[macro_export] macro_rules! col_println {
+#[macro_export]
+macro_rules! col_println {
     ($color: ident, $($arg:tt)*) => {
         {
             use colored::Colorize;
@@ -60,7 +65,8 @@ pub fn get_usize(pointer: &usize, memory: &[u8]) -> usize {
 ///
 /// col_print!((red, bold), "Sample Text: [{}, {}]", "Text one", "text two");
 /// ```
-#[macro_export] macro_rules! col_print {
+#[macro_export]
+macro_rules! col_print {
     ($color: ident, $($arg:tt)*) => {
        {
            use colored::Colorize;
@@ -86,6 +92,7 @@ pub fn info(info: &str) {
 }
 
 /// Waits for enter key to be pressed
+#[allow(clippy::unused_io_amount)]
 pub fn pause() {
     let mut stdout = stdout();
     stdout.write(b"Press enter to exit...").unwrap();

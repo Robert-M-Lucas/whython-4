@@ -15,112 +15,165 @@ pub const BOOLEAN_FALSE: u8 = 0x00;
 pub const BOOLEAN_TRUE: u8 = 0xFF;
 
 impl BooleanType {
-    pub(crate) fn create_empty() -> Self { Self {} }
+    pub(crate) fn create_empty() -> Self {
+        Self {}
+    }
 }
 
 impl TypeTrait for BooleanType {
-    fn static_assign_literal(&self, _super: &Type, memory_managers: &mut MemoryManagers,
-                             literal: &Literal) -> Result<(), String> {
+    fn static_assign_literal(
+        &self,
+        _super: &Type,
+        memory_managers: &mut MemoryManagers,
+        literal: &Literal,
+    ) -> Result<(), String> {
         // Get literal value
         let value: bool;
-        match literal
-        {
-            Literal::BoolLiteral(boolean) => { value = *boolean },
-            Literal::IntLiteral(integer) => {
-                if *integer == 0 { value = false; }
-                else if *integer == 1 { value = true; }
-                else {
-                    return Err(format!("{} can only be assigned {} '0' or '1'",
-                                       self.get_type().to_string(),
-                                       Literal::IntLiteral(0).to_string()))
+        match literal {
+            Literal::Bool(boolean) => value = *boolean,
+            Literal::Int(integer) => {
+                if *integer == 0 {
+                    value = false;
+                } else if *integer == 1 {
+                    value = true;
+                } else {
+                    return Err(format!(
+                        "{} can only be assigned {} '0' or '1'",
+                        self.get_type().to_string(),
+                        Literal::Int(0).to_string()
+                    ));
                 }
             }
             unhandled_literal => {
-                return Err(format!("{} not supported for {} assignment",
-                                        unhandled_literal.to_string(), self.get_type().to_string()))
+                return Err(format!(
+                    "{} not supported for {} assignment",
+                    unhandled_literal.to_string(),
+                    self.get_type().to_string()
+                ))
             }
         }
 
         // Allocate from constant
         let constant_address;
         if value {
-            constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_TRUE); // Reserve for constant
-        }
-        else {
-            constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_FALSE); // Reserve for constant
+            constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_TRUE);
+        // Reserve for constant
+        } else {
+            constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_FALSE);
+            // Reserve for constant
         }
 
-        CopyInstruction::new_alloc(memory_managers, constant_address,
-                                   _super.get_address(), self.get_size());
+        CopyInstruction::new_alloc(
+            memory_managers,
+            constant_address,
+            _super.get_address(),
+            self.get_size(),
+        );
 
         Ok(())
     }
 
-    fn get_type(&self) -> TypeSymbol { TypeSymbol::Boolean }
+    fn get_type(&self) -> TypeSymbol {
+        TypeSymbol::Boolean
+    }
 
-    fn get_size(&self) -> usize { 1 }
+    fn get_size(&self) -> usize {
+        1
+    }
 
-    fn get_operation_type(&self, _lhs: &Type, operator: &Operator, rhs: Option<&Type>) -> Result<TypeSymbol, String> {
+    fn get_operation_type(
+        &self,
+        _lhs: &Type,
+        operator: &Operator,
+        rhs: Option<&Type>,
+    ) -> Result<TypeSymbol, String> {
         if rhs.is_none() {
             return match operator {
-                Operator::Not => {
-                    Ok(self.get_type())
-                },
-                _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+                Operator::Not => Ok(self.get_type()),
+                _ => create_op_not_impl_error(&operator, self.get_type(), rhs),
             };
         }
 
         match rhs.as_ref().unwrap().get_type() {
-            TypeSymbol::Boolean => {},
-            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs)
+            TypeSymbol::Boolean => {}
+            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs),
         };
 
         match operator {
             Operator::And | Operator::Or | Operator::Equal | Operator::NotEqual => {
                 Ok(self.get_type())
-            },
-            _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+            }
+            _ => create_op_not_impl_error(&operator, self.get_type(), rhs),
         }
     }
 
-    fn operate(&self, lhs: &Type, memory_managers: &mut MemoryManagers, operator: Operator,
-               rhs: Option<&Type>, destination: &Type) -> Result<(), String> {
-
+    fn operate(
+        &self,
+        lhs: &Type,
+        memory_managers: &mut MemoryManagers,
+        operator: Operator,
+        rhs: Option<&Type>,
+        destination: &Type,
+    ) -> Result<(), String> {
         if rhs.is_none() {
             return match operator {
                 Operator::Not => {
-                    InvertInstruction::new_alloc(memory_managers,
-                                                 lhs.get_address(),
-                                                 destination.get_address());
+                    InvertInstruction::new_alloc(
+                        memory_managers,
+                        lhs.get_address(),
+                        destination.get_address(),
+                    );
                     Ok(())
-                },
-                _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+                }
+                _ => create_op_not_impl_error(&operator, self.get_type(), rhs),
             };
         }
 
         match rhs.as_ref().unwrap().get_type() {
-            TypeSymbol::Boolean => {},
-            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs)
+            TypeSymbol::Boolean => {}
+            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs),
         };
 
         match operator {
             Operator::And => {
-                AndInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), destination.get_address());
+                AndInstruction::new_alloc(
+                    memory_managers,
+                    lhs.get_address(),
+                    rhs.unwrap().get_address(),
+                    destination.get_address(),
+                );
                 Ok(())
-            },
+            }
             Operator::Equal => {
-                EqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), self.get_size(), destination.get_address());
+                EqualInstruction::new_alloc(
+                    memory_managers,
+                    lhs.get_address(),
+                    rhs.unwrap().get_address(),
+                    self.get_size(),
+                    destination.get_address(),
+                );
                 Ok(())
-            },
+            }
             Operator::NotEqual => {
-                NotEqualInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), self.get_size(), destination.get_address());
+                NotEqualInstruction::new_alloc(
+                    memory_managers,
+                    lhs.get_address(),
+                    rhs.unwrap().get_address(),
+                    self.get_size(),
+                    destination.get_address(),
+                );
                 Ok(())
-            },
+            }
             Operator::Or => {
-                OrInstruction::new_alloc(memory_managers, lhs.get_address(), rhs.unwrap().get_address(), destination.get_address());
+                OrInstruction::new_alloc(
+                    memory_managers,
+                    lhs.get_address(),
+                    rhs.unwrap().get_address(),
+                    destination.get_address(),
+                );
                 Ok(())
-            },
-            _ => create_op_not_impl_error(&operator, self.get_type(), rhs)
+            }
+            _ => create_op_not_impl_error(&operator, self.get_type(), rhs),
         }
     }
 

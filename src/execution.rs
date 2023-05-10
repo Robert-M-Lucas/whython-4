@@ -1,5 +1,3 @@
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::Instant;
 use crate::col_println;
 use crate::processing::instructions::add_instruction_13::AddInstruction;
 use crate::processing::instructions::and_instruction_6::AndInstruction;
@@ -18,6 +16,8 @@ use crate::processing::instructions::or_instruction_8::OrInstruction;
 use crate::processing::instructions::print_chars_instruction_9::PrintCharsInstruction;
 use crate::processing::instructions::print_instruction_5::PrintInstruction;
 use crate::processing::processor::MemoryManagers;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::Instant;
 
 /// Executes the compiled program
 pub fn execute(memory_managers: &mut MemoryManagers, exit: &AtomicBool) -> Result<(), String> {
@@ -28,35 +28,39 @@ pub fn execute(memory_managers: &mut MemoryManagers, exit: &AtomicBool) -> Resul
     let start_time = Instant::now();
 
     while pointer < program_length {
-        let code = &memory_managers.program_memory.memory[pointer..pointer+2];
+        let code = &memory_managers.program_memory.memory[pointer..pointer + 2];
         pointer += 2;
 
         match u16::from_le_bytes(code.try_into().unwrap()) {
-            00 => CopyInstruction::execute(&mut pointer, memory_managers),
-            01 => InvertInstruction::execute(&mut pointer, memory_managers),
-            02 => JumpIfNotInstruction::execute(&mut pointer, memory_managers),
-            03 => JumpInstruction::execute(&mut pointer, memory_managers),
-            04 => JumpVariableInstruction::execute(&mut pointer, memory_managers),
-            05 => PrintInstruction::execute(&mut pointer, memory_managers),
-            06 => AndInstruction::execute(&mut pointer, memory_managers),
-            07 => EqualInstruction::execute(&mut pointer, memory_managers),
-            08 => OrInstruction::execute(&mut pointer, memory_managers),
-            09 => PrintCharsInstruction::execute(&mut pointer, memory_managers),
+            0 => CopyInstruction::execute(&mut pointer, memory_managers),
+            1 => InvertInstruction::execute(&mut pointer, memory_managers),
+            2 => JumpIfNotInstruction::execute(&mut pointer, memory_managers),
+            3 => JumpInstruction::execute(&mut pointer, memory_managers),
+            4 => JumpVariableInstruction::execute(&mut pointer, memory_managers),
+            5 => PrintInstruction::execute(&mut pointer, memory_managers),
+            6 => AndInstruction::execute(&mut pointer, memory_managers),
+            7 => EqualInstruction::execute(&mut pointer, memory_managers),
+            8 => OrInstruction::execute(&mut pointer, memory_managers),
+            9 => PrintCharsInstruction::execute(&mut pointer, memory_managers),
             10 => DynamicFromCopyInstruction::execute(&mut pointer, memory_managers),
             11 => DynamicToCopyInstruction::execute(&mut pointer, memory_managers),
             12 => JumpIfInstruction::execute(&mut pointer, memory_managers),
             13 => AddInstruction::execute(&mut pointer, memory_managers),
             14 => NotEqualInstruction::execute(&mut pointer, memory_managers),
             15 => InputInstruction::execute(&mut pointer, memory_managers),
-            code => return Err(format!("Unknown code! [{}]", code))
+            code => return Err(format!("Unknown code! [{}]", code)),
         };
 
         if exit.load(Ordering::Relaxed) {
-            return Err("Program terminated by ctrl+c".to_string())
+            return Err("Program terminated by Ctrl+C".to_string());
         }
     }
 
-    col_println!((green, bold), "\nExecution completed [{:?}]", start_time.elapsed());
+    col_println!(
+        (green, bold),
+        "\nExecution completed [{:?}]",
+        start_time.elapsed()
+    );
 
     Ok(())
 }

@@ -1,11 +1,11 @@
-use std::mem::size_of;
-use crate::util::get_usize;
+use super::Instruction;
 use crate::processing::instructions::INSTRUCTION_CODE_LENGTH;
 use crate::processing::processor::MemoryManagers;
-use super::Instruction;
+use crate::util::get_usize;
+use std::mem::size_of;
 
 pub struct JumpInstruction {
-    address: usize
+    address: usize,
 }
 
 pub const JUMP_INSTRUCTION_CODE: u16 = 3;
@@ -24,22 +24,21 @@ impl JumpInstruction {
     }
 
     pub fn set_destination(&self, memory_managers: &mut MemoryManagers, dest: usize) {
-        memory_managers.program_memory.overwrite(
-            self.address + INSTRUCTION_CODE_LENGTH,
-            &dest.to_le_bytes()
-        )
+        memory_managers
+            .program_memory
+            .overwrite(self.address + INSTRUCTION_CODE_LENGTH, &dest.to_le_bytes())
     }
 
-    pub fn get_code() -> u16 { JUMP_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 {
+        JUMP_INSTRUCTION_CODE
+    }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 1 // dest
     }
 
     pub fn get_debug(data: &[u8]) -> String {
-        format!("JUMP [{}]",
-                get_usize(&0, data),
-        )
+        format!("JUMP [{}]", get_usize(&0, data),)
     }
 
     pub fn execute(pointer: &mut usize, memory_managers: &mut MemoryManagers) {

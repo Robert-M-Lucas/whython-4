@@ -1,10 +1,10 @@
-use std::mem::size_of;
-use crate::util::get_usize;
-use crate::processing::processor::MemoryManagers;
 use super::Instruction;
+use crate::processing::processor::MemoryManagers;
+use crate::util::get_usize;
+use std::mem::size_of;
 
 pub struct DynamicToCopyInstruction {
-    address: usize
+    address: usize,
 }
 
 pub const DYNAMIC_TO_COPY_INSTRUCTION_CODE: u16 = 11;
@@ -16,10 +16,8 @@ impl DynamicToCopyInstruction {
         indexing_size: usize,
         to_pointer_location: usize,
         direct_from: usize,
-        length: usize
-    )
-        -> Self {
-
+        length: usize,
+    ) -> Self {
         let mut instruction_memory = vec![];
         instruction_memory.extend(DYNAMIC_TO_COPY_INSTRUCTION_CODE.to_le_bytes());
         instruction_memory.extend(to_location.to_le_bytes());
@@ -35,19 +33,22 @@ impl DynamicToCopyInstruction {
         Self { address }
     }
 
-    pub fn get_code() -> u16 { DYNAMIC_TO_COPY_INSTRUCTION_CODE }
+    pub fn get_code() -> u16 {
+        DYNAMIC_TO_COPY_INSTRUCTION_CODE
+    }
 
     pub fn get_size() -> usize {
         size_of::<usize>() * 5
     }
 
     pub(crate) fn get_debug(data: &[u8]) -> String {
-        format!("DYNAMIC COPY [{}] dest [{}:{}:{}] (len:{})",
-                get_usize(&(size_of::<usize>() * 3), data),
-                get_usize(&0, data),
-                get_usize(&size_of::<usize>(), data),
-                get_usize(&(size_of::<usize>() * 2), data),
-                get_usize(&(size_of::<usize>() * 4), data),
+        format!(
+            "DYNAMIC COPY [{}] dest [{}:{}:{}] (len:{})",
+            get_usize(&(size_of::<usize>() * 3), data),
+            get_usize(&0, data),
+            get_usize(&size_of::<usize>(), data),
+            get_usize(&(size_of::<usize>() * 2), data),
+            get_usize(&(size_of::<usize>() * 4), data),
         )
     }
 
