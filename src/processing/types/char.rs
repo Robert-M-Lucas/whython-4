@@ -31,7 +31,7 @@ impl TypeTrait for CharType {
                     );
                 }
 
-                value = string.chars().nth(0).unwrap() as u8;
+                value = string.chars().next().unwrap() as u8;
             }
             Literal::Int(integer) => {
                 if *integer < 0 || *integer > 255 {
@@ -43,8 +43,8 @@ impl TypeTrait for CharType {
             unhandled_literal => {
                 return Err(format!(
                     "{} not supported for {} assignment",
-                    unhandled_literal.to_string(),
-                    self.get_type().to_string()
+                    unhandled_literal,
+                    self.get_type()
                 ))
             }
         }
@@ -77,7 +77,7 @@ impl TypeTrait for CharType {
             _ => {
                 return Err(format!(
                     "This type cannot be created with {} initialisation argument",
-                    argument_literal.to_string()
+                    argument_literal
                 ))
             }
         };
@@ -92,7 +92,7 @@ impl TypeTrait for CharType {
             _ => {
                 return Err(format!(
                     "This type cannot be created with {} assignment argument",
-                    assignment_literal.to_string()
+                    assignment_literal
                 ))
             }
         };
@@ -113,7 +113,7 @@ impl TypeTrait for CharType {
         self.static_assign_literal(
             _super,
             memory_managers,
-            &Literal::String(assigner.chars().nth(0).unwrap().to_string()),
+            &Literal::String(assigner.chars().next().unwrap().to_string()),
         )?;
         for i in 1..count {
             objs[i - 1].static_assign_literal(
@@ -140,19 +140,17 @@ impl TypeTrait for CharType {
         rhs: Option<&Type>,
     ) -> Result<TypeSymbol, String> {
         if rhs.is_none() {
-            return match operator {
-                _ => create_op_not_impl_error(&operator, self.get_type(), rhs),
-            };
+            return create_op_not_impl_error(operator, self.get_type(), rhs);
         }
 
         match rhs.as_ref().unwrap().get_type() {
             TypeSymbol::Character => {}
-            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs),
+            _ => return create_op_not_impl_error(operator, self.get_type(), rhs),
         };
 
         match operator {
             Operator::Equal | Operator::NotEqual => Ok(TypeSymbol::Boolean),
-            _ => create_op_not_impl_error(&operator, self.get_type(), rhs),
+            _ => create_op_not_impl_error(operator, self.get_type(), rhs),
         }
     }
 
@@ -165,9 +163,7 @@ impl TypeTrait for CharType {
         destination: &Type,
     ) -> Result<(), String> {
         if rhs.is_none() {
-            return match operator {
-                _ => create_op_not_impl_error(&operator, self.get_type(), rhs),
-            };
+            return create_op_not_impl_error(&operator, self.get_type(), rhs);
         }
 
         match rhs.as_ref().unwrap().get_type() {

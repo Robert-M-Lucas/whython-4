@@ -68,7 +68,7 @@ pub fn try_arithmetic_block_into_parameters(arithmetic_block: &Symbol) -> Result
         _ => panic!("Must be arithmetic block"),
     };
 
-    if list.len() == 0 {
+    if list.is_empty() {
         return Ok(Literal::ParameterList(Vec::new()));
     }
 
@@ -138,7 +138,7 @@ impl SymbolHandler for AllSymbolHandler {
                     }
                 }
 
-                return Some(Symbol::Name(String::from(string)));
+                Some(Symbol::Name(String::from(string)))
             })
     }
 }

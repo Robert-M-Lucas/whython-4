@@ -32,7 +32,7 @@ pub fn handle_arithmetic_section(
             .to_string()
     }
 
-    if section.len() > 3 || section.len() == 0 {
+    if section.len() > 3 || section.is_empty() {
         return Err(get_formatting_error());
     }
 
@@ -41,7 +41,7 @@ pub fn handle_arithmetic_section(
         // Get operator
         let operator = match section[1] {
             Symbol::Operator(op) => op,
-            _ => return Err(get_formatting_error().to_string()),
+            _ => return Err(get_formatting_error()),
         };
 
         // Get lhs
@@ -49,8 +49,8 @@ pub fn handle_arithmetic_section(
         let lhs = match &section[0] {
             Symbol::Name(name) => reference_stack.get_variable(name)?,
             Symbol::Literal(literal) => {
-                let object = get_type_from_literal(&literal, memory_managers)?;
-                object.static_assign_literal(memory_managers, &literal)?;
+                let object = get_type_from_literal(literal, memory_managers)?;
+                object.static_assign_literal(memory_managers, literal)?;
                 _lhs_holder = Some(object);
                 _lhs_holder.as_ref().unwrap()
             }
@@ -81,11 +81,11 @@ pub fn handle_arithmetic_section(
         let rhs = match &section[2] {
             Symbol::Name(name) => reference_stack.get_variable(name)?,
             Symbol::Literal(literal) => {
-                let object = match get_type_from_literal(&literal, memory_managers) {
+                let object = match get_type_from_literal(literal, memory_managers) {
                     Err(e) => return Err(e),
                     Ok(o) => o,
                 };
-                object.static_assign_literal(memory_managers, &literal)?;
+                object.static_assign_literal(memory_managers, literal)?;
                 _rhs_holder = Some(object);
                 _rhs_holder.as_ref().unwrap()
             }
@@ -118,11 +118,11 @@ pub fn handle_arithmetic_section(
             let mut result = get_type(&result_type, memory_managers)?;
             lhs.operate(memory_managers, operator, Some(rhs), &mut result)?;
 
-            return Ok(Some(result));
+            Ok(Some(result))
         } else {
             lhs.operate(memory_managers, operator, Some(rhs), to_overwrite.unwrap())?;
 
-            return Ok(None);
+            Ok(None)
         }
     }
     //? Two symbols - function calling, indexing or prefix operators
@@ -136,7 +136,7 @@ pub fn handle_arithmetic_section(
             //     _ => panic!()
             // };
 
-            let function = reference_stack.get_variable(&name)?;
+            let function = reference_stack.get_variable(name)?;
 
             // Get arguments
             // let arguments = match &section[1] {
@@ -252,7 +252,7 @@ pub fn handle_arithmetic_section(
             };
 
             if to_overwrite.is_some() {
-                return match to_index.get_indexed(memory_managers, index, &to_overwrite.unwrap()) {
+                return match to_index.get_indexed(memory_managers, index, to_overwrite.unwrap()) {
                     Err(e) => return Err(e),
                     Ok(_) => Ok(None),
                 };
@@ -270,7 +270,7 @@ pub fn handle_arithmetic_section(
             // Get operator
             let operator = match section[0] {
                 Symbol::Operator(op) => op,
-                _ => return Err(get_formatting_error().to_string()),
+                _ => return Err(get_formatting_error()),
             };
 
             // Get operand
@@ -278,8 +278,8 @@ pub fn handle_arithmetic_section(
             let lhs = match &section[1] {
                 Symbol::Name(name) => reference_stack.get_variable(name)?,
                 Symbol::Literal(literal) => {
-                    let object = get_type_from_literal(&literal, memory_managers)?;
-                    object.static_assign_literal(memory_managers, &literal)?;
+                    let object = get_type_from_literal(literal, memory_managers)?;
+                    object.static_assign_literal(memory_managers, literal)?;
                     _lhs_holder = Some(object);
                     _lhs_holder.as_ref().unwrap()
                 }
@@ -341,13 +341,13 @@ pub fn handle_arithmetic_section(
             // Get type out of literal
             Symbol::Literal(literal) => {
                 if to_overwrite.is_none() {
-                    let object = get_type_from_literal(&literal, memory_managers)?;
-                    object.static_assign_literal(memory_managers, &literal)?;
+                    let object = get_type_from_literal(literal, memory_managers)?;
+                    object.static_assign_literal(memory_managers, literal)?;
                     Ok(Some(object))
                 } else {
                     to_overwrite
                         .unwrap()
-                        .static_assign_literal(memory_managers, &literal)?;
+                        .static_assign_literal(memory_managers, literal)?;
                     Ok(None)
                 }
             }

@@ -37,7 +37,7 @@ impl TypeTrait for FunctionType {
     ) -> Result<(), String> {
         Err(format!(
             "{} can't be assigned from other function",
-            self.get_type().to_string()
+            self.get_type()
         ))
     }
 

@@ -14,7 +14,7 @@ impl LineHandler for VariableInitialisationLine {
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut BlockCoordinator,
     ) -> ProcessingResult {
-        if line.len() == 0 || !matches!(line[0], Symbol::Type(_)) {
+        if line.is_empty() || !matches!(line[0], Symbol::Type(_)) {
             return ProcessingResult::Unmatched;
         }
 

@@ -12,7 +12,7 @@ impl LineHandler for FunctionLine {
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut BlockCoordinator,
     ) -> ProcessingResult {
-        if line.len() == 0 {
+        if line.is_empty() {
             return ProcessingResult::Unmatched;
         }
 

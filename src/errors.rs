@@ -23,13 +23,13 @@ pub fn create_op_not_impl_error<T>(
         Some(rhs) => Err(format!(
             "'{}' operator not implemented for '{}' and '{}'",
             operator,
-            lhs.to_string(),
-            rhs.get_type().to_string()
+            lhs,
+            rhs.get_type()
         )),
         None => Err(format!(
             "'{}' operator not implemented for '{}'",
             operator,
-            lhs.to_string()
+            lhs
         )),
     }
 }

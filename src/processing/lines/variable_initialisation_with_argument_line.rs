@@ -13,7 +13,7 @@ impl LineHandler for VariableInitialisationWithArgumentLine {
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut BlockCoordinator,
     ) -> ProcessingResult {
-        if line.len() == 0
+        if line.is_empty()
             || !matches!(line[0], Symbol::Type(_))
             || !matches!(line[1], Symbol::Indexer(_))
         {

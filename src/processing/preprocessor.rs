@@ -18,7 +18,7 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
             return Ok(());
         }
 
-        let symbol = get_all_symbol(&buffer);
+        let symbol = get_all_symbol(buffer);
         if symbol.is_none() {
             return Err(format!("Symbol '{}' not found", buffer));
         }

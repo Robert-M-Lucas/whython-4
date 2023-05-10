@@ -38,7 +38,7 @@ impl MemoryManager {
 
     /// Overwrites a region of memory
     pub fn overwrite(&mut self, position: usize, data: &[u8]) {
-        for (i, b) in data.into_iter().enumerate() {
+        for (i, b) in data.iter().enumerate() {
             self.memory[position + i] = *b;
         }
     }
@@ -69,14 +69,14 @@ impl MemoryManager {
             .open(name);
 
         if file.is_err() {
-            println!("Failed to open file - {}", file.unwrap_err().to_string());
+            println!("Failed to open file - {}", file.unwrap_err());
             return;
         }
 
         let mut file = file.unwrap();
         let r = file.write_all(&self.memory);
         if r.is_err() {
-            println!("Failed to write to file - {}", r.unwrap_err().to_string())
+            println!("Failed to write to file - {}", r.unwrap_err())
         }
     }
 }

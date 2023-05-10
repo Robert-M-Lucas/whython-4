@@ -122,7 +122,7 @@ impl BlockCoordinator {
         memory_managers: &mut MemoryManagers,
         symbol_line: &Vec<Symbol>,
     ) -> Result<bool, String> {
-        if self.stack.len() == 0 {
+        if self.stack.is_empty() {
             panic!("Called on_exit when not BlockHandler exists on stack!")
         }
 
@@ -131,7 +131,7 @@ impl BlockCoordinator {
         let result = handler.on_exit(memory_managers, self.get_reference_stack_mut(), symbol_line);
 
         if result.is_ok() {
-            return if result.unwrap() == false {
+            return if !result.unwrap() {
                 self.stack.push(handler);
                 Ok(false)
             } else {
@@ -147,7 +147,7 @@ impl BlockCoordinator {
         &mut self,
         memory_managers: &mut MemoryManagers,
     ) -> Result<(), String> {
-        if self.stack.len() == 0 {
+        if self.stack.is_empty() {
             panic!("Called on_exit when not BlockHandler exists on stack!")
         }
 

@@ -34,7 +34,7 @@ impl JumpInstruction {
     }
 
     pub fn get_size() -> usize {
-        size_of::<usize>() * 1 // dest
+        size_of::<usize>() // dest
     }
 
     pub fn get_debug(data: &[u8]) -> String {

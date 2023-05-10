@@ -29,27 +29,27 @@ pub enum ProcessingResult {
 impl ProcessingResult {
     /// Calls `f` if state is `Unmatched` returns `self` otherwise
     pub fn or_else<F: FnOnce() -> ProcessingResult>(self, f: F) -> ProcessingResult {
-        return match self {
+        match self {
             Self::Success | Self::Failure(_) => self,
             Self::Unmatched => f(),
-        };
+        }
     }
 
     pub fn is_failure(&self) -> bool {
-        return matches!(self, Self::Failure(_));
+        matches!(self, Self::Failure(_))
     }
     pub fn is_success(&self) -> bool {
-        return matches!(self, Self::Success);
+        matches!(self, Self::Success)
     }
     pub fn is_unmatched(&self) -> bool {
-        return matches!(self, Self::Unmatched);
+        matches!(self, Self::Unmatched)
     }
 
     pub fn get_error(self) -> String {
-        return match self {
+        match self {
             Self::Failure(e) => e,
             _ => panic!("Attempted to get error where there was none!"),
-        };
+        }
     }
 }
 
@@ -72,7 +72,7 @@ impl MemoryManagers {
         to_save.extend(&self.variable_memory.memory);
         to_save.extend(&self.program_memory.memory);
 
-        let name = name + format!(" - {}.cwhy", size_of::<usize>() * 8).as_str();
+        let name = name + format!(" - {}.cwhy", (usize::BITS as usize)).as_str();
 
         println!(
             "Saving compiled data '{}' [{} bytes - {{{}:{}}}]",
@@ -93,14 +93,14 @@ impl MemoryManagers {
             .open(name);
 
         if file.is_err() {
-            println!("Failed to open file - {}", file.unwrap_err().to_string());
+            println!("Failed to open file - {}", file.unwrap_err());
             return;
         }
 
         let mut file = file.unwrap();
         let r = file.write_all(&to_save);
         if r.is_err() {
-            println!("Failed to write to file - {}", r.unwrap_err().to_string())
+            println!("Failed to write to file - {}", r.unwrap_err())
         }
     }
 
@@ -164,7 +164,7 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
 
     'line_iterator: for (line_index, line) in symbols.into_iter().enumerate() {
         //? Skip empty lines
-        if line.1.len() == 0 {
+        if line.1.is_empty() {
             continue;
         }
 
@@ -178,7 +178,7 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
 
         //? Exit blocks until block indentation matches code indentation
         while block_coordinator.get_indentation() >= 1
-            && indentation <= block_coordinator.get_indentation() - 1
+            && indentation < block_coordinator.get_indentation()
         {
             if block_coordinator.get_indentation() >= 2
                 && indentation <= block_coordinator.get_indentation() - 2
@@ -193,7 +193,7 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
                 if result.is_err() {
                     return create_line_error(result.unwrap_err(), line_index);
                 }
-                if result.unwrap() == false {
+                if !result.unwrap() {
                     continue 'line_iterator;
                 }
             }

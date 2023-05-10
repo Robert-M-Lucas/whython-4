@@ -75,11 +75,11 @@ impl BlockHandler for IfBlock {
             reference_stack: &mut ReferenceStack,
         ) -> Result<bool, String> {
             this.on_forced_exit(memory_managers, reference_stack)?;
-            return Ok(true);
+            Ok(true)
         }
 
         //? No elif or else
-        if symbol_line.len() == 0 {
+        if symbol_line.is_empty() {
             return exit_with_cleanup(self, memory_managers, reference_stack);
         }
 
@@ -147,7 +147,7 @@ impl BlockHandler for IfBlock {
                 reference_stack.add_handler();
                 Ok(false)
             }
-            _ => return exit_with_cleanup(self, memory_managers, reference_stack),
+            _ => exit_with_cleanup(self, memory_managers, reference_stack),
         }
     }
 

@@ -94,12 +94,6 @@ impl ReferenceManager {
 
     /// Returns the `Some(variable)` if it exists. If not, returns `None`
     pub fn get_variable(&self, name: &str) -> Option<&Type> {
-        for v in &self.variables {
-            if *v.get_name() == *name {
-                return Some(&v);
-            }
-        }
-
-        None
+        self.variables.iter().find(|&v| *v.get_name() == *name)
     }
 }

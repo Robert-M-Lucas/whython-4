@@ -39,16 +39,16 @@ impl TypeTrait for BooleanType {
                 } else {
                     return Err(format!(
                         "{} can only be assigned {} '0' or '1'",
-                        self.get_type().to_string(),
-                        Literal::Int(0).to_string()
+                        self.get_type(),
+                        Literal::Int(0)
                     ));
                 }
             }
             unhandled_literal => {
                 return Err(format!(
                     "{} not supported for {} assignment",
-                    unhandled_literal.to_string(),
-                    self.get_type().to_string()
+                    unhandled_literal,
+                    self.get_type()
                 ))
             }
         }
@@ -90,20 +90,20 @@ impl TypeTrait for BooleanType {
         if rhs.is_none() {
             return match operator {
                 Operator::Not => Ok(self.get_type()),
-                _ => create_op_not_impl_error(&operator, self.get_type(), rhs),
+                _ => create_op_not_impl_error(operator, self.get_type(), rhs),
             };
         }
 
         match rhs.as_ref().unwrap().get_type() {
             TypeSymbol::Boolean => {}
-            _ => return create_op_not_impl_error(&operator, self.get_type(), rhs),
+            _ => return create_op_not_impl_error(operator, self.get_type(), rhs),
         };
 
         match operator {
             Operator::And | Operator::Or | Operator::Equal | Operator::NotEqual => {
                 Ok(self.get_type())
             }
-            _ => create_op_not_impl_error(&operator, self.get_type(), rhs),
+            _ => create_op_not_impl_error(operator, self.get_type(), rhs),
         }
     }
 
