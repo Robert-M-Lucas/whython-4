@@ -97,14 +97,14 @@ pub fn try_arithmetic_block_into_parameters(arithmetic_block: &Symbol) -> Result
         // Check for list separator
         if i + 2 < list.len() {
             match list[i + 2] {
-                Symbol::Punctuation(punctuation) =>
-                {
-                    #[allow(unreachable_patterns)]
-                    match punctuation {
-                        Punctuation::ListSeparator => (),
-                        _ => return Err(formatting_error()),
-                    }
-                }
+                Symbol::Punctuation(Punctuation::ListSeparator) => (), // =>
+                // {
+                //     #[allow(unreachable_patterns)]
+                //     match punctuation {
+                //         Punctuation::ListSeparator => (),
+                //         _ => return Err(formatting_error()),
+                //     }
+                // }
                 _ => return Err(formatting_error()),
             }
         }

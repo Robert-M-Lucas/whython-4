@@ -71,6 +71,7 @@ impl ReferenceStack {
     pub fn complete_handler_removal(&mut self) { self.stack_removed = None; }*/
 }
 
+#[derive(Default)]
 pub struct ReferenceManager {
     variables: Vec<Type>, // Type, Array Index
 }

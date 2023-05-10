@@ -54,14 +54,13 @@ impl TypeTrait for BooleanType {
         }
 
         // Allocate from constant
-        let constant_address;
-        if value {
-            constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_TRUE);
+        let constant_address= if value {
+            memory_managers.variable_memory.append_byte(BOOLEAN_TRUE)
         // Reserve for constant
         } else {
-            constant_address = memory_managers.variable_memory.append_byte(BOOLEAN_FALSE);
+            memory_managers.variable_memory.append_byte(BOOLEAN_FALSE)
             // Reserve for constant
-        }
+        };
 
         CopyInstruction::new_alloc(
             memory_managers,
