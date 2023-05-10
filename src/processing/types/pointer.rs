@@ -31,8 +31,7 @@ impl TypeTrait for PointerType {
                     Err(_) => {
                         return Err(format!(
                             "Cannot fit {}'s value '{}' into Pointer",
-                            literal,
-                            integer
+                            literal, integer
                         ))
                     }
                     Ok(value) => value,

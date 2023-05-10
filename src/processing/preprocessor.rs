@@ -4,6 +4,7 @@ use crate::processing::symbols::{get_all_symbol, Symbol, STRING_DELIMITERS};
 use debugless_unwrap::DebuglessUnwrapErr;
 
 /// Takes a line of code and returns an array of symbols
+#[allow(clippy::single_match)]
 pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
     let mut symbol_line = Vec::new();
 
@@ -99,18 +100,22 @@ pub fn get_symbols_from_line(line: &str) -> Result<Vec<Symbol>, String> {
         if c == ')' && !in_string {
             bracket_depth -= 1;
 
-            if bracket_depth == 0 {
-                symbol_line.push(match get_symbols_from_line(buffer.as_str()) {
-                    Ok(symbols) => ArithmeticBlock(symbols),
-                    Err(e) => return Err(e),
-                });
-                buffer.clear();
-            } else if bracket_depth < 0 {
-                return Err(
-                    "Closing bracket found with no corresponding opening bracket".to_string(),
-                );
-            } else {
-                buffer.push(c);
+            match bracket_depth {
+                0 => {
+                    symbol_line.push(match get_symbols_from_line(buffer.as_str()) {
+                        Ok(symbols) => ArithmeticBlock(symbols),
+                        Err(e) => return Err(e),
+                    });
+                    buffer.clear();
+                }
+                i32::MIN..=-1 => {
+                    return Err(
+                        "Closing bracket found with no corresponding opening bracket".to_string(),
+                    );
+                }
+                _ => {
+                    buffer.push(c);
+                }
             }
 
             continue;

@@ -45,12 +45,11 @@ fn wrapped_main(exit: &AtomicBool) {
         .as_str(),
     );
 
-    let input_file =
-        if args.len() >= 2 {
-            args[1].clone()
-        } else {
-            "main.why".to_string()
-        };
+    let input_file = if args.len() >= 2 {
+        args[1].clone()
+    } else {
+        "main.why".to_string()
+    };
 
     let mut memory;
 

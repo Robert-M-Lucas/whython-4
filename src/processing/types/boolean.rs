@@ -54,7 +54,7 @@ impl TypeTrait for BooleanType {
         }
 
         // Allocate from constant
-        let constant_address= if value {
+        let constant_address = if value {
             memory_managers.variable_memory.append_byte(BOOLEAN_TRUE)
         // Reserve for constant
         } else {

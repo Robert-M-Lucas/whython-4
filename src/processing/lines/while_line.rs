@@ -9,7 +9,7 @@ pub struct WhileLine {}
 
 impl LineHandler for WhileLine {
     fn process_line(
-        line: &Vec<Symbol>,
+        line: &[Symbol],
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut BlockCoordinator,
     ) -> ProcessingResult {
@@ -18,19 +18,13 @@ impl LineHandler for WhileLine {
         }
 
         match line[0] {
-            Symbol::Block(block) => match block {
-                Block::While => {
-                    match block_coordinator.add_block_handler(
-                        WhileBlock::new(),
-                        memory_managers,
-                        line,
-                    ) {
-                        Err(e) => ProcessingResult::Failure(e),
-                        Ok(_) => ProcessingResult::Success,
-                    }
+            Symbol::Block(Block::While) => {
+                match block_coordinator.add_block_handler(WhileBlock::new(), memory_managers, line)
+                {
+                    Err(e) => ProcessingResult::Failure(e),
+                    Ok(_) => ProcessingResult::Success,
                 }
-                _ => ProcessingResult::Unmatched,
-            },
+            }
             _ => ProcessingResult::Unmatched,
         }
     }

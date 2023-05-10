@@ -28,7 +28,7 @@ impl BlockHandler for FunctionBlock {
         &mut self,
         memory_managers: &mut MemoryManagers,
         reference_stack: &mut ReferenceStack,
-        symbol_line: &Vec<Symbol>,
+        symbol_line: &[Symbol],
     ) -> Result<(), String> {
         warn("Functions do not currently support recursion (including indirect). Usage will create unstable behaviour!");
 
@@ -90,8 +90,10 @@ impl BlockHandler for FunctionBlock {
         }
 
         if return_type.is_some() {
-            reference_stack
-                .register_variable(return_type.as_ref().unwrap().duplicate(), "return".to_string())?;
+            reference_stack.register_variable(
+                return_type.as_ref().unwrap().duplicate(),
+                "return".to_string(),
+            )?;
         }
 
         self.jump_variable = Some(memory_managers.variable_memory.reserve(size_of::<usize>()));

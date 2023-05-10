@@ -8,7 +8,7 @@ pub struct FunctionLine {}
 
 impl LineHandler for FunctionLine {
     fn process_line(
-        line: &Vec<Symbol>,
+        line: &[Symbol],
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut BlockCoordinator,
     ) -> ProcessingResult {

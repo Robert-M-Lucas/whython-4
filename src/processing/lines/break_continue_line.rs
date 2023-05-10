@@ -7,7 +7,7 @@ pub struct BreakContinueLine {}
 
 impl LineHandler for BreakContinueLine {
     fn process_line(
-        line: &Vec<Symbol>,
+        line: &[Symbol],
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut BlockCoordinator,
     ) -> ProcessingResult {

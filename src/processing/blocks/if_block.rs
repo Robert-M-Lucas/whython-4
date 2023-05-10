@@ -26,7 +26,7 @@ impl BlockHandler for IfBlock {
         &mut self,
         memory_managers: &mut MemoryManagers,
         reference_stack: &mut ReferenceStack,
-        symbol_line: &Vec<Symbol>,
+        symbol_line: &[Symbol],
     ) -> Result<(), String> {
         //? Extract condition boolean
 
@@ -67,7 +67,7 @@ impl BlockHandler for IfBlock {
         &mut self,
         memory_managers: &mut MemoryManagers,
         reference_stack: &mut ReferenceStack,
-        symbol_line: &Vec<Symbol>,
+        symbol_line: &[Symbol],
     ) -> Result<bool, String> {
         fn exit_with_cleanup(
             this: &mut IfBlock,

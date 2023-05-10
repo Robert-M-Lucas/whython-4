@@ -10,7 +10,7 @@ pub struct VariableInitialisationLine {}
 
 impl LineHandler for VariableInitialisationLine {
     fn process_line(
-        line: &Vec<Symbol>,
+        line: &[Symbol],
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut BlockCoordinator,
     ) -> ProcessingResult {
@@ -35,15 +35,7 @@ impl LineHandler for VariableInitialisationLine {
         };
 
         match &line[2] {
-            Symbol::Assigner(assigner) => {
-                match assigner {
-                    Assigner::Setter => {}
-                    _ => return ProcessingResult::Failure(
-                        "Type must be followed by a Name, '=' and value to initialise a variable"
-                            .to_string(),
-                    ),
-                }
-            }
+            Symbol::Assigner(Assigner::Setter) => {}
             _ => {
                 return ProcessingResult::Failure(
                     "Type must be followed by a Name, '=' and value to initialise a variable"
@@ -60,24 +52,22 @@ impl LineHandler for VariableInitialisationLine {
             _ => panic!(),
         };
 
-        match handle_arithmetic_section(
+        if let Err(e) = handle_arithmetic_section(
             memory_managers,
             block_coordinator.get_reference_stack(),
             &line[3..],
             Some(&object),
             true,
         ) {
-            Err(e) => return ProcessingResult::Failure(e),
-            Ok(_) => {}
+            return ProcessingResult::Failure(e);
         };
 
         object.set_name(name.clone());
-        match block_coordinator
+        if let Err(e) = block_coordinator
             .get_reference_stack_mut()
             .register_variable(object, name.clone())
         {
-            Err(e) => return ProcessingResult::Failure(e),
-            Ok(_) => {}
+            return ProcessingResult::Failure(e);
         };
 
         ProcessingResult::Success

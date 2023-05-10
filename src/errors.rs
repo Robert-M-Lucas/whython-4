@@ -28,8 +28,7 @@ pub fn create_op_not_impl_error<T>(
         )),
         None => Err(format!(
             "'{}' operator not implemented for '{}'",
-            operator,
-            lhs
+            operator, lhs
         )),
     }
 }

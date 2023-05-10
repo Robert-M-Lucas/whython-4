@@ -122,12 +122,19 @@ impl MemoryManagers {
         let mut program_memory =
             Vec::with_capacity(data.len() - variable_memory_length - size_of::<usize>());
 
-        for i in size_of::<usize>()..(size_of::<usize>() + variable_memory_length) {
-            variable_memory.push(data[i])
+        for i in data
+            .iter()
+            .skip(size_of::<usize>())
+            .take(variable_memory_length)
+        {
+            variable_memory.push(*i);
         }
 
-        for i in (size_of::<usize>() + variable_memory_length)..(data.len()) {
-            program_memory.push(data[i])
+        for i in data
+            .iter()
+            .skip(size_of::<usize>() + variable_memory_length)
+        {
+            program_memory.push(*i);
         }
 
         Ok(Self {
@@ -184,14 +191,14 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
                 && indentation <= block_coordinator.get_indentation() - 2
             {
                 let result = block_coordinator.force_exit_block_handler(&mut memory_managers);
-                if result.is_err() {
-                    return create_line_error(result.unwrap_err(), line_index);
+                if let Err(e) = result {
+                    return create_line_error(e, line_index);
                 }
             } else {
                 let result =
                     block_coordinator.exit_block_handler(&mut memory_managers, &symbol_line);
-                if result.is_err() {
-                    return create_line_error(result.unwrap_err(), line_index);
+                if let Err(e) = result {
+                    return create_line_error(e, line_count);
                 }
                 if !result.unwrap() {
                     continue 'line_iterator;
@@ -269,8 +276,8 @@ pub fn process_symbols(symbols: Vec<(usize, Vec<Symbol>)>) -> Result<MemoryManag
     //? Exit remaining blocks
     while block_coordinator.get_indentation() >= 1 {
         let result = block_coordinator.force_exit_block_handler(&mut memory_managers);
-        if result.is_err() {
-            return create_line_error(result.unwrap_err(), line_count);
+        if let Err(e) = result {
+            return create_line_error(e, line_count);
         }
     }
 

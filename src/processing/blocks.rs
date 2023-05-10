@@ -13,7 +13,7 @@ pub trait BlockHandler {
         &mut self,
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut ReferenceStack,
-        symbol_line: &Vec<Symbol>,
+        symbol_line: &[Symbol],
     ) -> Result<(), String>;
 
     /// Try to exit block
@@ -23,7 +23,7 @@ pub trait BlockHandler {
         &mut self,
         memory_managers: &mut MemoryManagers,
         reference_stack: &mut ReferenceStack,
-        _symbol_line: &Vec<Symbol>,
+        _symbol_line: &[Symbol],
     ) -> Result<bool, String> {
         self.on_forced_exit(memory_managers, reference_stack)?;
         Ok(true)
@@ -68,7 +68,7 @@ impl BlockCoordinator {
         &mut self,
         mut handler: Box<dyn BlockHandler>,
         memory_managers: &mut MemoryManagers,
-        symbol_line: &Vec<Symbol>,
+        symbol_line: &[Symbol],
     ) -> Result<(), String> {
         self.reference_stack.add_handler();
         let r = handler.on_entry(memory_managers, self.get_reference_stack_mut(), symbol_line);
@@ -120,7 +120,7 @@ impl BlockCoordinator {
     pub fn exit_block_handler(
         &mut self,
         memory_managers: &mut MemoryManagers,
-        symbol_line: &Vec<Symbol>,
+        symbol_line: &[Symbol],
     ) -> Result<bool, String> {
         if self.stack.is_empty() {
             panic!("Called on_exit when not BlockHandler exists on stack!")

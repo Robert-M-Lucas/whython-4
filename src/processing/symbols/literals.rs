@@ -57,9 +57,9 @@ impl SymbolHandler for LiteralSymbolHandler {
                     && STRING_DELIMITERS.contains(&string.chars().next().unwrap())
                     && string.chars().last().unwrap() == string.chars().next().unwrap()
                 {
-                    return Some(Symbol::Literal(Literal::String(
-                        format_escape_codes(string[1..string.len() - 1].to_string()),
-                    )));
+                    return Some(Symbol::Literal(Literal::String(format_escape_codes(
+                        string[1..string.len() - 1].to_string(),
+                    ))));
                 }
                 None
             },

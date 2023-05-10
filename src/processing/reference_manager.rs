@@ -1,5 +1,6 @@
 use crate::processing::types::Type;
 
+#[derive(Default)]
 pub struct ReferenceStack {
     stack: Vec<ReferenceManager>,
 }
@@ -38,8 +39,8 @@ impl ReferenceStack {
         let mut reference_manager = &self.stack[i];
         loop {
             let r = reference_manager.get_variable(name);
-            if r.is_some() {
-                return Ok(r.unwrap());
+            if let Some(i) = r {
+                return Ok(i);
             }
             if i == 0 {
                 break;

@@ -31,7 +31,7 @@ impl BlockHandler for WhileBlock {
         &mut self,
         memory_managers: &mut MemoryManagers,
         reference_stack: &mut ReferenceStack,
-        symbol_line: &Vec<Symbol>,
+        symbol_line: &[Symbol],
     ) -> Result<(), String> {
         // Save position before boolean evaluation
         self.start_position = Some(memory_managers.program_memory.get_position());
@@ -74,7 +74,7 @@ impl BlockHandler for WhileBlock {
         &mut self,
         memory_managers: &mut MemoryManagers,
         reference_stack: &mut ReferenceStack,
-        _symbol_line: &Vec<Symbol>,
+        _symbol_line: &[Symbol],
     ) -> Result<bool, String> {
         self.on_forced_exit(memory_managers, reference_stack)?;
         Ok(true)

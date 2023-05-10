@@ -23,7 +23,7 @@ pub trait LineHandler {
     /// * `ProcessingResult::Unmatched` if the line is unmatched
     /// * `ProcessingResult::Failure(reason)` if the line is matched but an error occurred while processing it
     fn process_line(
-        line: &Vec<Symbol>,
+        line: &[Symbol],
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut BlockCoordinator,
     ) -> ProcessingResult;

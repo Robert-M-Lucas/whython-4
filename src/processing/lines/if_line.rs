@@ -8,7 +8,7 @@ pub struct IfLine {}
 
 impl LineHandler for IfLine {
     fn process_line(
-        line: &Vec<Symbol>,
+        line: &[Symbol],
         memory_managers: &mut MemoryManagers,
         block_coordinator: &mut BlockCoordinator,
     ) -> ProcessingResult {
