@@ -55,10 +55,21 @@ impl PrintInstruction {
         *pointer += size_of::<usize>();
         let count = get_usize(pointer, &memory_managers.program_memory.memory);
         *pointer += size_of::<usize>();
-        println!(
-            "{:X?}",
-            &memory_managers.variable_memory.memory[position..(position + (count * len))]
-        );
+
+        let data = &memory_managers.variable_memory.memory[position..(position + (count * len))];
+
+        if data.len() == 8 {
+            println!(
+                "{}",
+                usize::from_le_bytes((&memory_managers.variable_memory.memory[position..(position + (count * len))]).try_into().unwrap())
+            );
+        }
+        else {
+            println!(
+                "{:X?}",
+                &memory_managers.variable_memory.memory[position..(position + (count * len))]
+            );
+        }
     }
 }
 
